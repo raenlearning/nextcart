@@ -12,7 +12,7 @@
 
 ## 🌟 Fitur Utama (Key Features)
 
-### 🛍️ Modul Pembeli (Buyer Experience)
+### 🛍️ Modul Pembeli 
 * **Pencarian & Filter Kategori Interaktif**: Penelusuran produk berbasis kategori (Smartphone, Laptop, Audio, Gaming, dll.) dengan fitur *live search & debounce*[cite: 3].
 * **Keamanan Akses Data (Row Level Security)**: Isolasi penuh data riwayat transaksi, profil, dan keranjang belanja berbasis PostgreSQL RLS (`auth.uid()`)[cite: 3].
 * **Alur Checkout & Integrasi Payment Gateway**: Mendukung pemrosesan transaksi *real-time* via **Midtrans Snap WebView**[cite: 3], kalkulasi otomatis PPN (11%)[cite: 3], ongkir, serta klaim *voucher* diskon atomik berbasis RPC database[cite: 3].
@@ -21,7 +21,7 @@
 * **Ulasan & Wishlist**: Fitur pemberian *star rating* & ulasan produk[cite: 3], serta daftar keinginan (*wishlist*)[cite: 3].
 * **Animasi UI Interaktif**: Efek animasi *cart flying icon*, *bumping badge*, Lottie animation, dan dukungan mode Gelap/Terang (*Dark/Light Mode*)[cite: 3].
 
-### 🛡️ Modul Admin & Manajemen (Admin & Seller Portal)
+### 🛡️ Modul Admin & Manajemen 
 * **Dasboard Analitik Bisnis**: Grafik performa penjualan (*Revenue Chart*), pendapatan kotor (*Gross Revenue*), total pesanan, produk terlaris (*Top Products*), serta *export* laporan ke CSV[cite: 3].
 * **Kelola Katalog & Inventaris**: Tambah/edit produk, manajemen stok, unggah multi-foto produk ke **Supabase Storage**, dan fitur otomatis pembersihan berkas (*orphan images cleanup*)[cite: 3].
 * **Manajemen Pesanan & Status Pengiriman**: Pembaruan status pesanan secara *real-time* (Menunggu Pembayaran ➔ Diproses ➔ Dikirim ➔ Selesai)[cite: 3].
@@ -59,7 +59,7 @@ Instal Dependensi:
 Bash
 flutter pub get
 Konfigurasi Environment (.env):
-Buat berkas .env di direktori akar (root) proyek dan masukkan kredensial Supabase Anda[cite: 3]:
+Buat berkas .env di direktori root proyek dan masukkan kredensial Supabase Anda:
 
 Cuplikan kode
 SUPABASE_URL=[https://your-supabase-project.supabase.co](https://your-supabase-project.supabase.co)
