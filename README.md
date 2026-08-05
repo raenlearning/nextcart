@@ -40,6 +40,35 @@
 
 ---
 
+🚀 Panduan Memulai (Getting Started)
+Prasyarat
+Flutter SDK (v3.x atau terbaru)
+
+akun Supabase & Proyek Active
+
+Akun Midtrans Sandbox (Merchant)
+
+Langkah Instalasi
+Clone Repositori:
+
+Bash
+git clone [https://github.com/username/nextcart.git](https://github.com/username/nextcart.git)
+cd nextcart
+Instal Dependensi:
+
+Bash
+flutter pub get
+Konfigurasi Environment (.env):
+Buat berkas .env di direktori akar (root) proyek dan masukkan kredensial Supabase Anda[cite: 3]:
+
+Cuplikan kode
+SUPABASE_URL=[https://your-supabase-project.supabase.co](https://your-supabase-project.supabase.co)
+SUPABASE_PUBLISHABLE_KEY=your-supabase-publishable-key
+Jalankan Aplikasi:
+
+Bash
+flutter run
+
 ## 📁 Struktur Proyek (Directory Structure
 
 Aplikasi ini menggunakan pendekatan **Feature-First Architecture**[cite: 3]:
@@ -67,3 +96,5 @@ lib/
     ├── product/            # Product Details, Reviews, & Grid View
     ├── profile/            # Profile Detail & Settings
     └── wishlist/           # User Wishlist Grid
+
+
