@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "745491795053",
+    "project_id": "nextcart-da9c2",
+    "storage_bucket": "nextcart-da9c2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:745491795053:android:4592958d9b8d2e684dc364",
+        "android_client_info": {
+          "package_name": "com.nextcart.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5tQEa04edzEUJwPrTF48r0j5PKxTnBlU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
