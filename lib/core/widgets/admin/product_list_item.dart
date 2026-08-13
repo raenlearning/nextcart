@@ -148,6 +148,9 @@ class _PriceStockRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final stockValue = stock is int ? stock as int : int.tryParse('$stock') ?? 0;
+    final isLowStock = stockValue <= 5;
+
     return Row(
       children: [
         Text(
@@ -168,13 +171,30 @@ class _PriceStockRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        Text(
-          '$stock stocks',
-          style: TextStyle(
-            fontSize: 12,
-            color: context.colors.textSecondary,
+        if (isLowStock)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+            decoration: BoxDecoration(
+              color: AppColors.error.withAlpha(15),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              stockValue == 0 ? 'Stok habis' : 'Stok menipis ($stockValue)',
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: AppColors.error,
+              ),
+            ),
+          )
+        else
+          Text(
+            '$stockValue stok',
+            style: TextStyle(
+              fontSize: 12,
+              color: context.colors.textSecondary,
+            ),
           ),
-        ),
       ],
     );
   }

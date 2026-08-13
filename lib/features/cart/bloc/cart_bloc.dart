@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nextcart/core/constants/order_status.dart';
+import 'package:nextcart/data/repository/shipping_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
@@ -36,6 +37,16 @@ class ApplyVoucher extends CartEvent {
 
 class ClearVoucher extends CartEvent {}
 
+class SelectShippingAddress extends CartEvent {
+  final Map<String, dynamic> address;
+  SelectShippingAddress(this.address);
+}
+
+class SelectCourier extends CartEvent {
+  final Map<String, dynamic> courier;
+  SelectCourier(this.courier);
+}
+
 abstract class CartState {}
 
 class CartInitial extends CartState {}
@@ -46,8 +57,22 @@ class CartLoaded extends CartState {
   final List<Map<String, dynamic>> cartItems;
   final double totalPrice;
   final Map<String, dynamic>? voucher;
+  final int totalWeightGrams;
+  final Map<String, dynamic>? selectedAddress;
+  final Map<String, dynamic>? selectedCourier;
+  final List<Map<String, dynamic>> shippingRates;
+  final double shippingFee;
 
-  CartLoaded(this.cartItems, this.totalPrice, {this.voucher});
+  CartLoaded(
+    this.cartItems,
+    this.totalPrice, {
+    this.voucher,
+    this.totalWeightGrams = 0,
+    this.selectedAddress,
+    this.selectedCourier,
+    this.shippingRates = const [],
+    this.shippingFee = 0,
+  });
 }
 
 class CartError extends CartState {
@@ -68,9 +93,9 @@ class CheckoutStatusVerified extends CartState {
   CheckoutStatusVerified({required this.orderStatus, required this.message});
 }
 
-// --- BLOC ---
 class CartBloc extends Bloc<CartEvent, CartState> {
   final SupabaseClient _supabase = Supabase.instance.client;
+  final ShippingRepository _shippingRepository = ShippingRepository();
 
   CartBloc() : super(CartInitial()) {
     on<LoadCart>(_onLoadCart);
@@ -80,6 +105,8 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     on<TriggerCheckout>(_onTriggerCheckout);
     on<ApplyVoucher>(_onApplyVoucher);
     on<ClearVoucher>(_onClearVoucher);
+    on<SelectShippingAddress>(_onSelectShippingAddress);
+    on<SelectCourier>(_onSelectCourier);
   }
 
   Future<String?> _getCartId() async {
@@ -106,6 +133,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   }
 
   Future<void> _onLoadCart(LoadCart event, Emitter<CartState> emit) async {
+    final prev = state;
     emit(CartLoading());
     try {
       final userId = _supabase.auth.currentUser?.id;
@@ -122,6 +150,8 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         id,
         name,
         price,
+        stock,
+        weight_grams,
         images
       )
     ''')
@@ -131,21 +161,110 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       final cartItems = List<Map<String, dynamic>>.from(data);
 
       double total = 0;
+      int totalWeight = 0;
       for (var item in cartItems) {
         final product = item['products'] as Map<String, dynamic>?;
         if (product != null) {
           total += (product['price'] as num) * (item['quantity'] as int);
+          totalWeight +=
+              ((product['weight_grams'] as num?)?.toInt() ?? 0) *
+                  (item['quantity'] as int);
         }
       }
 
-      emit(CartLoaded(cartItems, total));
+      final keepAddress =
+          prev is CartLoaded ? prev.selectedAddress : null;
+      emit(CartLoaded(cartItems, total,
+          totalWeightGrams: totalWeight, selectedAddress: keepAddress));
+
+      if (keepAddress != null) await _loadRates(emit);
     } catch (e) {
       emit(CartError(e.toString()));
     }
   }
 
   double get _vatRate => 0.11;
-  double get _deliveryFee => 10000;
+
+  CartLoaded _copyLoaded(CartLoaded c, {Map<String, dynamic>? voucher}) {
+    return CartLoaded(
+      c.cartItems,
+      c.totalPrice,
+      voucher: voucher ?? c.voucher,
+      totalWeightGrams: c.totalWeightGrams,
+      selectedAddress: c.selectedAddress,
+      selectedCourier: c.selectedCourier,
+      shippingRates: c.shippingRates,
+      shippingFee: c.shippingFee,
+    );
+  }
+
+  Future<void> _onSelectShippingAddress(
+    SelectShippingAddress event,
+    Emitter<CartState> emit,
+  ) async {
+    final current = state;
+    if (current is! CartLoaded) return;
+    emit(CartLoaded(
+      current.cartItems,
+      current.totalPrice,
+      voucher: current.voucher,
+      totalWeightGrams: current.totalWeightGrams,
+      selectedAddress: event.address,
+    ));
+    await _loadRates(emit);
+  }
+
+  Future<void> _loadRates(Emitter<CartState> emit) async {
+    final current = state;
+    if (current is! CartLoaded) return;
+    final address = current.selectedAddress;
+    if (address == null) return;
+
+    try {
+      final rates = await _shippingRepository.fetchRates(
+        destPostal: address['postal_code'] as String?,
+        destCity: address['city'] as String?,
+        weightGrams: current.totalWeightGrams,
+      );
+
+      final Map<String, dynamic>? cheapest =
+          rates.isNotEmpty ? rates.first : null;
+      emit(CartLoaded(
+        current.cartItems,
+        current.totalPrice,
+        voucher: current.voucher,
+        totalWeightGrams: current.totalWeightGrams,
+        selectedAddress: address,
+        shippingRates: rates,
+        selectedCourier: cheapest,
+        shippingFee: (cheapest?['price'] as num?)?.toDouble() ?? 0,
+      ));
+    } catch (e) {
+      emit(CartLoaded(
+        current.cartItems,
+        current.totalPrice,
+        voucher: current.voucher,
+        totalWeightGrams: current.totalWeightGrams,
+        selectedAddress: address,
+        shippingFee: 0,
+      ));
+    }
+  }
+
+  void _onSelectCourier(SelectCourier event, Emitter<CartState> emit) {
+    final current = state;
+    if (current is! CartLoaded) return;
+    emit(CartLoaded(
+      current.cartItems,
+      current.totalPrice,
+      voucher: current.voucher,
+      totalWeightGrams: current.totalWeightGrams,
+      selectedAddress: current.selectedAddress,
+      shippingRates: current.shippingRates,
+      selectedCourier: event.courier,
+      shippingFee: (event.courier['price'] as num?)?.toDouble() ?? 0,
+    ));
+  }
 
   double calculateDiscount(double subtotal, Map<String, dynamic>? voucher) {
     if (voucher == null || voucher.isEmpty) return 0;
@@ -160,10 +279,14 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     return value;
   }
 
-  double checkoutTotal(double subtotal, Map<String, dynamic>? voucher) {
+  double checkoutTotal(
+    double subtotal,
+    Map<String, dynamic>? voucher,
+    double shippingFee,
+  ) {
     final discount = calculateDiscount(subtotal, voucher);
     final discounted = subtotal - discount;
-    return discounted + _deliveryFee + discounted * _vatRate;
+    return discounted + shippingFee + discounted * _vatRate;
   }
 
   Future<void> _onApplyVoucher(ApplyVoucher event, Emitter<CartState> emit) async {
@@ -209,7 +332,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         return;
       }
 
-      emit(CartLoaded(current.cartItems, current.totalPrice, voucher: data));
+      emit(_copyLoaded(current, voucher: data));
     } catch (e) {
       emit(CartError('Gagal memakai voucher: ${e.toString()}'));
     }
@@ -218,7 +341,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   Future<void> _onClearVoucher(ClearVoucher event, Emitter<CartState> emit) async {
     final current = state;
     if (current is CartLoaded) {
-      emit(CartLoaded(current.cartItems, current.totalPrice));
+      emit(_copyLoaded(current, voucher: null));
     }
   }
 
@@ -286,7 +409,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   Future<void> _onTriggerCheckout(
     TriggerCheckout event,
     Emitter<CartState> emit,
-  ) async {
+  ) async { 
     final user = _supabase.auth.currentUser;
     if (user == null) {
       emit(CartError('Silakan login terlebih dahulu.'));
@@ -299,6 +422,24 @@ class CartBloc extends Bloc<CartEvent, CartState> {
 
     final Map<String, dynamic>? appliedVoucher =
         (state is CartLoaded) ? (state as CartLoaded).voucher : null;
+
+    final Map<String, dynamic>? shippingAddressData =
+        (state is CartLoaded) ? (state as CartLoaded).selectedAddress : null;
+    final Map<String, dynamic>? shippingCourier =
+        (state is CartLoaded) ? (state as CartLoaded).selectedCourier : null;
+    final int totalWeightGrams =
+        (state is CartLoaded) ? (state as CartLoaded).totalWeightGrams : 0;
+    final double shippingFee =
+        (state is CartLoaded) ? (state as CartLoaded).shippingFee : 0;
+
+    if (shippingAddressData == null) {
+      emit(CartError('Silakan pilih alamat pengiriman terlebih dahulu.'));
+      return;
+    }
+    if (shippingCourier == null) {
+      emit(CartError('Silakan pilih kurir pengiriman terlebih dahulu.'));
+      return;
+    }
 
     emit(CheckoutLoading());
 
@@ -350,20 +491,23 @@ class CartBloc extends Bloc<CartEvent, CartState> {
 
       // Hitung ongkir & pajak (PPN atas nilai setelah diskon)
       final double discounted = recalculatedTotal - discountAmount;
-      final double deliveryFee = _deliveryFee;
+      final double deliveryFee = shippingFee;
       final double tax = discounted * _vatRate;
       final double payableTotal = discounted + deliveryFee + tax;
       final int grossAmount = payableTotal.round();
 
-      // 2. Ambil alamat profil user
-      String shippingAddress = "Alamat tidak diketahui";
-      final profileData = await _supabase
-          .from('profiles')
-          .select('address')
-          .eq('id', user.id)
-          .maybeSingle();
-      if (profileData != null && profileData['address'] != null) {
-        shippingAddress = profileData['address'];
+      // 2. Ambil alamat pengiriman terpilih (fallback ke alamat profil)
+      String shippingAddress = shippingAddressData['full_address'] as String? ??
+          'Alamat tidak diketahui';
+      if (shippingAddress.trim().isEmpty) {
+        final profileData = await _supabase
+            .from('profiles')
+            .select('address')
+            .eq('id', user.id)
+            .maybeSingle();
+        if (profileData != null && profileData['address'] != null) {
+          shippingAddress = profileData['address'];
+        }
       }
 
       // 3. Insert ke tabel Orders (ACID State)
@@ -374,8 +518,14 @@ class CartBloc extends Bloc<CartEvent, CartState> {
             'total_amount': payableTotal,
             'status': OrderStatus.waitingPayment,
             'shipping_address': shippingAddress,
-            if (voucherId != null) 'voucher_id': voucherId,
-            if (voucherCode != null) 'voucher_code': voucherCode,
+            'shipping_address_id': shippingAddressData['id'],
+            'courier_code': shippingCourier['code'],
+            'courier_service':
+                '${shippingCourier['name']} ${shippingCourier['service'] ?? ''}'
+                    .trim(),
+            'weight_grams': totalWeightGrams,
+            'voucher_id': ?voucherId,
+            'voucher_code': ?voucherCode,
             'discount_amount': discountAmount,
             'delivery_fee': deliveryFee,
             'tax_amount': tax,
@@ -396,12 +546,16 @@ class CartBloc extends Bloc<CartEvent, CartState> {
 
       // 5. Inisialisasi payment record untuk Midtrans
       final String midtransOrderId = 'NEXT-${const Uuid().v4()}';
-      await _supabase.from('payments').insert({
+      final paymentInsert = await _supabase.from('payments').insert({
         'order_id': orderId,
         'midtrans_id': midtransOrderId,
         'status': 'pending',
         'amount': payableTotal,
       });
+      if (paymentInsert.error != null) {
+        throw Exception(
+            'Gagal menyimpan data pembayaran: ${paymentInsert.error.message}');
+      }
 
       // 6. Invoke Supabase Edge Function untuk mengambil Snap Token
       final String email = user.email ?? '';
@@ -423,10 +577,14 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       final String? snapToken = response.data['token'];
 
       if (snapToken != null) {
-        await _supabase
+        final snapTokenUpdate = await _supabase
             .from('payments')
             .update({'snap_token': snapToken})
             .eq('order_id', orderId);
+        if (snapTokenUpdate.error != null) {
+          throw Exception(
+              'Gagal menyimpan token pembayaran: ${snapTokenUpdate.error.message}');
+        }
       }
 
       if (redirectUrl == null) {

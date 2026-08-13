@@ -38,6 +38,10 @@ class AdminProductBloc extends Bloc<AdminProductEvent, AdminProductState> {
           emit(AdminProductError('Stok tidak boleh negatif'));
           return;
         }
+        if (event.weightGrams < 0) {
+          emit(AdminProductError('Berat tidak boleh negatif'));
+          return;
+        }
         if (event.categoryId.isEmpty) {
           emit(AdminProductError('Kategori harus dipilih'));
           return;
@@ -47,7 +51,11 @@ class AdminProductBloc extends Bloc<AdminProductEvent, AdminProductState> {
           return;
         }
 
-        final currentUserId = _supabase.auth.currentUser?.id ?? '';
+        final currentUserId = _supabase.auth.currentUser?.id;
+        if (currentUserId == null || currentUserId.isEmpty) {
+          emit(AdminProductError('Sesi login tidak ditemukan. Silakan login ulang.'));
+          return;
+        }
         final newProduct = Product(
           id: '',
           name: event.name,
@@ -58,6 +66,7 @@ class AdminProductBloc extends Bloc<AdminProductEvent, AdminProductState> {
           images: event.images,
           sellerId: currentUserId,
           isActive: event.isActive,
+          weightGrams: event.weightGrams,
         );
         await _adminRepository.createProduct(newProduct);
         emit(AdminProductActionSuccess('Produk berhasil diupload!'));

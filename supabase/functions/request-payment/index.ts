@@ -24,6 +24,9 @@ serve(async (req) => {
     // Encode Server Key ke Base64 dengan aman
     const authHeader = btoa(MIDTRANS_SERVER_KEY + ':');
 
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || 'https://lizzsokaxbygxwlwxmwq.supabase.co';
+    const notificationUrl = `${supabaseUrl}/functions/v1/midtrans-webhook`;
+
     const response = await fetch('https://app.sandbox.midtrans.com/snap/v1/transactions', {
       method: 'POST',
       headers: {
@@ -39,7 +42,8 @@ serve(async (req) => {
         customer_details: {
           first_name: customer_name,
           email: customer_email
-        }
+        },
+        notification_url: notificationUrl
       })
     });
 

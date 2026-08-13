@@ -15,3 +15,5 @@ class AuthFailure extends AuthState {
   final String errorMessage;
   AuthFailure(this.errorMessage);
 }
+
+class AuthForgotPasswordSent extends AuthState {}

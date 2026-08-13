@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:nextcart/features/admin/presentation/dashboard/admin_dashboard_page.dart';
 import 'package:nextcart/features/admin/presentation/order/admin_order_page.dart';
 import 'package:nextcart/features/admin/presentation/product/admin_product_management.dart';
+import 'package:nextcart/features/admin/presentation/review/admin_review_management.dart';
 import 'package:nextcart/features/admin/presentation/user/admin_user_management.dart';
 import '../../../core/theme/app_colors.dart';
 
@@ -23,6 +24,7 @@ class _AdminNavigationContainerState extends State<AdminNavigationContainer> {
     const AdminProductManagementPage(),  
     const AdminOrderPage(),    
     const AdminUserManagementPage(),     
+    const AdminReviewManagementPage(),
   ];
 
   @override
@@ -67,10 +69,11 @@ class _AdminNavigationContainerState extends State<AdminNavigationContainer> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildAdminNavItem(0, FontAwesomeIcons.chartPie, 'Dasbor'),
+                    _buildAdminNavItem(0, FontAwesomeIcons.chartPie, 'Dashboard'),
                     _buildAdminNavItem(1, FontAwesomeIcons.boxOpen, 'Produk'),
                     _buildAdminNavItem(2, FontAwesomeIcons.receipt, 'Pesanan'),
                     _buildAdminNavItem(3, FontAwesomeIcons.usersGear, 'Pengguna'),
+                    _buildAdminNavItem(4, FontAwesomeIcons.star, 'Ulasan'),
                   ],
                 ),
               ),

@@ -7,8 +7,9 @@ import 'package:nextcart/features/cart/bloc/cart_bloc.dart';
 
 class DetailTopBar extends StatelessWidget {
   final AppColorScheme colors;
+  final VoidCallback? onShare;
 
-  const DetailTopBar({super.key, required this.colors});
+  const DetailTopBar({super.key, required this.colors, this.onShare});
 
   @override
   Widget build(BuildContext context) {
@@ -34,20 +35,31 @@ class DetailTopBar extends StatelessWidget {
             ),
           ),
 
-          BlocBuilder<CartBloc, CartState>(
-            builder: (context, state) {
-              int uniqueProductsCount = 0;
-              if (state is CartLoaded) {
-                uniqueProductsCount = state.cartItems.length;
-              }
-              return BumpingCartIcon(
-                count: uniqueProductsCount,
-                colors: colors,
-                onTap: () {
-                  context.push('/cart');
+          Row(
+            children: [
+              if (onShare != null)
+                _CircleIconBtn(
+                  icon: Icons.share_outlined,
+                  colors: colors,
+                  onTap: onShare!,
+                ),
+              const SizedBox(width: 6),
+              BlocBuilder<CartBloc, CartState>(
+                builder: (context, state) {
+                  int uniqueProductsCount = 0;
+                  if (state is CartLoaded) {
+                    uniqueProductsCount = state.cartItems.length;
+                  }
+                  return BumpingCartIcon(
+                    count: uniqueProductsCount,
+                    colors: colors,
+                    onTap: () {
+                      context.push('/cart');
+                    },
+                  );
                 },
-              );
-            },
+              ),
+            ],
           ),
         ],
       ),

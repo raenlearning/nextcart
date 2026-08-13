@@ -1,6 +1,10 @@
 class AppAssets {
   // Images
   static const bannerPromotion = 'assets/images/background_promo.png';
+  static const bannerTech1 = 'assets/images/banner_tech_1.jpg';
+  static const bannerTech2 = 'assets/images/banner_tech_2.jpg';
+  static const bannerTech3 = 'assets/images/banner_tech_3.jpg';
+  static const bannerTech4 = 'assets/images/banner_tech_4.jpg';
   static const onBoarding1 = 'assets/images/onboarding_1.png';
   static const onBoarding2 = 'assets/images/onboarding_2.png';
   static const onBoarding3 = 'assets/images/onboarding_3.png';

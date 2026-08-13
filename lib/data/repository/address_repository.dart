@@ -6,6 +6,10 @@ class ShippingAddress {
   final String? recipientName;
   final String? phone;
   final String fullAddress;
+  final String? province;
+  final String? city;
+  final String? district;
+  final String? postalCode;
   final double? latitude;
   final double? longitude;
   final bool isDefault;
@@ -16,6 +20,10 @@ class ShippingAddress {
     this.recipientName,
     this.phone,
     required this.fullAddress,
+    this.province,
+    this.city,
+    this.district,
+    this.postalCode,
     this.latitude,
     this.longitude,
     this.isDefault = false,
@@ -28,6 +36,10 @@ class ShippingAddress {
       recipientName: json['recipient_name'] as String?,
       phone: json['phone'] as String?,
       fullAddress: json['full_address'] as String,
+      province: json['province'] as String?,
+      city: json['city'] as String?,
+      district: json['district'] as String?,
+      postalCode: json['postal_code'] as String?,
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
       isDefault: json['is_default'] as bool? ?? false,

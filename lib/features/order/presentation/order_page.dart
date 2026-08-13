@@ -79,6 +79,7 @@ class OrderScreenState extends State<OrderScreen>
               quantity,
               price_at_purchase,
               products (
+                id,
                 name,
                 images
               )

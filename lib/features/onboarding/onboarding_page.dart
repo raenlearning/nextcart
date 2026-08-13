@@ -98,12 +98,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
               return Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Background image dengan error handler
                   Image.asset(
                     item.imagePath,
-                    width: 200,
-                    height: 200,
-                    errorBuilder: (_, __, ___) => Container(
+                    errorBuilder: (_, _, _) => Container(
                       color: Colors.grey[900],
                       child: const Center(
                         child: Icon(

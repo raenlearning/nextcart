@@ -109,7 +109,7 @@ serve(async (req) => {
       });
     }
 
-    await supabase
+    const { error: paymentUpdateError } = await supabase
       .from("payments")
       .update({
         status: paymentStatus,
@@ -120,10 +120,32 @@ serve(async (req) => {
       })
       .eq("id", paymentRow.id);
 
-    await supabase
+    if (paymentUpdateError) {
+      console.error("Gagal update payments:", paymentUpdateError.message);
+      return new Response(JSON.stringify({ error: "Failed to update payment" }), {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+      });
+    }
+
+    const { error: orderUpdateError } = await supabase
       .from("orders")
       .update({ status: orderStatus })
       .eq("id", paymentRow.order_id);
+
+    if (orderUpdateError) {
+      console.error("Gagal update orders:", orderUpdateError.message);
+      return new Response(JSON.stringify({ error: "Failed to update order" }), {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+      });
+    }
 
     if (paymentStatus === "settlement") {
       const { data: orderItems } = await supabase
@@ -133,10 +155,13 @@ serve(async (req) => {
 
       if (orderItems) {
         for (const item of orderItems) {
-          await supabase.rpc("deduct_product_stock", {
+          const { error: stockError } = await supabase.rpc("deduct_product_stock", {
             p_product_id: item.product_id,
             p_quantity: item.quantity,
           });
+          if (stockError) {
+            console.error("Gagal deduct stok:", item.product_id, stockError.message);
+          }
         }
       }
     }

@@ -105,7 +105,7 @@ class _AdminAnalyticsDashboardPageState
                         children: [
                           Expanded(
                             child: Text(
-                              'Dasbor',
+                              'Dashboard',
                               style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w800,

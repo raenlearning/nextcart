@@ -41,4 +41,12 @@ class AuthRepository {
     await _supabase.auth.signOut();
   }
 
+  Future<void> resetPasswordForEmail(String email) async {
+    try {
+      await _supabase.auth.resetPasswordForEmail(email);
+    } catch (e) {
+      throw Exception('Gagal mengirim tautan reset: ${e.toString()}');
+    }
+  }
+
 }

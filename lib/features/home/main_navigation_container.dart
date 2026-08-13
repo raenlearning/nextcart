@@ -1,8 +1,9 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:nextcart/features/order/presentation/order_page.dart';
 import 'package:nextcart/features/profile/presentation/profile_page.dart';
+import 'package:nextcart/features/wishlist/bloc/wishlist_bloc.dart';
 import 'package:nextcart/features/wishlist/wishlist_page.dart';
 import '../../../core/theme/app_colors.dart';
 import 'home_page.dart';
@@ -45,53 +46,64 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final colors = context.colors;
 
     return Scaffold(
       extendBody: true,
       body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: SafeArea(
+        top: false,
         child: Container(
           margin: const EdgeInsets.fromLTRB(20, 0, 20, 16),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(28),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 10,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 10,
+              ),
+              decoration: BoxDecoration(
+                color: colors.card,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: colors.divider.withValues(alpha: 0.8),
                 ),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? Colors.black.withValues(alpha: 0.3)
-                      : Colors.white.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(28),
-
-                  border: Border.all(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.12)
-                        : Colors.white.withValues(alpha: 0.6),
-                    width: 1.5,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
-                      blurRadius: 24,
-                      offset: const Offset(0, 8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(
+                      alpha: context.isDark ? 0.3 : 0.06,
                     ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildNavItem(0, FontAwesomeIcons.house, 'Beranda'),
-                    _buildNavItem(1, FontAwesomeIcons.heart, 'Wishlist'),
-                    _buildNavItem(2, FontAwesomeIcons.cartPlus, 'Pesanan'),
-                    _buildNavItem(3, FontAwesomeIcons.person, 'Profil'),
-                  ],
-                ),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildNavItem(0, FontAwesomeIcons.house, 'Beranda'),
+                  BlocBuilder<WishlistBloc, WishlistState>(
+                    buildWhen: (previous, current) =>
+                        (previous is WishlistLoaded &&
+                         current is WishlistLoaded &&
+                         previous.productIds.length != current.productIds.length) ||
+                        previous is! WishlistLoaded ||
+                        current is! WishlistLoaded,
+                    builder: (context, state) {
+                      final count = state is WishlistLoaded
+                          ? state.productIds.length
+                          : 0;
+                      return _buildNavItem(
+                        1,
+                        FontAwesomeIcons.heart,
+                        'Wishlist',
+                        badgeCount: count,
+                      );
+                    },
+                  ),
+                  _buildNavItem(2, FontAwesomeIcons.cartPlus, 'Pesanan'),
+                  _buildNavItem(3, FontAwesomeIcons.person, 'Profil'),
+                ],
               ),
             ),
           ),
@@ -100,7 +112,12 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
     );
   }
 
-  Widget _buildNavItem(int index, FaIconData icon, String label) {
+  Widget _buildNavItem(
+    int index,
+    FaIconData icon,
+    String label, {
+    int badgeCount = 0,
+  }) {
     final theme = Theme.of(context);
     final isSelected = _currentIndex == index;
 
@@ -121,12 +138,43 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            FaIcon(
-              icon,
-              size: 18,
-              color: isSelected
-                  ? Colors.white
-                  : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                FaIcon(
+                  icon,
+                  size: 18,
+                  color: isSelected
+                      ? Colors.white
+                      : theme.textTheme.bodyMedium?.color
+                          ?.withValues(alpha: 0.6),
+                ),
+                if (badgeCount > 0)
+                  Positioned(
+                    right: -8,
+                    top: -8,
+                    child: Container(
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.sale,
+                        shape: BoxShape.circle,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        badgeCount > 99 ? '99+' : '$badgeCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
             AnimatedSize(
               duration: const Duration(milliseconds: 250),

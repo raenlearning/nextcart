@@ -143,7 +143,6 @@ class ProfileDetailPageState extends State<ProfileDetailPage> {
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             children: [
-              // Area Manajemen Foto / Avatar picker
               Center(
                 child: Stack(
                   children: [

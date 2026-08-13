@@ -48,7 +48,7 @@ class _ViewAllProductsPageState extends State<ViewAllProductsPage> {
     }
   }
 
-  FocusNode _searchFocusNode = FocusNode();
+  final FocusNode _searchFocusNode = FocusNode();
 
   void _focusSearchField() {
     _searchFocusNode.requestFocus();

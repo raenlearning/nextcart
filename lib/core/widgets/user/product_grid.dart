@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,6 +8,7 @@ import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/core/widgets/cart_fly_animation.dart';
 import 'package:nextcart/data/models/product_model.dart';
 import 'package:nextcart/features/cart/bloc/cart_bloc.dart';
+import 'package:nextcart/features/wishlist/bloc/wishlist_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomeProductGrid extends StatelessWidget {
@@ -44,17 +44,6 @@ class ProductCard extends StatefulWidget {
 class _ProductCardState extends State<ProductCard> {
   final GlobalKey _cartButtonKey = GlobalKey();
 
-  double get _rating {
-    final r = Random(widget.product.id.hashCode);
-    return double.parse((4.0 + r.nextDouble()).toStringAsFixed(1));
-  }
-
-  (int, double) get _discountAndOriginal {
-    final r = Random(widget.product.id.hashCode);
-    final pct = 10 + r.nextInt(21);
-    return (pct, widget.product.price / (1 - pct / 100));
-  }
-
   void _onAddToCart() {
     HapticFeedback.lightImpact();
 
@@ -78,7 +67,6 @@ class _ProductCardState extends State<ProductCard> {
     final imageUrl = widget.product.images.isNotEmpty
         ? widget.product.images.first
         : null;
-    final (discountPct, originalPrice) = _discountAndOriginal;
 
     return GestureDetector(
       onTap: () => context.push('/product-detail', extra: widget.product),
@@ -105,6 +93,12 @@ class _ProductCardState extends State<ProductCard> {
               child: Stack(
                 children: [
                   _ProductImage(imageUrl: imageUrl),
+                  if (widget.product.stock <= 5)
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      child: _LowStockBadge(),
+                    ),
                   Positioned(top: 8, right: 8, child: _WishlistButton(product: widget.product)),
                 ],
               ),
@@ -129,47 +123,33 @@ class _ProductCardState extends State<ProductCard> {
                   ),
                    const SizedBox(height: 5),
 
-                  // Rating
-                  _RatingRow(rating: _rating),
-                  const SizedBox(height: 8),
+                   // Rating
+                   if (widget.product.totalRating > 0)
+                     _RatingRow(rating: widget.product.totalRating),
+                   if (widget.product.totalRating > 0)
+                     const SizedBox(height: 8),
 
-                  // Price + Cart button
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: Wrap(
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: 6,
-                          runSpacing: 0,
-                          children: [
-                            Text(
-                              CurrencyFormatter.rupiah(widget.product.price),
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800,
-                                color: colors.textPrimary,
-                              ),
-                            ),
-                            Text(
-                              CurrencyFormatter.rupiah(originalPrice),
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: colors.textHint,
-                                decoration: TextDecoration.lineThrough,
-                                decorationColor: colors.textHint,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      _AddToCartButton(
-                        key: _cartButtonKey,
-                        onTap: _onAddToCart,
-                      ),
-                    ],
-                  ),
+                   // Price + Cart button
+                   Row(
+                     crossAxisAlignment: CrossAxisAlignment.center,
+                     children: [
+                       Expanded(
+                         child: Text(
+                           CurrencyFormatter.rupiah(widget.product.price),
+                           style: TextStyle(
+                             fontSize: 12,
+                             fontWeight: FontWeight.w800,
+                             color: colors.textPrimary,
+                           ),
+                         ),
+                       ),
+                       const SizedBox(width: 6),
+                       _AddToCartButton(
+                         key: _cartButtonKey,
+                         onTap: _onAddToCart,
+                       ),
+                     ],
+                   ),
                 ],
               ),
             ),
@@ -226,40 +206,39 @@ class _ProductImage extends StatelessWidget {
   }
 }
 
-class _WishlistButton extends StatefulWidget {
+class _LowStockBadge extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: Colors.black.withAlpha(150),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.local_fire_department, color: AppColors.rating, size: 11),
+          SizedBox(width: 3),
+          Text(
+            'Stok Menipis',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 9,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WishlistButton extends StatelessWidget {
   final Product product;
   const _WishlistButton({required this.product});
 
-  @override
-  State<_WishlistButton> createState() => _WishlistButtonState();
-}
-
-class _WishlistButtonState extends State<_WishlistButton> {
-  bool _isWishlisted = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkWishlistStatus();
-  }
-
-  Future<void> _checkWishlistStatus() async {
-    final userId = Supabase.instance.client.auth.currentUser?.id;
-    if (userId == null) return;
-    try {
-      final data = await Supabase.instance.client
-          .from('wishlist_items')
-          .select('id')
-          .eq('user_id', userId)
-          .eq('product_id', widget.product.id)
-          .maybeSingle();
-      if (mounted) {
-        setState(() => _isWishlisted = data != null);
-      }
-    } catch (_) {}
-  }
-
-  Future<void> _toggleWishlist() async {
+  void _toggleWishlist(BuildContext context) {
     final userId = Supabase.instance.client.auth.currentUser?.id;
     if (userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -267,36 +246,17 @@ class _WishlistButtonState extends State<_WishlistButton> {
       );
       return;
     }
-    setState(() => _isWishlisted = !_isWishlisted);
-    try {
-      if (_isWishlisted) {
-        await Supabase.instance.client
-            .from('wishlist_items')
-            .insert({'user_id': userId, 'product_id': widget.product.id});
-      } else {
-        final existing = await Supabase.instance.client
-            .from('wishlist_items')
-            .select('id')
-            .eq('user_id', userId)
-            .eq('product_id', widget.product.id)
-            .maybeSingle();
-        if (existing != null) {
-          await Supabase.instance.client
-              .from('wishlist_items')
-              .delete()
-              .eq('id', existing['id']);
-        }
-      }
-    } catch (_) {
-      setState(() => _isWishlisted = !_isWishlisted);
-    }
+    context.read<WishlistBloc>().add(WishlistToggle(product.id));
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final isWishlisted =
+        context.watch<WishlistBloc>().contains(product.id);
+
     return GestureDetector(
-      onTap: _toggleWishlist,
+      onTap: () => _toggleWishlist(context),
       child: Container(
         width: 30,
         height: 30,
@@ -312,8 +272,8 @@ class _WishlistButtonState extends State<_WishlistButton> {
           ],
         ),
         child: Icon(
-          _isWishlisted ? Icons.favorite : Icons.favorite_border,
-          color: _isWishlisted ? AppColors.favorite : colors.textSecondary,
+          isWishlisted ? Icons.favorite : Icons.favorite_border,
+          color: isWishlisted ? AppColors.favorite : colors.textSecondary,
           size: 16,
         ),
       ),

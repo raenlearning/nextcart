@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/data/repository/review_repository.dart';
 
@@ -17,14 +20,38 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
   final _titleController = TextEditingController();
   final _commentController = TextEditingController();
   final ReviewRepository _repository = ReviewRepository();
+  final ImagePicker _picker = ImagePicker();
+  List<XFile> _images = [];
   int _rating = 0;
   bool _isSaving = false;
+
+  static const int _maxImages = 3;
 
   @override
   void dispose() {
     _titleController.dispose();
     _commentController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImages() async {
+    try {
+      final picked = await _picker.pickMultiImage(limit: _maxImages);
+      setState(() {
+        final remaining = _maxImages - _images.length;
+        if (remaining <= 0) return;
+        _images = [..._images, ...picked.take(remaining)];
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal memilih foto: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _submit() async {
@@ -38,11 +65,17 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
 
     setState(() => _isSaving = true);
     try {
+      List<String> uploadedUrls = [];
+      if (_images.isNotEmpty) {
+        uploadedUrls = await _repository.uploadReviewImages(_images);
+      }
+
       await _repository.addReview(
         productId: widget.productId,
         rating: _rating,
         title: _titleController.text,
         comment: _commentController.text,
+        images: uploadedUrls,
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -126,6 +159,99 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
                 ),
               ),
               const SizedBox(height: 24),
+              Text(
+                'Foto (opsional)',
+                style: TextStyle(
+                  color: colors.textPrimary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 6),
+              SizedBox(
+                height: 76,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    ..._images.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final file = entry.value;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.file(
+                                File(file.path),
+                                width: 76,
+                                height: 76,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            Positioned(
+                              top: 4,
+                              right: 4,
+                              child: GestureDetector(
+                                onTap: () => setState(
+                                  () => _images.removeAt(index),
+                                ),
+                                child: Container(
+                                  padding: const EdgeInsets.all(2),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.black54,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                    size: 12,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                    if (_images.length < _maxImages)
+                      GestureDetector(
+                        onTap: _pickImages,
+                        child: Container(
+                          width: 76,
+                          height: 76,
+                          decoration: BoxDecoration(
+                            color: colors.inputFill,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: colors.border,
+                              style: BorderStyle.solid,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.add_a_photo_outlined,
+                                color: AppColors.primary,
+                                size: 22,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${_images.length}/$_maxImages',
+                                style: TextStyle(
+                                  color: colors.textHint,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
               Text(
                 'Judul',
                 style: TextStyle(

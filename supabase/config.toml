@@ -434,3 +434,11 @@ entrypoint = "./functions/midtrans-webhook/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/midtrans-webhook/*.html" ]
+
+[functions.send-notification]
+enabled = true
+verify_jwt = false
+
+[functions.order-notify]
+enabled = true
+verify_jwt = false

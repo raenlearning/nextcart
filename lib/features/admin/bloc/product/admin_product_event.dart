@@ -12,6 +12,7 @@ class AddAdminProduct extends AdminProductEvent {
   final String categoryId;
   final List<String> images;
   final bool isActive;
+  final int weightGrams;
 
   AddAdminProduct({
     required this.name,
@@ -21,6 +22,7 @@ class AddAdminProduct extends AdminProductEvent {
     required this.categoryId,
     required this.images,
     required this.isActive,
+    this.weightGrams = 0,
   });
 }
 

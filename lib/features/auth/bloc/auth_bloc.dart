@@ -58,5 +58,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(AuthFailure(e.toString()));
       }
     });
+
+    on<AuthForgotPasswordRequested>((event, emit) async {
+      emit(AuthLoading());
+      try {
+        await _authRepository.resetPasswordForEmail(event.email);
+        emit(AuthForgotPasswordSent());
+      } catch (e) {
+        emit(AuthFailure(e.toString()));
+      }
+    });
   }
 }

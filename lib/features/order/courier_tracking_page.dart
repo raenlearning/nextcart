@@ -29,10 +29,10 @@ class _CourierTrackingPageState extends State<CourierTrackingPage> {
   final MapController _mapController = MapController();
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  // Koordinat Tujuan (Lokasi Pembeli)
+  // Koordinat Tujuan 
   late final LatLng _destination;
 
-  // Titik Awal Kurir (Toko / Gudang)
+  // Titik Awal Kurir
   late final LatLng _startLocation;
 
   // Lokasi Kurir Sekarang

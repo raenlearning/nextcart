@@ -9,9 +9,11 @@ import 'package:nextcart/features/admin/bloc/analytics/admin_analytic_bloc.dart'
 import 'package:nextcart/features/admin/bloc/product/admin_product_bloc.dart';
 import 'package:nextcart/data/repository/auth_repository.dart';
 import 'package:nextcart/data/repository/product_repository.dart';
+import 'package:nextcart/data/repository/wishlist_repository.dart';
 import 'package:nextcart/features/auth/bloc/auth_bloc.dart';
 import 'package:nextcart/features/cart/bloc/cart_bloc.dart';
 import 'package:nextcart/features/product/bloc/product_bloc.dart';
+import 'package:nextcart/features/wishlist/bloc/wishlist_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:nextcart/core/router/app_router.dart';
 import 'package:nextcart/core/theme/app_theme.dart';
@@ -44,6 +46,9 @@ class MainApp extends StatelessWidget {
         RepositoryProvider<ProductRepository>(
           create: (_) => ProductRepository(),
         ),
+        RepositoryProvider<WishlistRepository>(
+          create: (_) => WishlistRepository(),
+        ),
         RepositoryProvider<AdminRepository>(create: (_) => AdminRepository()),
         RepositoryProvider<AdminAnalyticsRepository>(
           create: (_) => const SupabaseAdminAnalyticsRepository(),
@@ -75,10 +80,17 @@ class MainApp extends StatelessWidget {
           ),
 
           BlocProvider(create: (_) => CartBloc()),
+
+          BlocProvider(
+            create: (context) => WishlistBloc(
+              repository: context.read<WishlistRepository>(),
+            )..add(WishlistLoad()),
+          ),
         ],
         child: MaterialApp.router(
           title: 'Nextcart E-Commerce',
           debugShowCheckedModeBanner: false,
+          scaffoldMessengerKey: PushService.instance.messengerKey,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           routerConfig: AppRouter.router,

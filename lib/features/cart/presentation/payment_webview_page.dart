@@ -49,7 +49,7 @@ class _PaymentWebViewPageState extends State<PaymentWebViewPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pembayaran Nextcart'),
+        title: const Text('Payment Nextcart'),
         actions: [
           IconButton(
             icon: const Icon(Icons.close),

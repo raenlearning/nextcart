@@ -19,6 +19,7 @@ class _AdminOrderPageState extends State<AdminOrderPage> {
   List<Map<String, dynamic>> _filteredOrders = [];
   bool _isLoading = true;
   String _searchQuery = '';
+  final Map<String, int> _statusCounts = {};
 
   final List<String> _statuses = ['all', ...OrderStatus.all];
   String _selectedStatus = 'all';
@@ -44,6 +45,8 @@ class _AdminOrderPageState extends State<AdminOrderPage> {
   Future<void> _fetchOrders() async {
     setState(() => _isLoading = true);
     try {
+      _fetchStatusCounts();
+
       var query = _supabase.from('orders').select('''
         id,
         total_amount,
@@ -96,6 +99,21 @@ class _AdminOrderPageState extends State<AdminOrderPage> {
     }
   }
 
+  Future<void> _fetchStatusCounts() async {
+    try {
+      final data = await _supabase
+          .from('orders')
+          .select('status')
+          .order('created_at', ascending: false);
+      final counts = <String, int>{};
+      for (final row in data as List) {
+        final status = (row as Map)['status'] as String? ?? 'all';
+        counts[status] = (counts[status] ?? 0) + 1;
+      }
+      if (mounted) setState(() => _statusCounts..clear()..addAll(counts));
+    } catch (_) {}
+  }
+
   void _applyLocalFilter() {
     if (_searchQuery.isEmpty) {
       _filteredOrders = List.from(_orders);
@@ -116,6 +134,37 @@ class _AdminOrderPageState extends State<AdminOrderPage> {
   }
 
   Future<void> _updateOrderStatus(String orderId, String newStatus) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        final colors = context.colors;
+        return AlertDialog(
+          backgroundColor: colors.card,
+          title: const Text('Ubah Status Pesanan'),
+          content: Text(
+            'Ubah status pesanan menjadi "${OrderStatus.label(newStatus)}"?',
+            style: TextStyle(color: colors.textPrimary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Batal'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Ya, Ubah'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !mounted) return;
+
     try {
       await _supabase
           .from('orders')
@@ -126,7 +175,7 @@ class _AdminOrderPageState extends State<AdminOrderPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Status pesanan berhasil diperbarui menjadi $newStatus',
+              'Status pesanan berhasil diperbarui menjadi ${OrderStatus.label(newStatus)}',
             ),
             backgroundColor: AppColors.success,
           ),
@@ -418,6 +467,7 @@ class _AdminOrderPageState extends State<AdminOrderPage> {
           final status = _statuses[index];
           final isSelected = status == _selectedStatus;
           final chipColor = status == 'all' ? Colors.black : OrderStatus.color(status);
+          final count = _statusCounts[status] ?? 0;
 
           return GestureDetector(
             onTap: () => _onStatusChipTap(status),
@@ -454,6 +504,24 @@ class _AdminOrderPageState extends State<AdminOrderPage> {
                       color: isSelected ? Colors.white : colors.textSecondary,
                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                       fontSize: 12.5,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? Colors.white.withValues(alpha: 0.2)
+                          : colors.inputFill,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '$count',
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : colors.textSecondary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ],

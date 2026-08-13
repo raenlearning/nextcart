@@ -18,6 +18,10 @@ class _AddressFormPageState extends State<AddressFormPage> {
   final _recipientController = TextEditingController();
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
+  final _provinceController = TextEditingController();
+  final _cityController = TextEditingController();
+  final _districtController = TextEditingController();
+  final _postalCodeController = TextEditingController();
   final AddressRepository _repository = AddressRepository();
   bool _isDefault = false;
   bool _isSaving = false;
@@ -33,6 +37,10 @@ class _AddressFormPageState extends State<AddressFormPage> {
       _recipientController.text = a.recipientName ?? '';
       _phoneController.text = a.phone ?? '';
       _addressController.text = a.fullAddress;
+      _provinceController.text = a.province ?? '';
+      _cityController.text = a.city ?? '';
+      _districtController.text = a.district ?? '';
+      _postalCodeController.text = a.postalCode ?? '';
       _isDefault = a.isDefault;
     }
   }
@@ -43,6 +51,10 @@ class _AddressFormPageState extends State<AddressFormPage> {
     _recipientController.dispose();
     _phoneController.dispose();
     _addressController.dispose();
+    _provinceController.dispose();
+    _cityController.dispose();
+    _districtController.dispose();
+    _postalCodeController.dispose();
     super.dispose();
   }
 
@@ -58,6 +70,18 @@ class _AddressFormPageState extends State<AddressFormPage> {
         'recipient_name': _recipientController.text.trim(),
         'phone': _phoneController.text.trim(),
         'full_address': _addressController.text.trim(),
+        'province': _provinceController.text.trim().isEmpty
+            ? null
+            : _provinceController.text.trim(),
+        'city': _cityController.text.trim().isEmpty
+            ? null
+            : _cityController.text.trim(),
+        'district': _districtController.text.trim().isEmpty
+            ? null
+            : _districtController.text.trim(),
+        'postal_code': _postalCodeController.text.trim().isEmpty
+            ? null
+            : _postalCodeController.text.trim(),
         'is_default': _isDefault,
       };
 
@@ -161,6 +185,45 @@ class _AddressFormPageState extends State<AddressFormPage> {
                   return null;
                 },
               ),
+              const SizedBox(height: 20),
+              _label('Provinsi'),
+              const SizedBox(height: 6),
+              TextFormField(
+                controller: _provinceController,
+                style: TextStyle(color: colors.textPrimary, fontSize: 14),
+                decoration: const InputDecoration(hintText: 'cth: DKI Jakarta'),
+              ),
+              const SizedBox(height: 20),
+              _label('Kota/Kabupaten'),
+              const SizedBox(height: 6),
+              TextFormField(
+                controller: _cityController,
+                style: TextStyle(color: colors.textPrimary, fontSize: 14),
+                decoration: const InputDecoration(hintText: 'cth: Jakarta Selatan'),
+              ),
+              const SizedBox(height: 20),
+              _label('Kecamatan'),
+              const SizedBox(height: 6),
+              TextFormField(
+                controller: _districtController,
+                style: TextStyle(color: colors.textPrimary, fontSize: 14),
+                decoration: const InputDecoration(hintText: 'cth: Kebayoran Baru'),
+              ),
+              const SizedBox(height: 20),
+              _label('Kode Pos'),
+              const SizedBox(height: 6),
+              TextFormField(
+                controller: _postalCodeController,
+                style: TextStyle(color: colors.textPrimary, fontSize: 14),
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(hintText: 'cth: 12120'),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Kode pos diperlukan untuk ongkir';
+                  }
+                  return null;
+                },
+              ),
               const SizedBox(height: 12),
               SwitchListTile(
                 value: _isDefault,
@@ -169,7 +232,7 @@ class _AddressFormPageState extends State<AddressFormPage> {
                   'Jadikan alamat utama',
                   style: TextStyle(color: colors.textPrimary, fontSize: 13.5),
                 ),
-                activeColor: AppColors.primary,
+                activeThumbColor: AppColors.primary,
                 onChanged: (v) => setState(() => _isDefault = v),
               ),
               const SizedBox(height: 28),

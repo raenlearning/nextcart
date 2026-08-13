@@ -90,6 +90,37 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
   Future<void> _saveChanges() async {
     if (_pendingChanges.isEmpty || _isSaving) return;
 
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        final colors = context.colors;
+        return AlertDialog(
+          backgroundColor: colors.card,
+          title: const Text('Simpan Perubahan'),
+          content: Text(
+            'Ubah peran ${_pendingChanges.length} pengguna?',
+            style: TextStyle(color: colors.textPrimary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Batal'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Simpan'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !mounted) return;
+
     setState(() => _isSaving = true);
     try {
       await Future.wait(

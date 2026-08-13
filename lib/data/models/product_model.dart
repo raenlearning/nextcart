@@ -8,7 +8,9 @@ class Product {
   final List<String> images;
   final String sellerId;
   final bool isActive;
-  
+  final int weightGrams;
+  final double totalRating;
+  final int ratingCount;
 
   Product({
     required this.id,
@@ -20,6 +22,9 @@ class Product {
     required this.images,
     required this.sellerId,
     required this.isActive,
+    this.weightGrams = 0,
+    this.totalRating = 0,
+    this.ratingCount = 0,
   });
 
 
@@ -33,6 +38,7 @@ class Product {
     List<String>? images,
     String? sellerId,
     bool? isActive,
+    int? weightGrams,
   }) {
     return Product(
       id: id ?? this.id,
@@ -44,6 +50,7 @@ class Product {
       images: images ?? this.images,
       sellerId: sellerId ?? this.sellerId,
       isActive: isActive ?? this.isActive,
+      weightGrams: weightGrams ?? this.weightGrams,
     );
   }
 
@@ -58,12 +65,15 @@ class Product {
       images: List<String>.from(json['images'] ?? []),
       sellerId: json['seller_id'] as String? ?? '',
       isActive: json['is_active'] as bool? ?? true,
+      weightGrams: (json['weight_grams'] as num?)?.toInt() ?? 0,
+      totalRating: (json['total_rating'] as num?)?.toDouble() ?? 0,
+      ratingCount: (json['rating_count'] as num?)?.toInt() ?? 0,
     );
   }
 
    Map<String, dynamic> toJson() {
      return {
-       'id': id,
+       if (id.isNotEmpty) 'id': id,
        'name': name,
        'description': description,
        'price': price,
@@ -72,6 +82,7 @@ class Product {
        'images': images,
        'seller_id': sellerId,
        'is_active': isActive,
+       'weight_grams': weightGrams,
      };
    }
 }

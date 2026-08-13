@@ -10,8 +10,7 @@ import 'package:nextcart/features/cart/bloc/cart_bloc.dart';
 
 class BottomBar extends StatelessWidget {
   final double price;
-  final double originalPrice;
-  final int discountPercent;
+  final int quantity;
   final AppColorScheme colors;
   final bool isDark;
   final Product product;
@@ -20,13 +19,14 @@ class BottomBar extends StatelessWidget {
   const BottomBar({
     super.key,
     required this.price,
-    required this.originalPrice,
-    required this.discountPercent,
+    required this.quantity,
     required this.colors,
     required this.isDark,
     required this.product,
     required this.addToCartKey,
   });
+
+  bool get _outOfStock => product.stock <= 0;
 
   void _addToCart(BuildContext context) {
     HapticFeedback.lightImpact();
@@ -77,15 +77,17 @@ class BottomBar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  '$discountPercent% Off',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.success,
+                if (!_outOfStock && product.stock <= 5) ...[
+                  Text(
+                    'Stok menipis, tersisa ${product.stock}',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.warning,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
+                  const SizedBox(height: 2),
+                ],
                 Row(
                   children: [
                     Text(
@@ -98,53 +100,62 @@ class BottomBar extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(width: 6),
-                Text(
-                  CurrencyFormatter.rupiah(originalPrice),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: colors.textHint,
-                    decoration: TextDecoration.lineThrough,
-                    decorationColor: colors.textHint,
-                  ),
-                ),
               ],
             ),
           ),
 
           const SizedBox(width: 12),
 
-          GestureDetector(
-            key: addToCartKey,
-            onTap: () => _addToCart(context),
-            child: Container(
+          if (_outOfStock)
+            Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: colors.textPrimary,
+                color: colors.textHint.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.shopping_bag_outlined,
-                    color: colors.background,
-                    size: 20,
-                  ),
-
-                  SizedBox(width: 5),
-
-                  Text(
-                    'Tambah ke keranjang',
-                    style: TextStyle(
+              child: Text(
+                'Stok Habis',
+                style: TextStyle(
+                  color: colors.textHint,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            )
+          else
+            GestureDetector(
+              key: addToCartKey,
+              onTap: () => _addToCart(context),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: colors.textPrimary,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.shopping_bag_outlined,
                       color: colors.background,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
+                      size: 20,
                     ),
-                  ),
-                ],
+
+                    SizedBox(width: 5),
+
+                    Text(
+                      quantity > 1
+                          ? 'Tambah $quantity ke keranjang'
+                          : 'Tambah ke keranjang',
+                      style: TextStyle(
+                        color: colors.background,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

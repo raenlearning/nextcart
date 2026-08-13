@@ -31,6 +31,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
   late TextEditingController _descController;
   late TextEditingController _priceController;
   late TextEditingController _stockController;
+  late TextEditingController _weightController;
 
   String? _selectedCategoryId;
   List<Map<String, dynamic>> _categoriesList = [];
@@ -63,6 +64,11 @@ class _ProductFormPageState extends State<ProductFormPage> {
           ? currentProduct!.stock.toString()
           : '',
     );
+    _weightController = TextEditingController(
+      text: currentProduct != null && currentProduct.weightGrams > 0
+          ? currentProduct.weightGrams.toString()
+          : '',
+    );
 
     _isActive = currentProduct?.isActive ?? true;
     _existingImages = currentProduct?.images != null
@@ -79,6 +85,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
     _descController.dispose();
     _priceController.dispose();
     _stockController.dispose();
+    _weightController.dispose();
     super.dispose();
   }
 
@@ -151,6 +158,11 @@ class _ProductFormPageState extends State<ProductFormPage> {
       _showSnack('Silakan pilih kategori produk.', AppColors.warning);
       return;
     }
+    final weightInput = int.tryParse(_weightController.text.trim());
+    if (weightInput == null || weightInput <= 0) {
+      _showSnack('Berat produk harus diisi (minimal 1 gram).', AppColors.warning);
+      return;
+    }
 
     setState(() => _isLoading = true);
 
@@ -162,6 +174,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
         );
       }
       final finalImages = [..._existingImages, ...newUrls];
+      final weightGrams = int.tryParse(_weightController.text.trim()) ?? 0;
 
       if (!mounted) return;
 
@@ -175,6 +188,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
             categoryId: _selectedCategoryId!,
             images: finalImages,
             isActive: _isActive,
+            weightGrams: weightGrams,
           ),
         );
       } else {
@@ -190,6 +204,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
               images: finalImages,
               sellerId: widget.product!.sellerId,
               isActive: _isActive,
+              weightGrams: weightGrams,
             ),
           ),
         );
@@ -401,6 +416,23 @@ class _ProductFormPageState extends State<ProductFormPage> {
 
                   FormSection(label: "Stock"),
                   FlatField(controller: _stockController, hint: "0", keyboardType: TextInputType.number),
+
+                  FormSection(label: "Berat (gram)"),
+                  FlatField(
+                    controller: _weightController,
+                    hint: "cth: 250",
+                    keyboardType: TextInputType.number,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                    child: Text(
+                      'Berat dipakai untuk menghitung ongkos kirim.',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: context.colors.textSecondary,
+                      ),
+                    ),
+                  ),
 
                   const SizedBox(height: 32),
                 ],
