@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 360" width="400" height="360">
+  <!-- Background blobs -->
+  <circle cx="200" cy="150" r="130" fill="#FFF1F5" opacity="0.9"/>
+  <circle cx="120" cy="80" r="55" fill="#F5E8C7" opacity="0.5"/>
+  <circle cx="300" cy="240" r="70" fill="#EAF4FF" opacity="0.7"/>
+
+  <!-- Sparkles -->
+  <path d="M85 55 l4 10 10 4 -10 4 -4 10 -4 -10 -10 -4 10 -4z" fill="#FACC15"/>
+  <path d="M320 60 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3z" fill="#22D3EE"/>
+  <path d="M80 290 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3z" fill="#F97316"/>
+
+  <!-- Big heart outline -->
+  <path d="M200 260
+           C120 200 90 160 90 125
+           C90 95 112 75 140 75
+           C160 75 188 90 200 112
+           C212 90 240 75 260 75
+           C288 75 310 95 310 125
+           C310 160 280 200 200 260z"
+        fill="#F43F5E"/>
+  <path d="M200 236
+           C138 190 114 158 114 130
+           C114 108 130 94 151 94
+           C167 94 188 106 200 122
+           C212 106 233 94 249 94
+           C270 94 286 108 286 130
+           C286 158 262 190 200 236z"
+        fill="#FB7185"/>
+  <!-- Heart break line -->
+  <path d="M200 120 v-38" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round"/>
+  <path d="M200 120 l-22 14 l22 16 l-16 12" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M196 104 l-10 -10 m10 10 l10 -10" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round"/>
+
+  <!-- Floating products -->
+  <rect x="52" y="150" width="34" height="52" rx="7" fill="#8B5CF6"/>
+  <rect x="57" y="156" width="24" height="38" rx="4" fill="#A78BFA"/>
+  <circle cx="69" cy="198" r="2.5" fill="#FFFFFF"/>
+
+  <rect x="310" y="180" width="36" height="26" rx="10" fill="#F97316"/>
+  <rect x="310" y="186" width="36" height="8" rx="4" fill="#FDBA74"/>
+
+  <path d="M235 40 a16 16 0 0 1 32 0 v18 h-32z" fill="#06B6D4"/>
+  <rect x="235" y="56" width="7" height="18" rx="3.5" fill="#0F172A"/>
+  <rect x="260" y="56" width="7" height="18" rx="3.5" fill="#0F172A"/>
+  <rect x="231" y="58" width="15" height="10" rx="5" fill="#0F172A"/>
+  <rect x="256" y="58" width="15" height="10" rx="5" fill="#0F172A"/>
+</svg>

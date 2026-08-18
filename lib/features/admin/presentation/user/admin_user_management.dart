@@ -165,7 +165,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // ── Header ──────────────────────────────────────────────
+            // ── Header 
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: Row(
@@ -176,7 +176,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Kelola Pengguna',
+                          'Pengguna',
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.w800,
@@ -247,7 +247,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
             Expanded(
               child: _isLoading
                   ? const Center(
-                      child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2.4),
+                      child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2.4),
                     )
                   : _filteredUsers.isEmpty
                       ? Center(
@@ -290,11 +290,11 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                         ),
             ),
 
-            // ── Save bar ─────────────────────────────────────────────
+            // ── Save bar 
             SafeArea(
               top: false,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                padding: const EdgeInsets.fromLTRB(10, 8, 10, 12),
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 200),
                   child: hasPendingChanges
@@ -305,7 +305,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                           child: ElevatedButton(
                             onPressed: !_isSaving ? _saveChanges : null,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.black,
+                              backgroundColor: AppColors.primary,
                               disabledBackgroundColor: colors.border,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),

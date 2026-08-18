@@ -23,8 +23,8 @@ class _AdminNavigationContainerState extends State<AdminNavigationContainer> {
     const AdminAnalyticsDashboardPage(), 
     const AdminProductManagementPage(),  
     const AdminOrderPage(),    
-    const AdminUserManagementPage(),     
     const AdminReviewManagementPage(),
+    const AdminUserManagementPage(),     
   ];
 
   @override
@@ -72,8 +72,8 @@ class _AdminNavigationContainerState extends State<AdminNavigationContainer> {
                     _buildAdminNavItem(0, FontAwesomeIcons.chartPie, 'Dashboard'),
                     _buildAdminNavItem(1, FontAwesomeIcons.boxOpen, 'Produk'),
                     _buildAdminNavItem(2, FontAwesomeIcons.receipt, 'Pesanan'),
-                    _buildAdminNavItem(3, FontAwesomeIcons.usersGear, 'Pengguna'),
-                    _buildAdminNavItem(4, FontAwesomeIcons.star, 'Ulasan'),
+                    _buildAdminNavItem(3, FontAwesomeIcons.star, 'Ulasan'),                  
+                    _buildAdminNavItem(4, FontAwesomeIcons.usersGear, 'Pengguna'),
                   ],
                 ),
               ),

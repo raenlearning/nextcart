@@ -1,101 +1,23 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nextcart/core/constants/order_status.dart';
+import 'package:nextcart/core/constants/pricing.dart';
 import 'package:nextcart/data/repository/shipping_repository.dart';
+import 'package:nextcart/features/cart/bloc/cart_event.dart';
+import 'package:nextcart/features/cart/bloc/cart_state.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
-// --- EVENTS ---
-abstract class CartEvent {}
-
-class LoadCart extends CartEvent {}
-
-class AddToCart extends CartEvent {
-  final String productId;
-  AddToCart(this.productId);
-}
-
-class UpdateCartQuantity extends CartEvent {
-  final String cartItemId;
-  final int newQuantity;
-  UpdateCartQuantity(this.cartItemId, this.newQuantity);
-}
-
-class RemoveFromCart extends CartEvent {
-  final String cartItemId;
-  RemoveFromCart(this.cartItemId);
-}
-
-class TriggerCheckout extends CartEvent {
-  final List<Map<String, dynamic>> cartItems;
-  TriggerCheckout({required this.cartItems});
-}
-
-class ApplyVoucher extends CartEvent {
-  final String code;
-  ApplyVoucher(this.code);
-}
-
-class ClearVoucher extends CartEvent {}
-
-class SelectShippingAddress extends CartEvent {
-  final Map<String, dynamic> address;
-  SelectShippingAddress(this.address);
-}
-
-class SelectCourier extends CartEvent {
-  final Map<String, dynamic> courier;
-  SelectCourier(this.courier);
-}
-
-abstract class CartState {}
-
-class CartInitial extends CartState {}
-
-class CartLoading extends CartState {}
-
-class CartLoaded extends CartState {
-  final List<Map<String, dynamic>> cartItems;
-  final double totalPrice;
-  final Map<String, dynamic>? voucher;
-  final int totalWeightGrams;
-  final Map<String, dynamic>? selectedAddress;
-  final Map<String, dynamic>? selectedCourier;
-  final List<Map<String, dynamic>> shippingRates;
-  final double shippingFee;
-
-  CartLoaded(
-    this.cartItems,
-    this.totalPrice, {
-    this.voucher,
-    this.totalWeightGrams = 0,
-    this.selectedAddress,
-    this.selectedCourier,
-    this.shippingRates = const [],
-    this.shippingFee = 0,
-  });
-}
-
-class CartError extends CartState {
-  final String message;
-  CartError(this.message);
-}
-
-class CheckoutLoading extends CartState {}
-
-class CheckoutRedirectReady extends CartState {
-  final String redirectUrl;
-  CheckoutRedirectReady(this.redirectUrl);
-}
-
-class CheckoutStatusVerified extends CartState {
-  final String orderStatus;
-  final String message;
-  CheckoutStatusVerified({required this.orderStatus, required this.message});
-}
+export 'package:nextcart/features/cart/bloc/cart_event.dart';
+export 'package:nextcart/features/cart/bloc/cart_state.dart';
 
 class CartBloc extends Bloc<CartEvent, CartState> {
   final SupabaseClient _supabase = Supabase.instance.client;
   final ShippingRepository _shippingRepository = ShippingRepository();
+  Timer? _orderPollTimer;
+  String? _cachedCartId;
+  String? _cachedCartUserId;
 
   CartBloc() : super(CartInitial()) {
     on<LoadCart>(_onLoadCart);
@@ -109,9 +31,76 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     on<SelectCourier>(_onSelectCourier);
   }
 
+  @override
+  Future<void> close() async {
+    _cancelOrderPoll();
+    return super.close();
+  }
+
+  void _cancelOrderPoll() {
+    _orderPollTimer?.cancel();
+    _orderPollTimer = null;
+  }
+
+  /// Menunggu status pesanan berubah dari `waiting_payment` via polling.
+  /// Mengembalikan status terbaru, atau status fallback setelah timeout.
+  /// Memakai polling bertahap (bukan Realtime) agar tetap jalan di Free Plan.
+  Future<String> _waitForOrderStatus(String orderId) {
+    final completer = Completer<String>();
+    final statuses = {
+      OrderStatus.processing,
+      OrderStatus.delivered,
+      OrderStatus.completed,
+      OrderStatus.cancelled,
+    };
+
+    const totalBudget = Duration(seconds: 90);
+    final start = DateTime.now();
+    var delay = const Duration(milliseconds: 1500);
+
+    Future<void> poll() async {
+      if (completer.isCompleted) return;
+      if (DateTime.now().difference(start) >= totalBudget) {
+        if (!completer.isCompleted) {
+          completer.complete(OrderStatus.waitingPayment);
+        }
+        return;
+      }
+
+      try {
+        final res = await _supabase
+            .from('orders')
+            .select('status')
+            .eq('id', orderId)
+            .maybeSingle();
+        final status = res?['status'] as String?;
+        if (status != null && statuses.contains(status)) {
+          if (!completer.isCompleted) completer.complete(status);
+          return;
+        }
+      } catch (_) {
+        // Abaikan error sementara, lanjut polling berikutnya.
+      }
+
+      if (completer.isCompleted) return;
+      _orderPollTimer = Timer(delay, poll);
+      delay = Duration(
+        milliseconds: (delay.inMilliseconds * 1.6).round().clamp(1500, 6000),
+      );
+    }
+
+    poll();
+
+    return completer.future;
+  }
+
   Future<String?> _getCartId() async {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) return null;
+
+    if (_cachedCartUserId == userId && _cachedCartId != null) {
+      return _cachedCartId;
+    }
 
     final cart = await _supabase
         .from('carts')
@@ -120,6 +109,8 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         .maybeSingle();
 
     if (cart != null) {
+      _cachedCartId = cart['id'];
+      _cachedCartUserId = userId;
       return cart['id'];
     }
 
@@ -129,6 +120,10 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         .select('id')
         .maybeSingle();
 
+    if (newCart != null) {
+      _cachedCartId = newCart['id'];
+      _cachedCartUserId = userId;
+    }
     return newCart?['id'];
   }
 
@@ -183,7 +178,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     }
   }
 
-  double get _vatRate => 0.11;
+  double get _vatRate => AppPricing.vatRate;
 
   CartLoaded _copyLoaded(CartLoaded c, {Map<String, dynamic>? voucher}) {
     return CartLoaded(
@@ -361,13 +356,15 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       if (existingItem != null) {
         await _supabase
             .from('cart_items')
-            .update({'quantity': existingItem['quantity'] + 1})
+            .update({
+              'quantity': (existingItem['quantity'] as int) + event.quantity,
+            })
             .eq('id', existingItem['id']);
       } else {
         await _supabase.from('cart_items').insert({
           'cart_id': cartId,
           'product_id': event.productId,
-          'quantity': 1,
+          'quantity': event.quantity,
         });
       }
 
@@ -409,7 +406,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   Future<void> _onTriggerCheckout(
     TriggerCheckout event,
     Emitter<CartState> emit,
-  ) async { 
+  ) async {
     final user = _supabase.auth.currentUser;
     if (user == null) {
       emit(CartError('Silakan login terlebih dahulu.'));
@@ -447,18 +444,31 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       final List<Map<String, dynamic>> validatedItems = [];
       double recalculatedTotal = 0;
 
-      // 1. Validasi Stok Produk langsung ke server
+      // 1. Validasi Stok Produk langsung ke server (1 query paralel)
+      final productIds = event.cartItems
+          .map((i) => i['product_id'] as String)
+          .toSet()
+          .toList();
+      final products = await _supabase
+          .from('products')
+          .select('id, name, price, stock')
+          .inFilter('id', productIds);
+      final productMap = {
+        for (final p in (products as List))
+          (p as Map<String, dynamic>)['id'] as String: p,
+      };
+
       for (var item in event.cartItems) {
         final productId = item['product_id'] as String;
         final quantity = item['quantity'] as int;
-        final currentProduct = await _supabase
-            .from('products')
-            .select('name, price, stock')
-            .eq('id', productId)
-            .maybeSingle();
+        final currentProduct = productMap[productId];
         if (currentProduct == null) throw Exception('Produk tidak tersedia.');
-        final int currentStock = currentProduct['stock'] as int;
-        if (currentStock < quantity) throw Exception('Stok tidak mencukupi.');
+        final int currentStock = (currentProduct['stock'] as num).toInt();
+        if (currentStock < quantity) {
+          throw Exception(
+            'Stok tidak mencukupi untuk ${currentProduct['name'] ?? productId}.',
+          );
+        }
         final double currentPrice = (currentProduct['price'] as num).toDouble();
         validatedItems.add({
           'product_id': productId,
@@ -534,28 +544,25 @@ class CartBloc extends Bloc<CartEvent, CartState> {
           .single();
       final String orderId = orderResponse['id'];
 
-      // 4. Insert batch ke order_items
-      for (var item in validatedItems) {
-        await _supabase.from('order_items').insert({
-          'order_id': orderId,
-          'product_id': item['product_id'],
-          'quantity': item['quantity'],
-          'price_at_purchase': item['price'],
-        });
-      }
+      // 4. Insert batch ke order_items (1 round-trip)
+      await _supabase.from('order_items').insert([
+        for (var item in validatedItems)
+          {
+            'order_id': orderId,
+            'product_id': item['product_id'],
+            'quantity': item['quantity'],
+            'price_at_purchase': item['price'],
+          },
+      ]);
 
       // 5. Inisialisasi payment record untuk Midtrans
       final String midtransOrderId = 'NEXT-${const Uuid().v4()}';
-      final paymentInsert = await _supabase.from('payments').insert({
+      await _supabase.from('payments').insert({
         'order_id': orderId,
         'midtrans_id': midtransOrderId,
         'status': 'pending',
         'amount': payableTotal,
       });
-      if (paymentInsert.error != null) {
-        throw Exception(
-            'Gagal menyimpan data pembayaran: ${paymentInsert.error.message}');
-      }
 
       // 6. Invoke Supabase Edge Function untuk mengambil Snap Token
       final String email = user.email ?? '';
@@ -577,14 +584,10 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       final String? snapToken = response.data['token'];
 
       if (snapToken != null) {
-        final snapTokenUpdate = await _supabase
+        await _supabase
             .from('payments')
             .update({'snap_token': snapToken})
             .eq('order_id', orderId);
-        if (snapTokenUpdate.error != null) {
-          throw Exception(
-              'Gagal menyimpan token pembayaran: ${snapTokenUpdate.error.message}');
-        }
       }
 
       if (redirectUrl == null) {
@@ -604,18 +607,8 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         await _supabase.from('cart_items').delete().eq('cart_id', cart['id']);
       }
 
-      // 8. Polling status pesanan terbaru dari Webhook Midtrans yang masuk ke Supabase
-      String status = OrderStatus.waitingPayment;
-      for (int attempt = 0; attempt < 10; attempt++) {
-        final latestOrder = await _supabase
-            .from('orders')
-            .select('status')
-            .eq('id', orderId)
-            .single();
-        status = latestOrder['status'] as String;
-        if (status != OrderStatus.waitingPayment) break;
-        await Future.delayed(const Duration(seconds: 3));
-      }
+      // 8. Tunggu status pesanan terbaru via Realtime (webhook Midtrans memperbarui orders)
+      final String status = await _waitForOrderStatus(orderId);
 
       String userMessage = 'Status pesanan: ${OrderStatus.label(status)}';
       if (status == OrderStatus.processing) {

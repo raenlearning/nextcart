@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lottie/lottie.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:nextcart/core/constants/app_assets.dart';
-import 'package:nextcart/core/theme/app_colors.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -15,7 +15,6 @@ class SplashPage extends StatefulWidget {
 class _SplashPageState extends State<SplashPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
 
   @override
@@ -28,18 +27,13 @@ class _SplashPageState extends State<SplashPage>
   void _setupAnimations() {
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(seconds: 2),
     );
 
-    _scaleAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
-
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeIn,
+    );
 
     _controller.forward();
   }
@@ -83,55 +77,52 @@ class _SplashPageState extends State<SplashPage>
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
+    const cream = Color(0xFFF5F0E1);
+    const deepBlue = Color.fromARGB(255, 68, 106, 194);
 
     return Scaffold(
-      backgroundColor: colors.background,
-      body: Center(
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            return FadeTransition(
-              opacity: _fadeAnimation,
-              child: ScaleTransition(
-                scale: _scaleAnimation,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+      backgroundColor: deepBlue,
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: SafeArea(
+          child: Column(
+            children: [
+              const Spacer(flex: 3),
 
-                     Lottie.asset(
-                       AppAssets.splashLogo,
-                       width: 90,
-                       height: 90,
-                       repeat: true,
-                     ),
-                    const SizedBox(height: 24),
-                    // Nama Brand
-                    Text(
-                      'Nextcart',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w900,
-                        color: colors.textPrimary,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    // Tagline
-                    Text(
-                      'Teknologi Gen-Baru • Tanpa Ribet',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: colors.textSecondary,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                  ],
+              // Brand name
+              Text(
+                'NextCart',
+                style: GoogleFonts.dmSerifDisplay(
+                  fontSize: 44,
+                  color: cream,
+                  letterSpacing: 0.5,
+                  height: 1.1,
                 ),
               ),
-            );
-          },
+              const SizedBox(height: 8),
+
+              // Thin brand underline accent
+              Container(
+                width: 48,
+                height: 3,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF22D3EE),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+
+              const Spacer(flex: 2),
+
+              // Illustration
+              SvgPicture.asset(
+                AppAssets.splashIllustration,
+                width: MediaQuery.sizeOf(context).width * 0.92,
+                fit: BoxFit.contain,
+              ),
+
+              const Spacer(flex: 3),
+            ],
+          ),
         ),
       ),
     );

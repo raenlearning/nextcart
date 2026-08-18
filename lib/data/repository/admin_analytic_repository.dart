@@ -18,9 +18,18 @@ class SupabaseAdminAnalyticsRepository implements AdminAnalyticsRepository {
   }) async {
     final supabase = Supabase.instance.client;
 
-    final result = await supabase.rpc('get_seller_analytics', params: {
-      'p_from': from.toIso8601String(),
-    });
+    final results = await Future.wait<dynamic>([
+      supabase.rpc('get_seller_analytics', params: {
+        'p_from': from.toIso8601String(),
+      }),
+      supabase
+          .from('profiles')
+          .select('id')
+          .count(CountOption.exact),
+    ]);
+
+    final result = results[0];
+    final usersResponse = results[1] as PostgrestResponse<dynamic>;
 
     if (result == null) {
       throw Exception('Respons null dar server analytics.');
@@ -53,16 +62,11 @@ class SupabaseAdminAnalyticsRepository implements AdminAnalyticsRepository {
       );
     }).toList();
 
-    final usersCount = await supabase
-        .from('profiles')
-        .select('id')
-        .count(CountOption.exact);
-
     return AnalyticsSummary(
       grossRevenue: (data['gross_revenue'] as num).toDouble(),
       completedOrders: (data['completed_orders'] as num).toInt(),
       totalProducts: (data['total_products'] as num).toInt(),
-      totalUsers: usersCount.count,
+      totalUsers: usersResponse.count,
       revenueChart: revenueChart,
       topProducts: topProducts,
       orderStatusBreakdown: statusBreakdown,

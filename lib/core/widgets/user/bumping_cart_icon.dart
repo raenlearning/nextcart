@@ -35,20 +35,9 @@ class _BumpingCartIconState extends State<BumpingCartIcon>
     );
 
     _bumpScale = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: Tween(begin: 1.0, end: 1.35),
-        weight: 50,
-      ),
-      TweenSequenceItem(
-        tween: Tween(begin: 1.35, end: 1.0),
-        weight: 50,
-      ),
-    ]).animate(
-      CurvedAnimation(
-        parent: _bumpController,
-        curve: Curves.easeOut,
-      ),
-    );
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.35), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 1.35, end: 1.0), weight: 50),
+    ]).animate(CurvedAnimation(parent: _bumpController, curve: Curves.easeOut));
 
     cartBumpNotifier.addListener(_onBump);
   }
@@ -69,22 +58,31 @@ class _BumpingCartIconState extends State<BumpingCartIcon>
     return GestureDetector(
       onTap: widget.onTap,
       child: Container(
+        width: 40,
+        height: 40 , 
+        decoration: BoxDecoration(
+          color:  widget.colors.card,
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white.withAlpha(65)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(25),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        
         padding: const EdgeInsets.all(8),
         child: AnimatedBuilder(
           animation: _bumpScale,
           builder: (context, child) {
-            return Transform.scale(
-              scale: _bumpScale.value,
-              child: child,
-            );
+            return Transform.scale(scale: _bumpScale.value, child: child);
           },
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              SvgPicture.asset(
-                AppAssets.cartIcon,
-                height: 28,
-              ),
+              SvgPicture.asset(AppAssets.cartIcon, height: 28, colorFilter: ColorFilter.mode(widget.colors.textPrimary, BlendMode.srcIn)),
               if (widget.count > 0)
                 Positioned(
                   right: -5,

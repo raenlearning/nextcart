@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 
@@ -53,7 +54,7 @@ class UserItem extends StatelessWidget {
         color: colors.card,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: isPending ? Colors.black : colors.border,
+          color: isPending ? AppColors.warning : colors.border,
           width: isPending ? 1.4 : 1,
         ),
         boxShadow: [
@@ -74,7 +75,7 @@ class UserItem extends StatelessWidget {
               color: style.bg,
               image: avatarUrl != null
                   ? DecorationImage(
-                      image: NetworkImage(avatarUrl),
+                      image: CachedNetworkImageProvider(avatarUrl),
                       fit: BoxFit.cover,
                     )
                   : null,
@@ -119,7 +120,7 @@ class UserItem extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.black,
+                          color: AppColors.warning,
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: const Text(
@@ -212,7 +213,7 @@ class _ToggleChip extends StatelessWidget {
         duration: const Duration(milliseconds: 160),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
         decoration: BoxDecoration(
-          color: selected ? Colors.black : Colors.transparent,
+          color: selected ? AppColors.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(

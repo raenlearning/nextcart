@@ -9,22 +9,30 @@ class SupabaseStorageHelper {
     List<String> uploadedPaths = [];
 
     try {
-      for (var file in files) {
+      final results = await Future.wait(files.asMap().entries.map((entry) async {
+        final index = entry.key;
+        final file = entry.value;
         final fileBytes = await file.readAsBytes();
-        final fileName = '${DateTime.now().millisecondsSinceEpoch}_${file.name}';
+        final fileName =
+            '${DateTime.now().millisecondsSinceEpoch}_${index}_${file.name}';
         final path = 'products/$fileName';
 
         await _supabase.storage.from('product-images').uploadBinary(
               path,
               fileBytes,
-              fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+              fileOptions:
+                  const FileOptions(cacheControl: '3600', upsert: false),
             );
 
         final String publicUrl =
             _supabase.storage.from('product-images').getPublicUrl(path);
 
-        uploadedUrls.add(publicUrl);
-        uploadedPaths.add(path);
+        return (url: publicUrl, path: path);
+      }));
+
+      for (final r in results) {
+        uploadedUrls.add(r.url);
+        uploadedPaths.add(r.path);
       }
 
       return uploadedUrls;

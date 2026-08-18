@@ -57,13 +57,12 @@ class WishlistRepository {
 
     final start = (page - 1) * pageSize;
 
-    final data = await query
-        .order(
-          sortBy == 'price_low' || sortBy == 'price_high'
-              ? 'products.price'
-              : 'created_at',
-          ascending: sortBy == 'price_low',
-        )
+    final data = await (sortBy == 'price_low' || sortBy == 'price_high'
+            ? query.order(
+                'products(price)',
+                ascending: sortBy == 'price_low',
+              )
+            : query.order('created_at', ascending: false))
         .range(start, start + pageSize - 1);
 
     return List<Map<String, dynamic>>.from(data);

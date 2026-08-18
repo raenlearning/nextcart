@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nextcart/core/constants/app_assets.dart';
 import 'package:nextcart/core/widgets/user/app_bar.dart';
 import 'package:nextcart/core/widgets/user/category_chips.dart';
 import 'package:nextcart/core/widgets/user/header_section.dart';
 import 'package:nextcart/core/widgets/user/product_grid.dart';
 import 'package:nextcart/core/widgets/user/promo_banner.dart';
 import 'package:nextcart/core/widgets/user/search_bar.dart';
+import 'package:nextcart/core/widgets/shimmer_box.dart';
+import 'package:nextcart/core/constants/app_spacing.dart';
 import 'package:nextcart/features/product/bloc/product_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/theme/app_colors.dart';
@@ -99,7 +103,7 @@ class _HomePageState extends State<HomePage> {
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 110),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, AppSpacing.bottomNavSpace),
           child: SafeArea(
             top: true,
             bottom: false,
@@ -112,12 +116,23 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 24),
 
                 Text(
-                  'Teknologi Gen-Baru\nTanpa Ribet',
+                  'Teknologi Gen-Baru',
                   style: TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
                     height: 1.2,
                     color: colors.textPrimary,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                Text(
+                  'Tanpa Ribet',
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    height: 1.2,
+                    color: AppColors.primary,
+                    letterSpacing: -0.5,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -153,7 +168,7 @@ class _HomePageState extends State<HomePage> {
                 BlocBuilder<ProductBloc, ProductState>(
                   builder: (context, state) {
                     if (state is ProductLoading) {
-                      return const _SkeletonGrid();
+                      return const ShimmerProductGrid();
                     }
                     if (state is ProductError) {
                       return _ErrorRetry(
@@ -183,85 +198,6 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _SkeletonGrid extends StatelessWidget {
-  const _SkeletonGrid();
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 0.66,
-      ),
-      itemCount: 4,
-      itemBuilder: (context, index) {
-        return Container(
-          decoration: BoxDecoration(
-            color: colors.card,
-            borderRadius: BorderRadius.circular(18),
-            border: context.isDark ? Border.all(color: colors.border) : null,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: colors.inputFill,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(18),
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _ShimmerBox(width: 120, height: 12, colors: colors),
-                    const SizedBox(height: 8),
-                    _ShimmerBox(width: 70, height: 12, colors: colors),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _ShimmerBox extends StatelessWidget {
-  final double width;
-  final double height;
-  final AppColorScheme colors;
-
-  const _ShimmerBox({
-    required this.width,
-    required this.height,
-    required this.colors,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        color: colors.inputFill,
-        borderRadius: BorderRadius.circular(6),
       ),
     );
   }
@@ -329,10 +265,14 @@ class _EmptyProducts extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 40),
+        padding: const EdgeInsets.symmetric(vertical: 24),
         child: Column(
           children: [
-            Icon(Icons.inventory_2_outlined, size: 40, color: colors.textHint),
+            SvgPicture.asset(
+              AppAssets.emptySearch,
+              width: 160,
+              height: 145,
+            ),
             const SizedBox(height: 12),
             Text(
               'Belum ada produk di kategori ini.',

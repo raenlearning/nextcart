@@ -63,10 +63,10 @@ class RoleSelectionDialog extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: selected ? Colors.black : colors.inputFill,
+                      color: selected ? AppColors.primary : colors.inputFill,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: selected ? Colors.black : colors.border,
+                        color: selected ? AppColors.primary : colors.border,
                       ),
                     ),
                     child: Row(

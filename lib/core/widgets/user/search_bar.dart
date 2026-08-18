@@ -19,21 +19,31 @@ class HomeSearchBar extends StatelessWidget {
           decoration: InputDecoration(
             hintText: 'Cari produk teknologi...',
             hintStyle: TextStyle(color: colors.textHint, fontSize: 14),
-            prefixIcon: Icon(Icons.search, color: colors.textSecondary),
+            prefixIcon: Icon(Icons.search, color: colors.textSecondary, size: 20),
+            suffixIcon: Container(
+              margin: const EdgeInsets.all(8),
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: colors.iconFill,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(Icons.tune, size: 16, color: colors.textSecondary),
+            ),
             filled: true,
             fillColor: colors.inputFill,
-            contentPadding: const EdgeInsets.symmetric(vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(vertical: 14),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: colors.border),
+              borderSide: BorderSide.none,
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: colors.border),
+              borderSide: BorderSide.none,
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+              borderSide: BorderSide.none,
             ),
           ),
         ),

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:nextcart/core/helper/currency_formatter.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
@@ -88,7 +89,10 @@ class _ProductThumbnail extends StatelessWidget {
         color: context.colors.inputFill,
         border: Border.all(color: AppColors.slate200),
         image: hasImage
-            ? DecorationImage(image: NetworkImage(imageUrl!), fit: BoxFit.cover)
+            ? DecorationImage(
+                image: CachedNetworkImageProvider(imageUrl!),
+                fit: BoxFit.cover,
+              )
             : null,
       ),
       child: hasImage

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -43,12 +44,14 @@ class _ReviewListPageState extends State<ReviewListPage> {
   }
 
   Future<void> _openForm() async {
-    final canReview = await _repository.hasReviewed(widget.productId);
+    final hasAlreadyReviewed =
+        await _repository.hasAlreadyReviewed(widget.productId);
     if (!mounted) return;
 
-    if (canReview) {
+    if (hasAlreadyReviewed) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Kamu sudah memberi ulasan untuk produk ini')),
+        const SnackBar(
+            content: Text('Kamu sudah memberi ulasan untuk produk ini')),
       );
       return;
     }
@@ -184,7 +187,7 @@ class _ReviewCard extends StatelessWidget {
                 radius: 20,
                 backgroundColor: colors.inputFill,
                 backgroundImage: review.userAvatar != null
-                    ? NetworkImage(review.userAvatar!)
+                    ? CachedNetworkImageProvider(review.userAvatar!)
                     : null,
                 child: review.userAvatar == null
                     ? Icon(Icons.person, color: colors.textSecondary, size: 20)
@@ -244,12 +247,17 @@ class _ReviewCard extends StatelessWidget {
                     padding: const EdgeInsets.only(right: 8),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10),
-                      child: Image.network(
-                        url,
+                      child: CachedNetworkImage(
+                        imageUrl: url,
                         width: 76,
                         height: 76,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => Container(
+                        placeholder: (_, _) => Container(
+                          width: 76,
+                          height: 76,
+                          color: colors.inputFill,
+                        ),
+                        errorWidget: (_, _, _) => Container(
                           width: 76,
                           height: 76,
                           color: colors.inputFill,

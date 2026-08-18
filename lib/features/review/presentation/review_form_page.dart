@@ -24,8 +24,35 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
   List<XFile> _images = [];
   int _rating = 0;
   bool _isSaving = false;
+  bool _checked = false;
 
   static const int _maxImages = 3;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkExistingReview();
+  }
+
+  Future<void> _checkExistingReview() async {
+    try {
+      final already = await _repository.hasAlreadyReviewed(widget.productId);
+      if (!mounted) return;
+      if (already) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Kamu sudah memberi ulasan untuk produk ini'),
+            backgroundColor: AppColors.warning,
+          ),
+        );
+        context.pop();
+      } else {
+        setState(() => _checked = true);
+      }
+    } catch (_) {
+      if (mounted) setState(() => _checked = true);
+    }
+  }
 
   @override
   void dispose() {
@@ -55,6 +82,7 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
   }
 
   Future<void> _submit() async {
+    if (!_checked) return;
     if (_rating == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Pilih rating terlebih dahulu')),

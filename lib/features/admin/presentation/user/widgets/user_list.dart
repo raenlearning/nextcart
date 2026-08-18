@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nextcart/core/constants/app_spacing.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'user_item.dart';
 
@@ -41,7 +42,7 @@ class UserList extends StatelessWidget {
         ),
         Expanded(
           child: ListView.builder(
-            padding: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.only(bottom: AppSpacing.bottomNavSpace),
             itemCount: users.length,
             itemBuilder: (context, index) {
               final user = users[index];

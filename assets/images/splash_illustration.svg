@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 720" width="600" height="720">
+  <!-- Background organic blobs -->
+  <circle cx="110" cy="130" r="95" fill="#F5E8C7" opacity="0.35"/>
+  <circle cx="495" cy="200" r="115" fill="#A5E6F5" opacity="0.30"/>
+  <circle cx="160" cy="620" r="90" fill="#C9B8F0" opacity="0.35"/>
+
+  <!-- Sparkles -->
+  <path d="M 160 120 L 165 133 L 178 138 L 165 143 L 160 156 L 155 143 L 142 138 L 155 133 Z" fill="#F5C76B"/>
+  <path d="M 452 92 L 456 102 L 466 106 L 456 110 L 452 120 L 448 110 L 438 106 L 448 102 Z" fill="#F59E0B"/>
+  <path d="M 70 205 L 74 215 L 84 219 L 74 223 L 70 233 L 66 223 L 56 219 L 66 215 Z" fill="#F5E8C7"/>
+  <path d="M 540 470 L 544 480 L 554 484 L 544 488 L 540 498 L 536 488 L 526 484 L 536 480 Z" fill="#F5C76B"/>
+  <path d="M 310 60 L 313 68 L 321 71 L 313 74 L 310 82 L 307 74 L 299 71 L 307 68 Z" fill="#22D3EE"/>
+
+  <!-- Laptop (top-left) -->
+  <rect x="95" y="140" width="120" height="16" rx="8" fill="#2563EB" transform="rotate(-6 155 148)"/>
+  <rect x="100" y="70" width="110" height="80" rx="8" fill="#22D3EE" transform="rotate(-6 155 110)"/>
+  <rect x="108" y="78" width="94" height="60" rx="4" fill="#F5E8C7" transform="rotate(-6 155 108)"/>
+
+  <!-- Smartwatch (top-right) -->
+  <rect x="452" y="150" width="34" height="40" rx="10" fill="#334155"/>
+  <rect x="452" y="225" width="34" height="40" rx="10" fill="#334155"/>
+  <rect x="444" y="182" width="50" height="52" rx="14" fill="#F59E0B"/>
+  <rect x="452" y="190" width="34" height="36" rx="8" fill="#0F172A"/>
+  <rect x="458" y="200" width="3" height="14" rx="1.5" fill="#FFFFFF"/>
+  <rect x="465" y="200" width="12" height="8" rx="2" fill="#FFFFFF" opacity="0.6"/>
+
+  <!-- Wireless earbuds (top-center) -->
+  <ellipse cx="250" cy="90" rx="20" ry="28" fill="#F5C76B" transform="rotate(-18 250 90)"/>
+  <circle cx="315" cy="66" r="11" fill="#4DA3FF"/>
+  <rect x="313" y="73" width="4" height="18" rx="2" fill="#4DA3FF"/>
+  <circle cx="348" cy="80" r="11" fill="#4DA3FF"/>
+  <rect x="346" y="87" width="4" height="18" rx="2" fill="#4DA3FF"/>
+
+  <!-- Left person (yellow) -->
+  <circle cx="105" cy="300" r="26" fill="#E8B28A"/>
+  <path d="M 62 385 Q 70 335 105 335 Q 140 335 148 385 L 142 480 Q 105 500 68 480 Z" fill="#F5C76B"/>
+  <path d="M 140 370 Q 185 360 200 375" stroke="#F5C76B" stroke-width="18" stroke-linecap="round" fill="none"/>
+  <path d="M 66 360 Q 45 330 55 300" stroke="#F5C76B" stroke-width="18" stroke-linecap="round" fill="none"/>
+  <path d="M 95 480 L 88 540" stroke="#2563EB" stroke-width="16" stroke-linecap="round"/>
+  <path d="M 120 480 L 128 540" stroke="#2563EB" stroke-width="16" stroke-linecap="round"/>
+  <ellipse cx="84" cy="548" rx="14" ry="8" fill="#0F172A"/>
+  <ellipse cx="132" cy="548" rx="14" ry="8" fill="#0F172A"/>
+
+  <!-- Right person (purple) -->
+  <circle cx="505" cy="310" r="26" fill="#E8B28A"/>
+  <path d="M 458 395 Q 466 345 505 345 Q 544 345 552 395 L 546 490 Q 505 510 464 490 Z" fill="#7C6CF0"/>
+  <path d="M 462 375 Q 420 365 405 380" stroke="#7C6CF0" stroke-width="18" stroke-linecap="round" fill="none"/>
+  <path d="M 540 380 Q 555 410 570 415" stroke="#7C6CF0" stroke-width="18" stroke-linecap="round" fill="none"/>
+  <rect x="568" y="398" width="30" height="44" rx="6" fill="#F5E8C7" transform="rotate(15 583 420)"/>
+  <rect x="576" y="406" width="14" height="26" rx="3" fill="#0F172A" opacity="0.4" transform="rotate(15 583 419)"/>
+  <path d="M 490 495 L 483 555" stroke="#334155" stroke-width="16" stroke-linecap="round"/>
+  <path d="M 520 495 L 528 555" stroke="#334155" stroke-width="16" stroke-linecap="round"/>
+  <ellipse cx="479" cy="563" rx="14" ry="8" fill="#0F172A"/>
+  <ellipse cx="532" cy="563" rx="14" ry="8" fill="#0F172A"/>
+
+  <!-- Shopping cart -->
+  <path d="M 185 440 Q 300 330 415 440" stroke="#2563EB" stroke-width="18" stroke-linecap="round" fill="none"/>
+  <path d="M 175 440 L 240 585 L 360 585 L 425 440 Z" fill="#4DA3FF"/>
+  <path d="M 155 440 L 445 440" stroke="#2563EB" stroke-width="18" stroke-linecap="round"/>
+  <path d="M 215 445 L 262 575" stroke="#2563EB" stroke-width="4" opacity="0.35"/>
+  <path d="M 300 445 L 300 585" stroke="#2563EB" stroke-width="4" opacity="0.35"/>
+  <path d="M 385 445 L 338 575" stroke="#2563EB" stroke-width="4" opacity="0.35"/>
+  <path d="M 235 585 L 230 625" stroke="#0F172A" stroke-width="14" stroke-linecap="round"/>
+  <path d="M 365 585 L 370 625" stroke="#0F172A" stroke-width="14" stroke-linecap="round"/>
+  <circle cx="222" cy="640" r="28" fill="#0F172A"/>
+  <circle cx="378" cy="640" r="28" fill="#0F172A"/>
+  <circle cx="222" cy="640" r="10" fill="#CBD5E1"/>
+  <circle cx="378" cy="640" r="10" fill="#CBD5E1"/>
+
+  <!-- Smartphone in basket -->
+  <rect x="262" y="380" width="52" height="88" rx="10" fill="#7C6CF0"/>
+  <rect x="272" y="390" width="32" height="60" rx="4" fill="#F5E8C7"/>
+  <circle cx="288" cy="400" r="3" fill="#0F172A" opacity="0.4"/>
+
+  <!-- Earbuds case in basket -->
+  <rect x="352" y="398" width="42" height="34" rx="12" fill="#F59E0B" transform="rotate(12 373 415)"/>
+
+  <!-- Headphones peeking behind cart -->
+  <path d="M 400 372 A 28 28 0 0 1 456 372" stroke="#22D3EE" stroke-width="12" stroke-linecap="round" fill="none"/>
+  <circle cx="400" cy="370" r="12" fill="#22D3EE"/>
+  <circle cx="456" cy="370" r="12" fill="#22D3EE"/>
+
+  <!-- Price tag (right) -->
+  <path d="M 480 500 L 530 525 L 512 558 L 462 533 Z" fill="#F59E0B"/>
+  <circle cx="488" cy="515" r="6" fill="#0F172A"/>
+
+  <!-- Gift box (bottom-left) -->
+  <rect x="40" y="620" width="60" height="50" rx="10" fill="#7C6CF0"/>
+  <rect x="40" y="612" width="60" height="18" rx="6" fill="#F5C76B"/>
+  <rect x="62" y="612" width="16" height="58" fill="#C9B8F0"/>
+  <circle cx="56" cy="612" r="8" fill="#F5C76B"/>
+  <circle cx="84" cy="612" r="8" fill="#F5C76B"/>
+</svg>

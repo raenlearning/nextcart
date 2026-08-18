@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 
@@ -8,30 +9,21 @@ class SingleImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 80, 24, 48),
-      child: Image.network(
-        url,
-        fit: BoxFit.contain,
-        loadingBuilder: (_, child, progress) {
-          if (progress == null) return child;
-          return Center(
-            child: CircularProgressIndicator(
-              value: progress.expectedTotalBytes != null
-                  ? progress.cumulativeBytesLoaded /
-                      progress.expectedTotalBytes!
-                  : null,
-              color: AppColors.primary,
-              strokeWidth: 2,
-            ),
-          );
-        },
-        errorBuilder: (_, _, _) => Center(
-          child: Icon(
-            Icons.broken_image_outlined,
-            size: 60,
-            color: context.colors.textHint,
-          ),
+    return CachedNetworkImage(
+      imageUrl: url,
+      fit: BoxFit.cover,
+      progressIndicatorBuilder: (context, url, progress) => Center(
+        child: CircularProgressIndicator(
+          value: progress.progress,
+          color: AppColors.primary,
+          strokeWidth: 2,
+        ),
+      ),
+      errorWidget: (_, _, _) => Center(
+        child: Icon(
+          Icons.broken_image_outlined,
+          size: 60,
+          color: context.colors.textHint,
         ),
       ),
     );

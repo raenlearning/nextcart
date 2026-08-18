@@ -11,7 +11,9 @@ import 'package:nextcart/features/onboarding/onboarding_page.dart';
 import 'package:nextcart/features/order/presentation/order_detail_page.dart';
 import 'package:nextcart/features/product/presentation/product_detail_page.dart';
 import 'package:nextcart/features/product/presentation/view_all_product_page.dart';
+import 'package:nextcart/features/profile/presentation/change_password_page.dart';
 import 'package:nextcart/features/profile/presentation/profile_detail_page.dart';
+import 'package:nextcart/features/profile/presentation/static_info_page.dart';
 import 'package:nextcart/features/review/presentation/review_form_page.dart';
 import 'package:nextcart/features/review/presentation/review_list_page.dart';
 import 'package:nextcart/features/splash/splash_page.dart';
@@ -133,6 +135,25 @@ class AppRouter {
           final profileData = state.extra as Map<String, dynamic>?;
           return ProfileDetailPage(profileData: profileData);
         },
+      ),
+      GoRoute(
+        path: '/change-password',
+        builder: (context, state) => const ChangePasswordPage(),
+      ),
+      GoRoute(
+        path: '/privacy-policy',
+        builder: (context, state) =>
+            const StaticInfoPage(type: StaticInfoType.privacyPolicy),
+      ),
+      GoRoute(
+        path: '/help-center',
+        builder: (context, state) =>
+            const StaticInfoPage(type: StaticInfoType.helpCenter),
+      ),
+      GoRoute(
+        path: '/about-app',
+        builder: (context, state) =>
+            const StaticInfoPage(type: StaticInfoType.aboutApp),
       ),
       GoRoute(
         path: '/review-list',

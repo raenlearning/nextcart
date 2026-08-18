@@ -23,17 +23,8 @@ class DetailTopBar extends StatelessWidget {
             colors: colors,
             onTap: () => context.pop(),
           ),
-          Expanded(
-            child: Text(
-              'Detail Produk',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: colors.textPrimary,
-              ),
-            ),
-          ),
+
+          const Spacer(),
 
           Row(
             children: [
@@ -43,7 +34,9 @@ class DetailTopBar extends StatelessWidget {
                   colors: colors,
                   onTap: onShare!,
                 ),
-              const SizedBox(width: 6),
+
+              const SizedBox(width: 8),
+              
               BlocBuilder<CartBloc, CartState>(
                 builder: (context, state) {
                   int uniqueProductsCount = 0;
@@ -83,12 +76,19 @@ class _CircleIconBtn extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 38,
-        height: 38,
+        width: 40,
+        height: 40,
         decoration: BoxDecoration(
           color: colors.card,
           shape: BoxShape.circle,
-          border: Border.all(color: colors.border),
+          border: Border.all(color: Colors.white.withAlpha(60)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(25),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         child: Icon(icon, size: 17, color: colors.textPrimary),
       ),

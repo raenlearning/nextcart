@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lottie/lottie.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:nextcart/core/constants/app_assets.dart';
 import 'package:nextcart/core/helper/csv_export_helper.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
-import 'package:nextcart/core/widgets/admin/dashboard_widget.dart';
+import 'package:nextcart/core/constants/app_spacing.dart';
+import 'package:nextcart/core/widgets/admin/dashboard_hero_banner.dart';
+import 'package:nextcart/core/widgets/admin/order_status_chart.dart';
+import 'package:nextcart/core/widgets/admin/period_filter_tabs.dart';
+import 'package:nextcart/core/widgets/admin/top_products_list.dart';
+import 'package:nextcart/core/widgets/shimmer_box.dart';
 import '../../bloc/analytics/admin_analytic_bloc.dart';
 import '../../bloc/analytics/admin_analytic_event.dart';
 import '../../bloc/analytics/admin_analytic_state.dart';
@@ -88,7 +91,7 @@ class _AdminAnalyticsDashboardPageState
       backgroundColor: colors.surface,
       body: SafeArea(
         child: RefreshIndicator(
-          color: Colors.black,
+          color: AppColors.primary,
           onRefresh: () async => _fetch(),
           child: BlocBuilder<AdminAnalyticsBloc, AdminAnalyticsState>(
             builder: (context, state) {
@@ -191,25 +194,30 @@ class _AdminAnalyticsDashboardPageState
                   ),
 
                   if (state is AdminAnalyticsLoading)
-                    SliverFillRemaining(
-                      child: Center(
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
                         child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Lottie.asset(
-                              AppAssets.loadingChart,
-                              width: 80,
-                              height: 80,
-                              repeat: true,
+                          children: const [
+                            Row(
+                              children: [
+                                Expanded(child: ShimmerBox(height: 110, radius: 16)),
+                                SizedBox(width: 12),
+                                Expanded(child: ShimmerBox(height: 110, radius: 16)),
+                              ],
                             ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Memuat data...',
-                              style: TextStyle(
-                                color: colors.textSecondary,
-                                fontSize: 13,
-                              ),
+                            SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Expanded(child: ShimmerBox(height: 110, radius: 16)),
+                                SizedBox(width: 12),
+                                Expanded(child: ShimmerBox(height: 110, radius: 16)),
+                              ],
                             ),
+                            SizedBox(height: 16),
+                            ShimmerBox(height: 220, radius: 16),
+                            SizedBox(height: 16),
+                            ShimmerBox(height: 180, radius: 16),
                           ],
                         ),
                       ),
@@ -239,7 +247,7 @@ class _AdminAnalyticsDashboardPageState
                               icon: const Icon(Icons.refresh_rounded, size: 16),
                               label: const Text('Coba Lagi'),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black,
+                                backgroundColor: AppColors.primary,
                                 foregroundColor: Colors.white,
                                 elevation: 0,
                                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -276,12 +284,12 @@ class _AdminAnalyticsDashboardPageState
                         child: TopProductsList(products: state.topProducts),
                       ),
                     ),
-                    const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                    const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.bottomNavSpace)),
                   ]
                   else
                     const SliverFillRemaining(
                       child: Center(
-                        child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2.4),
+                        child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2.4),
                       ),
                     ),
                 ],

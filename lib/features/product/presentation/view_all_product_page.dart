@@ -1,11 +1,17 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:nextcart/core/constants/app_assets.dart';
 import 'package:nextcart/core/widgets/user/product_grid.dart';
+import 'package:nextcart/core/widgets/shimmer_box.dart';
+import 'package:nextcart/core/widgets/user/promo_banner.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
-import 'package:nextcart/core/constants/app_assets.dart';
 import 'package:nextcart/data/models/product_model.dart';
+import 'package:nextcart/features/product/presentation/widgets/category_grid.dart';
+import 'package:nextcart/features/product/presentation/widgets/flash_sale_banner.dart';
+import 'package:nextcart/features/product/presentation/widgets/sort_chips.dart';
+import 'package:nextcart/features/product/presentation/widgets/trust_badges_row.dart';
 
 class ViewAllProductsPage extends StatefulWidget {
   final String title;
@@ -26,15 +32,22 @@ class ViewAllProductsPage extends StatefulWidget {
 class _ViewAllProductsPageState extends State<ViewAllProductsPage> {
   final SupabaseClient _supabase = Supabase.instance.client;
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+  final ScrollController _scrollController = ScrollController();
+  static const int _pageSize = 20;
   Timer? _debounce;
   List<Map<String, dynamic>> _categories = [];
   String? _selectedCategoryId;
   String _searchQuery = '';
+  String _sortOption = SortOption.newest.id;
   List<Product> _products = [];
   bool _isLoadingCategories = true;
   bool _isLoadingProducts = true;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
   String? _errorMessage;
   bool _isExpanded = false;
+  final GlobalKey _productGridKey = GlobalKey();
 
   @override
   void initState() {
@@ -43,23 +56,31 @@ class _ViewAllProductsPageState extends State<ViewAllProductsPage> {
     _fetchCategories();
     _fetchProducts();
     _searchController.addListener(_onSearchChanged);
+    _scrollController.addListener(_onScroll);
     if (widget.focusSearch) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _focusSearchField());
     }
   }
 
-  final FocusNode _searchFocusNode = FocusNode();
-
-  void _focusSearchField() {
-    _searchFocusNode.requestFocus();
-  }
-
   @override
   void dispose() {
     _debounce?.cancel();
+    _scrollController.dispose();
     _searchController.dispose();
     _searchFocusNode.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 400) {
+      _loadMoreProducts();
+    }
+  }
+
+  void _focusSearchField() {
+    _searchFocusNode.requestFocus();
   }
 
   void _onSearchChanged() {
@@ -91,11 +112,13 @@ class _ViewAllProductsPageState extends State<ViewAllProductsPage> {
         fetchedList.add(otherCategory);
       }
 
+      if (!mounted) return;
       setState(() {
         _categories = fetchedList;
         _isLoadingCategories = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() => _isLoadingCategories = false);
     }
   }
@@ -104,28 +127,22 @@ class _ViewAllProductsPageState extends State<ViewAllProductsPage> {
     setState(() {
       _isLoadingProducts = true;
       _errorMessage = null;
+      _products = [];
+      _hasMore = true;
+      _isLoadingMore = false;
     });
     try {
-      var query = _supabase
-          .from('products')
-          .select(
-            'id, name, description, price, stock, category_id, images, seller_id, is_active',
-          )
-          .eq('is_active', true);
-      if (_selectedCategoryId != null) {
-        query = query.eq('category_id', _selectedCategoryId!);
-      }
-      if (_searchQuery.isNotEmpty) {
-        query = query.ilike('name', '%$_searchQuery%');
-      }
-      final data = await query.order('created_at', ascending: false);
+      final data = await _productQuery().range(0, _pageSize - 1);
+      if (!mounted) return;
       setState(() {
         _products = (data as List)
             .map((json) => Product.fromJson(json as Map<String, dynamic>))
             .toList();
+        _hasMore = _products.length == _pageSize;
         _isLoadingProducts = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = 'Gagal memuat produk: $e';
         _isLoadingProducts = false;
@@ -133,33 +150,73 @@ class _ViewAllProductsPageState extends State<ViewAllProductsPage> {
     }
   }
 
+  Future<void> _loadMoreProducts() async {
+    if (_isLoadingMore || !_hasMore || _isLoadingProducts) return;
+    setState(() => _isLoadingMore = true);
+    try {
+      final offset = _products.length;
+      final data = await _productQuery().range(offset, offset + _pageSize - 1);
+      if (!mounted) return;
+      setState(() {
+        final newItems = (data as List)
+            .map((json) => Product.fromJson(json as Map<String, dynamic>))
+            .toList();
+        _products.addAll(newItems);
+        _hasMore = newItems.length == _pageSize;
+        _isLoadingMore = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isLoadingMore = false);
+    }
+  }
+
+  PostgrestTransformBuilder<PostgrestList> _productQuery() {
+    var query = _supabase
+        .from('products')
+        .select(
+          'id, name, description, price, stock, category_id, images, seller_id, is_active',
+        )
+        .eq('is_active', true);
+    if (_selectedCategoryId != null) {
+      query = query.eq('category_id', _selectedCategoryId!);
+    }
+    if (_searchQuery.isNotEmpty) {
+      query = query.ilike('name', '%$_searchQuery%');
+    }
+    switch (_sortOption) {
+      case 'price_asc':
+        return query.order('price', ascending: true);
+      case 'price_desc':
+        return query.order('price', ascending: false);
+      case 'rating':
+        return query.order('total_rating', ascending: false);
+      default:
+        return query.order('created_at', ascending: false);
+    }
+  }
+
+  void _onSortChanged(SortOption option) {
+    if (option.id == _sortOption) return;
+    setState(() => _sortOption = option.id);
+    _fetchProducts();
+  }
+
+  void _scrollToProducts() {
+    final context = _productGridKey.currentContext;
+    if (context == null) return;
+    Scrollable.ensureVisible(
+      context,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeOutCubic,
+      alignment: 0.0,
+    );
+  }
+
   void _onCategoryTap(String? categoryId) {
     if (categoryId == _selectedCategoryId) return;
     setState(() => _selectedCategoryId = categoryId);
     _fetchProducts();
-  }
-
-  String? _getSvgAsset(String categoryName) {
-    switch (categoryName.toLowerCase()) {
-      case 'smartphone':
-        return AppAssets.categorySmartPhone;
-      case 'laptop':
-        return AppAssets.categoryLaptop;
-      case 'audio':
-        return AppAssets.categoryAudio;
-      case 'gaming':
-        return AppAssets.categoryGaming;
-      case 'watch':
-        return AppAssets.categoryWatch;
-      case 'computer':
-        return AppAssets.categoryComputer;
-      case 'television':
-        return AppAssets.categoryTelevision;
-      case 'camera':
-        return AppAssets.categoryCamera;
-      default:
-        return null;
-    }
   }
 
   @override
@@ -183,25 +240,66 @@ class _ViewAllProductsPageState extends State<ViewAllProductsPage> {
       body: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: () async {
-          await _fetchCategories();
-          await _fetchProducts();
+          await Future.wait([_fetchCategories(), _fetchProducts()]);
         },
-        child: SingleChildScrollView(
+        child: CustomScrollView(
+          controller: _scrollController,
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),
-          child: Column(
-            children: [
-              _buildSearchBar(colors),
-              _buildCategoryChips(colors),
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Divider(color: colors.divider),
+          slivers: [
+            SliverToBoxAdapter(child: _buildSearchBar(colors)),
+            const SliverToBoxAdapter(child: SizedBox(height: 4)),
+            const SliverToBoxAdapter(child: HomeBannerCarousel()),
+            SliverToBoxAdapter(
+              child: CategoryGrid(
+                categories: _categories,
+                selectedCategoryId: _selectedCategoryId,
+                isLoading: _isLoadingCategories,
+                isExpanded: _isExpanded,
+                onCategoryTap: _onCategoryTap,
+                onToggleExpand: () =>
+                    setState(() => _isExpanded = !_isExpanded),
               ),
-              _buildProductGrid(colors),
-            ],
-          ),
+            ),
+            SliverToBoxAdapter(
+              child: FlashSaleBanner(onCta: _scrollToProducts),
+            ),
+            const SliverToBoxAdapter(child: TrustBadgesRow()),
+            const SliverToBoxAdapter(child: SizedBox(height: 12)),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (!_isLoadingProducts && _products.isNotEmpty) ...[
+                      Text(
+                        'Menampilkan ${_products.length} produk',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: colors.textHint,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    SortChips(
+                      selectedId: _sortOption,
+                      onSelected: _onSortChanged,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 4)),
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Divider(),
+              ),
+            ),
+            ..._buildProductSlivers(colors),
+          ],
         ),
       ),
     );
@@ -250,235 +348,120 @@ class _ViewAllProductsPageState extends State<ViewAllProductsPage> {
     );
   }
 
-  Widget _buildCategoryChips(AppColorScheme colors) {
-    if (_isLoadingCategories) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 20),
-        child: Center(
-          child: SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: AppColors.primary,
-            ),
-          ),
-        ),
-      );
-    }
-
-    final int totalItems = _categories.length + 1;
-
-    final int displayedCount = _isExpanded
-        ? totalItems
-        : (totalItems > 4 ? 4 : totalItems);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Belanja Sesuai Kategori',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: colors.textPrimary,
-                ),
-              ),
-              if (totalItems > 4)
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _isExpanded = !_isExpanded;
-                    });
-                  },
-                  icon: Icon(
-                    _isExpanded
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    color: colors.textSecondary,
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: displayedCount,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 12,
-              childAspectRatio: 0.82,
-            ),
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return _buildChip(
-                  colors,
-                  label: 'Semua',
-                  isSelected: _selectedCategoryId == null,
-                  onTap: () => _onCategoryTap(null),
-                  svgAsset: null,
-                );
-              }
-              final category = _categories[index - 1];
-              final categoryId = category['id'] as String;
-              final categoryName = category['name'] as String;
-
-              return _buildChip(
-                colors,
-                label: categoryName,
-                isSelected: _selectedCategoryId == categoryId,
-                onTap: () => _onCategoryTap(categoryId),
-                svgAsset: _getSvgAsset(categoryName),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChip(
-    AppColorScheme colors, {
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-    required String? svgAsset,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isSelected
-                  ? AppColors.primary
-                  : (context.isDark
-                        ? colors.inputFill
-                        : const Color(0xFFF3EAE6)),
-              border: Border.all(
-                color: isSelected
-                    ? AppColors.primary
-                    : colors.border.withValues(alpha: 0.5),
-                width: 1,
-              ),
-            ),
-            child: Center(
-              child: svgAsset != null
-                  ? SvgPicture.asset(
-                      svgAsset,
-                      width: 24,
-                      height: 24,
-                      colorFilter: ColorFilter.mode(
-                        isSelected ? Colors.white : colors.textPrimary,
-                        BlendMode.srcIn,
-                      ),
-                    )
-                  : Icon(
-                      label == 'Semua'
-                          ? Icons.apps_rounded
-                          : Icons.devices_other_rounded,
-                      size: 22,
-                      color: isSelected ? Colors.white : colors.textPrimary,
-                    ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Expanded(
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: isSelected ? AppColors.primary : colors.textPrimary,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                fontSize: 11.5,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProductGrid(AppColorScheme colors) {
+  List<Widget> _buildProductSlivers(AppColorScheme colors) {
     if (_isLoadingProducts) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 40),
-        child: Center(
-          child: CircularProgressIndicator(color: AppColors.primary),
+      return const [
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
+          sliver: SliverToBoxAdapter(
+            child: ShimmerProductGrid(
+              padding: EdgeInsets.zero,
+              childAspectRatio: 0.62,
+            ),
+          ),
         ),
-      );
+      ];
     }
     if (_errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.wifi_off_rounded, size: 48, color: colors.textHint),
-            const SizedBox(height: 12),
-            Text(
-              _errorMessage!,
-              style: TextStyle(color: colors.textSecondary),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _fetchProducts,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+      return [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 40),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.wifi_off_rounded,
+                      size: 48, color: colors.textHint),
+                  const SizedBox(height: 12),
+                  Text(
+                    _errorMessage!,
+                    style: TextStyle(color: colors.textSecondary),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _fetchProducts,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('Coba Lagi'),
+                  ),
+                ],
               ),
-              child: const Text('Coba Lagi'),
             ),
-          ],
+          ),
         ),
-      );
+      ];
     }
     if (_products.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 40),
-            Icon(Icons.search_off_rounded, size: 48, color: colors.textHint),
-            const SizedBox(height: 12),
-            Text(
-              _searchQuery.isNotEmpty
-                  ? 'Tidak ada produk untuk "$_searchQuery"'
-                  : 'Belum ada produk di kategori ini',
-              style: TextStyle(color: colors.textSecondary),
-              textAlign: TextAlign.center,
+      return [
+        SliverToBoxAdapter(
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 20),
+                SvgPicture.asset(
+                  AppAssets.emptySearch,
+                  width: 200,
+                  height: 180,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  _searchQuery.isNotEmpty
+                      ? 'Tidak ada produk untuk "$_searchQuery"'
+                      : 'Belum ada produk di kategori ini',
+                  style: TextStyle(color: colors.textSecondary, fontSize: 13.5),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Coba kata kunci atau kategori lain ya',
+                  style: TextStyle(color: colors.textHint, fontSize: 12),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-      );
+      ];
     }
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
-      itemCount: _products.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 14,
-        childAspectRatio: 0.62,
+    return [
+      SliverPadding(
+        key: _productGridKey,
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+        sliver: SliverGrid(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 14,
+            childAspectRatio: 0.62,
+          ),
+          delegate: SliverChildBuilderDelegate(
+            (context, index) => ProductCard(product: _products[index]),
+            childCount: _products.length,
+          ),
+        ),
       ),
-      itemBuilder: (context, index) => ProductCard(product: _products[index]),
-    );
+      if (_isLoadingMore)
+        const SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 20),
+            child: Center(
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.primary,
+                ),
+              ),
+            ),
+          ),
+        ),
+    ];
   }
 }

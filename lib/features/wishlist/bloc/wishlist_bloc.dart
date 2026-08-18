@@ -47,7 +47,6 @@ class WishlistLoading extends WishlistState {
   const WishlistLoading();
 }
 
-/// State utama: menyimpan id produk yang di-wishlist (untuk heart + badge).
 class WishlistLoaded extends WishlistState {
   final Set<String> productIds;
   final bool isLoading;
@@ -70,7 +69,6 @@ class WishlistLoaded extends WishlistState {
   }
 }
 
-/// State khusus untuk daftar wishlist page (search/filter/sort/pagination).
 class WishlistListLoaded extends WishlistState {
   final List<Map<String, dynamic>> items;
   final bool isLoading;
@@ -120,7 +118,6 @@ class WishlistBloc extends Bloc<WishlistEvent, WishlistState> {
     on<WishlistClearError>(_onClearError);
   }
 
-  /// Status heart: apakah produk di-wishlist user saat ini.
   bool contains(String productId) {
     final current = state;
     return current is WishlistLoaded && current.contains(productId);
@@ -178,8 +175,17 @@ class WishlistBloc extends Bloc<WishlistEvent, WishlistState> {
 
     try {
       await _repository.removeFromWishlist(event.productId);
-      final ids = await _repository.fetchWishlistedProductIds();
-      emit(WishlistLoaded(productIds: ids));
+      // Update daftar halaman secara lokal tanpa refetch (hemat 1 round-trip).
+      final listState = state;
+      if (listState is WishlistListLoaded) {
+        emit(listState.copyWith(
+          items: listState.items
+              .where((item) =>
+                  ((item['products'] as Map<String, dynamic>?)?['id']) !=
+                  event.productId)
+              .toList(),
+        ));
+      }
     } catch (e) {
       emit(WishlistError(e.toString()));
     }

@@ -1,4 +1,5 @@
 // core/helper/cart_alert_helper.dart
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 
@@ -54,10 +55,15 @@ class CartAlertHelper {
                     ),
                     padding: const EdgeInsets.all(8),
                     child: imageUrl != null
-                        ? Image.network(
-                            imageUrl,
+                        ? CachedNetworkImage(
+                            imageUrl: imageUrl,
                             fit: BoxFit.contain,
-                            errorBuilder: (_, _, _) => Icon(
+                            placeholder: (_, _) => Icon(
+                              Icons.broken_image_outlined,
+                              color: colors.textHint,
+                              size: 28,
+                            ),
+                            errorWidget: (_, _, _) => Icon(
                               Icons.broken_image_outlined,
                               color: colors.textHint,
                               size: 28,

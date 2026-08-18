@@ -127,9 +127,9 @@ class ReviewRepository {
     }
   }
 
-  Future<bool> hasReviewed(String productId) async {
+  Future<bool> hasAlreadyReviewed(String productId) async {
     final userId = _supabase.auth.currentUser?.id;
-    if (userId == null) return true;
+    if (userId == null) return false;
 
     final data = await _supabase
         .from('reviews')
@@ -146,9 +146,12 @@ class ReviewRepository {
     List<String> urls = [];
     List<String> paths = [];
     try {
-      for (var file in files) {
+      final results = await Future.wait(files.asMap().entries.map((entry) async {
+        final index = entry.key;
+        final file = entry.value;
         final fileBytes = await file.readAsBytes();
-        final fileName = '${DateTime.now().millisecondsSinceEpoch}_${file.name}';
+        final fileName =
+            '${DateTime.now().millisecondsSinceEpoch}_${index}_${file.name}';
         final path = 'reviews/$fileName';
 
         await _supabase.storage.from('review-images').uploadBinary(
@@ -158,8 +161,15 @@ class ReviewRepository {
                   const FileOptions(cacheControl: '3600', upsert: false),
             );
 
-        urls.add(_supabase.storage.from('review-images').getPublicUrl(path));
-        paths.add(path);
+        return (
+          url: _supabase.storage.from('review-images').getPublicUrl(path),
+          path: path,
+        );
+      }));
+
+      for (final r in results) {
+        urls.add(r.url);
+        paths.add(r.path);
       }
       return urls;
     } catch (e) {
@@ -180,13 +190,16 @@ class ReviewRepository {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) throw Exception('Silakan login terlebih dahulu.');
 
-    await _supabase.from('reviews').insert({
-      'product_id': productId,
-      'user_id': userId,
-      'rating': rating,
-      'title': title?.trim().isEmpty == true ? null : title?.trim(),
-      'comment': comment?.trim().isEmpty == true ? null : comment?.trim(),
-      'images': images,
-    });
+    await _supabase.from('reviews').upsert(
+          {
+            'product_id': productId,
+            'user_id': userId,
+            'rating': rating,
+            'title': title?.trim().isEmpty == true ? null : title?.trim(),
+            'comment': comment?.trim().isEmpty == true ? null : comment?.trim(),
+            'images': images,
+          },
+          onConflict: 'product_id,user_id',
+        );
   }
 }

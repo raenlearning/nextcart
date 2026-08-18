@@ -12,10 +12,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/theme/app_colors.dart';
 import 'widgets/image_hero.dart';
 import 'widgets/name_row.dart';
+import 'widgets/price_row.dart';
 import 'widgets/description.dart';
 import 'widgets/expandable_section_row.dart';
 import 'widgets/detail_top_bar.dart';
 import 'widgets/bottom_bar.dart';
+import 'widgets/quantity_selector.dart';
+import 'widgets/spec_row.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final Product product;
@@ -40,6 +43,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   bool _isRelatedLoading = true;
 
   @override
+  void initState() {
+    super.initState();
+    _loadDetail();
+  }
+
+  @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
@@ -56,12 +65,13 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     context.read<WishlistBloc>().add(WishlistToggle(widget.product.id));
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchRating();
-    _fetchCategory();
-    _fetchRelatedProducts();
+  Future<void> _loadDetail() async {
+    // Jalankan fetch rating, kategori, dan produk terkait secara paralel.
+    await Future.wait([
+      _fetchRating(),
+      _fetchCategory(),
+      _fetchRelatedProducts(),
+    ]);
   }
 
   Future<void> _fetchRelatedProducts() async {
@@ -143,22 +153,22 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                _SpecRow(
+                SpecRow(
                   label: 'Nama Produk',
                   value: widget.product.name,
                   colors: colors,
                 ),
-                _SpecRow(
+                SpecRow(
                   label: 'Kategori',
                   value: _categoryLabel ?? '-',
                   colors: colors,
                 ),
-                _SpecRow(
+                SpecRow(
                   label: 'Harga',
                   value: CurrencyFormatter.rupiah(widget.product.price),
                   colors: colors,
                 ),
-                _SpecRow(
+                SpecRow(
                   label: 'Stok',
                   value: '${widget.product.stock}',
                   colors: colors,
@@ -202,101 +212,131 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
     return Scaffold(
       backgroundColor: colors.surface,
-      body: SafeArea(
-        child: Column(
-          children: [
-            DetailTopBar(colors: colors, onShare: _shareProduct),
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ImageHero(
-                      product: widget.product,
-                      pageController: _pageController,
-                      height: size.height * 0.45,
-                      isDark: isDark,
-                      colors: colors,
-                    ),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: size.height * 0.1),
 
-                    const SizedBox(height: 16),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 30 ,vertical: 10),
+                  child: ImageHero(
+                    product: widget.product,
+                    pageController: _pageController,
+                    height: size.height * 0.35,
+                    isDark: isDark,
+                    colors: colors,
+                  ),
+                ),
 
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          NameRow(
-                            name: widget.product.name,
-                            isWishlisted: context
-                                .watch<WishlistBloc>()
-                                .contains(widget.product.id),
-                            colors: colors,
-                            isDark: isDark,
-                            onWishlistTap: _toggleWishlist,
-                          ),
-                          const SizedBox(height: 10),
-
-                           RatingRow(
-                             rating: _isMetaLoading
-                                 ? '--'
-                                 : (_rating > 0 ? _rating.toStringAsFixed(1) : '0.0'),
-                             reviewCount: _isMetaLoading ? 0 : _reviewCount,
-                             colors: colors,
-                           ),
-                          const SizedBox(height: 16),
-
-                          _QuantitySelector(
-                            quantity: _quantity,
-                            stock: widget.product.stock,
-                            colors: colors,
-                            onChanged: (value) =>
-                                setState(() => _quantity = value),
-                          ),
-                          const SizedBox(height: 16),
-
-                          Description(
-                            description: widget.product.description,
-                            colors: colors,
-                          ),
-                          const SizedBox(height: 20),
-
-                          ExpandableSectionRow(
-                            icon: Icons.description_outlined,
-                            label: 'Spesifikasi Produk',
-                            colors: colors,
-                            onTap: _openSpecs,
-                          ),
-                          const SizedBox(height: 10),
-                          ExpandableSectionRow(
-                            icon: Icons.reviews_outlined,
-                            label: 'Ulasan Produk',
-                            colors: colors,
-                            onTap: _openReviews,
-                          ),
-
-                          const SizedBox(height: 24),
-                          _buildRelatedProducts(colors),
-                        ],
+                Transform.translate(
+                  offset: const Offset(0, -20),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+                    decoration: BoxDecoration(
+                      color: colors.card,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(24),
                       ),
                     ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        PriceRow(
+                          price: widget.product.price,
+                          colors: colors,
+                        ),
+                        const SizedBox(height: 12),
 
-                    const SizedBox(height: 24),
-                  ],
+                        NameRow(
+                          name: widget.product.name,
+                          isWishlisted: context
+                              .watch<WishlistBloc>()
+                              .contains(widget.product.id),
+                          colors: colors,
+                          isDark: isDark,
+                          onWishlistTap: _toggleWishlist,
+                        ),
+                        const SizedBox(height: 10),
+
+                        GestureDetector(
+                          onTap: _openReviews,
+                          child: RatingRow(
+                            rating: _isMetaLoading
+                                ? '--'
+                                : (_rating > 0
+                                    ? _rating.toStringAsFixed(1)
+                                    : '0.0'),
+                            reviewCount: _isMetaLoading ? 0 : _reviewCount,
+                            colors: colors,
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+                        Divider(color: colors.divider, height: 1),
+                        const SizedBox(height: 20),
+
+                        QuantitySelector(
+                          quantity: _quantity,
+                          stock: widget.product.stock,
+                          colors: colors,
+                          onChanged: (value) =>
+                              setState(() => _quantity = value),
+                        ),
+                        const SizedBox(height: 20),
+
+                        Description(
+                          description: widget.product.description,
+                          colors: colors,
+                        ),
+                        const SizedBox(height: 20),
+
+                        ExpandableSectionRow(
+                          icon: Icons.description_outlined,
+                          label: 'Spesifikasi Produk',
+                          colors: colors,
+                          onTap: _openSpecs,
+                        ),
+                        const SizedBox(height: 10),
+                        ExpandableSectionRow(
+                          icon: Icons.reviews_outlined,
+                          label: 'Ulasan Produk',
+                          colors: colors,
+                          onTap: _openReviews,
+                        ),
+
+                        const SizedBox(height: 24),
+                        _buildRelatedProducts(colors),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-            BottomBar(
-              price: widget.product.price,
-              quantity: _quantity,
-              colors: colors,
-              isDark: isDark,
-              product: widget.product,
-              addToCartKey: _addToCartKey,
+          ),
+
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              bottom: false,
+              child: DetailTopBar(colors: colors, onShare: _shareProduct),
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: BottomBar(
+        price: widget.product.price,
+        quantity: _quantity,
+        colors: colors,
+        isDark: isDark,
+        product: widget.product,
+        addToCartKey: _addToCartKey,
       ),
     );
   }
@@ -322,15 +362,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Text(
-            'Produk Serupa',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: colors.textPrimary,
-            ),
+        Text(
+          'Produk Serupa',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: colors.textPrimary,
           ),
         ),
         const SizedBox(height: 12),
@@ -339,7 +376,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 20),
             itemCount: _relatedProducts.length,
             separatorBuilder: (_, _) => const SizedBox(width: 12),
             itemBuilder: (context, index) {
@@ -351,152 +387,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _QuantitySelector extends StatelessWidget {
-  final int quantity;
-  final int stock;
-  final AppColorScheme colors;
-  final ValueChanged<int> onChanged;
-
-  const _QuantitySelector({
-    required this.quantity,
-    required this.stock,
-    required this.colors,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final outOfStock = stock <= 0;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: colors.card,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colors.border),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.inventory_2_outlined, size: 20, color: colors.textSecondary),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              outOfStock
-                  ? 'Stok habis'
-                  : 'Stok: $stock',
-              style: TextStyle(
-                color: outOfStock
-                    ? AppColors.error
-                    : (stock <= 5 ? AppColors.warning : colors.textSecondary),
-                fontWeight: FontWeight.w600,
-                fontSize: 12.5,
-              ),
-            ),
-          ),
-          _QtyStepBtn(
-            icon: Icons.remove_rounded,
-            colors: colors,
-            enabled: quantity > 1,
-            onTap: () => onChanged(quantity - 1),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            child: Text(
-              '$quantity',
-              style: TextStyle(
-                color: colors.textPrimary,
-                fontWeight: FontWeight.w800,
-                fontSize: 15,
-              ),
-            ),
-          ),
-          _QtyStepBtn(
-            icon: Icons.add_rounded,
-            colors: colors,
-            enabled: !outOfStock && quantity < stock,
-            onTap: () => onChanged(quantity + 1),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _QtyStepBtn extends StatelessWidget {
-  final IconData icon;
-  final AppColorScheme colors;
-  final bool enabled;
-  final VoidCallback onTap;
-
-  const _QtyStepBtn({
-    required this.icon,
-    required this.colors,
-    required this.enabled,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: enabled ? onTap : null,
-      child: Container(
-        width: 32,
-        height: 32,
-        decoration: BoxDecoration(
-          color: enabled ? colors.inputFill : colors.inputFill.withValues(alpha: 0.4),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: colors.border),
-        ),
-        child: Icon(
-          icon,
-          size: 18,
-          color: enabled ? colors.textPrimary : colors.textHint,
-        ),
-      ),
-    );
-  }
-}
-
-class _SpecRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final AppColorScheme colors;
-
-  const _SpecRow({
-    required this.label,
-    required this.value,
-    required this.colors,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: TextStyle(color: colors.textSecondary, fontSize: 13),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(
-                color: colors.textPrimary,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
