@@ -1,13 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/core/constants/app_assets.dart';
 import 'package:nextcart/core/constants/app_spacing.dart';
 import 'package:nextcart/core/widgets/pressable_scale.dart';
-import 'package:nextcart/features/wishlist/bloc/wishlist_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -25,6 +23,7 @@ class ProfilePageState extends State<ProfilePage> {
   bool _isLoading = true;
   int _activeOrdersCount = 0;
   int _addressCount = 0;
+  int _wishlistCount = 0;
 
   @override
   void initState() {
@@ -78,12 +77,18 @@ class ProfilePageState extends State<ProfilePage> {
             .select('id')
             .eq('user_id', userId)
             .count(CountOption.exact),
+        _supabase
+            .from('wishlist_items')
+            .select('id')
+            .eq('user_id', userId)
+            .count(CountOption.exact),
       ]);
 
       if (!mounted) return;
       setState(() {
         _activeOrdersCount = results[0].count;
         _addressCount = results[1].count;
+        _wishlistCount = results[2].count;
       });
     } catch (_) {
       // Abaikan error count, biarkan tampil 0.
@@ -293,11 +298,6 @@ class ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildSummaryCards(AppColorScheme colors) {
-    final wishlistState = context.watch<WishlistBloc>().state;
-    final wishlistCount = wishlistState is WishlistLoaded
-        ? wishlistState.productIds.length
-        : 0;
-
     final items = [
       _SummaryItem(
         icon: Icons.local_shipping_outlined,
@@ -309,7 +309,7 @@ class ProfilePageState extends State<ProfilePage> {
       _SummaryItem(
         icon: Icons.favorite_outline,
         label: 'Wishlist',
-        count: wishlistCount,
+        count: _wishlistCount,
         color: AppColors.sale,
         onTap: () => widget.onTabChange?.call(1),
       ),

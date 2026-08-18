@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:nextcart/core/constants/app_assets.dart';
 import 'package:nextcart/core/constants/order_status.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/features/order/presentation/widgets/order_list.dart';
+import 'package:nextcart/features/order/presentation/widgets/order_search_bar.dart';
 import 'package:nextcart/features/order/presentation/widgets/order_status_tabs.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -16,55 +19,106 @@ class OrderScreen extends StatefulWidget {
 
 class OrderScreenState extends State<OrderScreen>
     with SingleTickerProviderStateMixin {
+  static const int _pageSize = 5;
+
   final SupabaseClient _supabase = Supabase.instance.client;
   late final TabController _tabController;
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
 
-  List<Map<String, dynamic>> _allOrders = [];
-  bool _isLoading = true;
+  String _searchQuery = '';
 
-  List<Map<String, dynamic>> get _activeOrders => _allOrders
-      .where(
-        (o) => [
-          OrderStatus.waitingPayment,
-          OrderStatus.processing,
-        ].contains(o['status']),
-      )
-      .toList();
+  final Map<int, List<Map<String, dynamic>>> _ordersByTab = {
+    0: [],
+    1: [],
+    2: [],
+  };
+  final Map<int, int> _pageByTab = {0: 1, 1: 1, 2: 1};
+  final Map<int, bool> _hasMoreByTab = {0: true, 1: true, 2: true};
+  final Map<int, bool> _isLoadingMoreByTab = {0: false, 1: false, 2: false};
+  final Map<int, bool> _isLoadingTab = {0: true, 1: false, 2: false};
 
-  List<Map<String, dynamic>> get _completedOrders =>
-      _allOrders.where((o) => o['status'] == OrderStatus.completed).toList();
+  bool _isInitialLoading = true;
 
-  List<Map<String, dynamic>> get _cancelledOrders =>
-      _allOrders.where((o) => o['status'] == OrderStatus.cancelled).toList();
+  static const _tabStatuses = {
+    0: [OrderStatus.waitingPayment, OrderStatus.processing],
+    1: [OrderStatus.completed],
+    2: [OrderStatus.cancelled],
+  };
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _fetchOrders();
+    _tabController.addListener(_onTabChanged);
+    _fetchTab(0, reset: true, initial: true);
+    _fetchTab(1, reset: true);
+    _fetchTab(2, reset: true);
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
+    _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
-  Future<void> refresh() => _fetchOrders();
-
-  Future<void> _fetchOrders() async {
-    setState(() => _isLoading = true);
-    try {
-      final userId = _supabase.auth.currentUser?.id;
-      if (userId == null) {
-        setState(() {
-          _allOrders = [];
-          _isLoading = false;
-        });
-        return;
+  void _onTabChanged() {
+    if (!_tabController.indexIsChanging) {
+      final index = _tabController.index;
+      if (_ordersByTab[index]?.isEmpty ?? true) {
+        _fetchTab(index, reset: true);
       }
+    }
+  }
 
-      final data = await _supabase
+  void _onSearchChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), () {
+      if (!mounted) return;
+      setState(() => _searchQuery = value.trim());
+      for (final tab in [0, 1, 2]) {
+        _fetchTab(tab, reset: true);
+      }
+    });
+  }
+
+  Future<void> refresh() async {
+    final current = _tabController.index;
+    await _fetchTab(current, reset: true);
+  }
+
+  Future<void> _fetchTab(int tabIndex, {bool reset = false, bool initial = false}) async {
+    if (reset) {
+      setState(() {
+        _pageByTab[tabIndex] = 1;
+        _hasMoreByTab[tabIndex] = true;
+        _isLoadingMoreByTab[tabIndex] = false;
+        _isLoadingTab[tabIndex] = true;
+      });
+    }
+
+    if (_isLoadingMoreByTab[tabIndex] == true && !reset) return;
+
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) {
+      setState(() {
+        _ordersByTab[tabIndex] = [];
+        _isInitialLoading = false;
+        _hasMoreByTab[tabIndex] = false;
+      });
+      return;
+    }
+
+    final statuses = _tabStatuses[tabIndex]!;
+    final page = _pageByTab[tabIndex]!;
+
+    if (!reset) setState(() => _isLoadingMoreByTab[tabIndex] = true);
+
+    try {
+      var query = _supabase
           .from('orders')
           .select('''
             id,
@@ -90,25 +144,47 @@ class OrderScreenState extends State<OrderScreen>
             )
           ''')
           .eq('user_id', userId)
+          .inFilter('status', statuses);
+
+      if (_searchQuery.isNotEmpty) {
+        query = query.ilike(
+          'order_items.products.name',
+          '%$_searchQuery%',
+        );
+      }
+
+      final data = await query
           .order('created_at', ascending: false)
-          .limit(50);
+          .range(
+            (page - 1) * _pageSize,
+            (page * _pageSize) - 1,
+          );
 
       if (!mounted) return;
+      final items = List<Map<String, dynamic>>.from(data);
       setState(() {
-        _allOrders = List<Map<String, dynamic>>.from(data);
-        _isLoading = false;
+        _ordersByTab[tabIndex] = reset
+            ? items
+            : [...?_ordersByTab[tabIndex], ...items];
+        _pageByTab[tabIndex] = page + 1;
+        _hasMoreByTab[tabIndex] = items.length >= _pageSize;
+        _isLoadingMoreByTab[tabIndex] = false;
+        _isLoadingTab[tabIndex] = false;
+        if (initial) _isInitialLoading = false;
       });
     } catch (e) {
       if (!mounted) return;
-      setState(() => _isLoading = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal memuat pesanan: ${e.toString()}'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
+      setState(() {
+        _isLoadingMoreByTab[tabIndex] = false;
+        _isLoadingTab[tabIndex] = false;
+        _isInitialLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal memuat pesanan: ${e.toString()}'),
+          backgroundColor: AppColors.error,
+        ),
+      );
     }
   }
 
@@ -131,11 +207,23 @@ class OrderScreenState extends State<OrderScreen>
           ),
         ),
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(48),
-          child: OrderStatusTabs(controller: _tabController, colors: colors),
+          preferredSize: const Size.fromHeight(104),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: OrderSearchBar(
+                  controller: _searchController,
+                  onChanged: _onSearchChanged,
+                  colors: colors,
+                ),
+              ),
+              OrderStatusTabs(controller: _tabController, colors: colors),
+            ],
+          ),
         ),
       ),
-      body: _isLoading
+      body: _isInitialLoading
           ? Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -160,26 +248,27 @@ class OrderScreenState extends State<OrderScreen>
           : TabBarView(
               controller: _tabController,
               children: [
-                OrderList(
-                  orders: _activeOrders,
-                  emptyMessage: 'Belum ada pesanan aktif',
-                  colors: colors,
-                  onRefresh: _fetchOrders,
-                ),
-                OrderList(
-                  orders: _completedOrders,
-                  emptyMessage: 'Belum ada pesanan selesai',
-                  colors: colors,
-                  onRefresh: _fetchOrders,
-                ),
-                OrderList(
-                  orders: _cancelledOrders,
-                  emptyMessage: 'Belum ada pesanan dibatalkan',
-                  colors: colors,
-                  onRefresh: _fetchOrders,
-                ),
+                _buildTab(0, 'Belum ada pesanan aktif'),
+                _buildTab(1, 'Belum ada pesanan selesai'),
+                _buildTab(2, 'Belum ada pesanan dibatalkan'),
               ],
             ),
+    );
+  }
+
+  Widget _buildTab(int index, String emptyMessage) {
+    final colors = context.colors;
+    return OrderList(
+      orders: _ordersByTab[index] ?? [],
+      isLoading: _isLoadingTab[index] ?? false,
+      isLoadingMore: _isLoadingMoreByTab[index] ?? false,
+      hasMore: _hasMoreByTab[index] ?? true,
+      emptyMessage: _searchQuery.isNotEmpty
+          ? 'Tidak ada pesanan untuk "$_searchQuery"'
+          : emptyMessage,
+      colors: colors,
+      onRefresh: () => _fetchTab(index, reset: true),
+      onLoadMore: () => _fetchTab(index),
     );
   }
 }
