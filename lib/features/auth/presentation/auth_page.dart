@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/theme/app_colors.dart';
-import '../bloc/auth_bloc.dart';
-import '../bloc/auth_state.dart';
-
-enum AuthMode { login, register }
+import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/features/auth/bloc/auth_bloc.dart';
+import 'package:nextcart/features/auth/bloc/auth_state.dart';
+import 'package:nextcart/features/auth/presentation/widgets/auth_mode_toggle.dart';
+import 'package:nextcart/features/auth/presentation/widgets/forgot_password_sheet.dart';
+import 'package:nextcart/features/auth/presentation/widgets/oauth_button.dart';
+import 'package:nextcart/features/auth/presentation/widgets/password_strength_indicator.dart';
+import 'package:nextcart/features/auth/presentation/widgets/remember_me_row.dart';
 
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
@@ -110,7 +113,24 @@ class _AuthPageState extends State<AuthPage> {
 
     return Scaffold(
       backgroundColor: context.colors.background,
-      body: SafeArea(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: context.isDark
+                ? [
+                    const Color(0xFF16233F),
+                    context.colors.background,
+                  ]
+                : [
+                    AppColors.primaryLight,
+                    context.colors.background,
+                  ],
+            stops: const [0.0, 0.45],
+          ),
+        ),
+        child: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
           child: BlocConsumer<AuthBloc, AuthState>(
@@ -152,6 +172,7 @@ class _AuthPageState extends State<AuthPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 500),
                       child: Text(
@@ -160,81 +181,31 @@ class _AuthPageState extends State<AuthPage> {
                             : 'Buat akun',
                         key: ValueKey(_currentMode),
                         textAlign: TextAlign.center,
-                        style:  TextStyle(
+                        style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                           height: 1.3,
                           color: context.colors.textPrimary,
+                          letterSpacing: -0.5,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 32),
-
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: context.colors.inputFill,
-                        borderRadius: BorderRadius.circular(24),
+                    const SizedBox(height: 8),
+                    Text(
+                      isLogin
+                          ? 'Masuk untuk melanjutkan belanja'
+                          : 'Gabung dan mulai jelajahi teknologi terbaru',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: context.colors.textSecondary,
                       ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => _switchMode(AuthMode.login),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 500),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                ),
+                    ),
+                    const SizedBox(height: 28),
 
-                                decoration: BoxDecoration(
-                                  color: isLogin
-                                      ? AppColors.primary
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  'Login',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: isLogin
-                                        ? Colors.white
-                                        : Colors.black,
-                                  ), 
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => _switchMode(AuthMode.register),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 500),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: !isLogin
-                                      ? AppColors.primary
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  'Register',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: isLogin
-                                        ? Colors.black
-                                        : Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    AuthModeToggle(
+                      currentMode: _currentMode,
+                      onSwitch: _switchMode,
                     ),
                     const SizedBox(height: 32),
 
@@ -264,7 +235,12 @@ class _AuthPageState extends State<AuthPage> {
                                   const SizedBox(height: 20),
                                   _buildPasswordField(),
                                   const SizedBox(height: 16),
-                                  _buildRememberMeRow(),
+                                  RememberMeRow(
+                                    value: _rememberMe,
+                                    onChanged: (val) =>
+                                        setState(() => _rememberMe = val),
+                                    onForgotPassword: _showForgotPasswordSheet,
+                                  ),
                                 ],
                               ),
                             ),
@@ -274,7 +250,7 @@ class _AuthPageState extends State<AuthPage> {
                                 mainAxisSize: MainAxisSize.min,
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                   Text(
+                                  Text(
                                     'Nama Lengkap',
                                     style: TextStyle(
                                       fontWeight: FontWeight.w600,
@@ -282,7 +258,6 @@ class _AuthPageState extends State<AuthPage> {
                                     ),
                                   ),
                                   const SizedBox(height: 8),
-
                                   TextFormField(
                                     controller: _nameController,
                                     focusNode: _nameFocusNode,
@@ -306,19 +281,17 @@ class _AuthPageState extends State<AuthPage> {
                                       return null;
                                     },
                                   ),
-
                                   const SizedBox(height: 20),
-
                                   _buildEmailField(),
-
                                   const SizedBox(height: 20),
-
                                   _buildPasswordField(),
-
                                   const SizedBox(height: 10),
-
                                   if (_currentMode == AuthMode.register) ...[
-                                    _buildPasswordStrength(),
+                                    PasswordStrengthIndicator(
+                                      score: _passwordStrength,
+                                      hasText:
+                                          _passwordController.text.isNotEmpty,
+                                    ),
                                     const SizedBox(height: 20),
                                     _buildConfirmPasswordField(),
                                   ],
@@ -338,12 +311,13 @@ class _AuthPageState extends State<AuthPage> {
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 18),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(28),
                         ),
+                        shadowColor: AppColors.primary,
                       ),
                       onPressed: state is AuthLoading ? null : _handleSubmit,
                       child: state is AuthLoading
-                          ?  SizedBox(
+                          ? SizedBox(
                               height: 20,
                               width: 20,
                               child: CircularProgressIndicator(
@@ -352,8 +326,8 @@ class _AuthPageState extends State<AuthPage> {
                               ),
                             )
                           : Text(
-                              isLogin ? 'Login' : 'Register',
-                              style:  TextStyle(
+                              isLogin ? 'Masuk' : 'Daftar',
+                              style: TextStyle(
                                 color: AppColors.slate100,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
@@ -363,8 +337,10 @@ class _AuthPageState extends State<AuthPage> {
                     const SizedBox(height: 32),
 
                     Row(
-                      children:  [
-                        Expanded(child: Divider(color: Colors.black12)),
+                      children: [
+                        Expanded(
+                          child: Divider(color: context.colors.divider),
+                        ),
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
@@ -375,7 +351,9 @@ class _AuthPageState extends State<AuthPage> {
                             ),
                           ),
                         ),
-                        Expanded(child: Divider(color: Colors.black12)),
+                        Expanded(
+                          child: Divider(color: context.colors.divider),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 24),
@@ -383,26 +361,26 @@ class _AuthPageState extends State<AuthPage> {
                     Row(
                       children: [
                         Expanded(
-                          child: _buildOAuthButton(
-                            'Google',
-                            FaIcon(
+                          child: OAuthButton(
+                            label: 'Google',
+                            icon: FaIcon(
                               FontAwesomeIcons.google,
                               size: 20,
                               color: context.colors.textPrimary,
                             ),
-                            () => _showOAuthNotice('Google'),
+                            onTap: () => _showOAuthNotice('Google'),
                           ),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
-                          child: _buildOAuthButton(
-                            'Apple',
-                            FaIcon(
+                          child: OAuthButton(
+                            label: 'Apple',
+                            icon: FaIcon(
                               FontAwesomeIcons.apple,
                               size: 20,
                               color: context.colors.textPrimary,
                             ),
-                            () => _showOAuthNotice('Apple'),
+                            onTap: () => _showOAuthNotice('Apple'),
                           ),
                         ),
                       ],
@@ -413,10 +391,8 @@ class _AuthPageState extends State<AuthPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          isLogin
-                              ? "Belum punya akun? "
-                              : "Sudah punya akun? ",
-                          style:  TextStyle(
+                          isLogin ? "Belum punya akun? " : "Sudah punya akun? ",
+                          style: TextStyle(
                             color: context.colors.textSecondary,
                           ),
                         ),
@@ -426,7 +402,7 @@ class _AuthPageState extends State<AuthPage> {
                           ),
                           child: Text(
                             isLogin ? 'Daftar' : 'Masuk',
-                            style:  TextStyle(
+                            style: TextStyle(
                               color: context.colors.textPrimary,
                               fontWeight: FontWeight.bold,
                             ),
@@ -441,6 +417,7 @@ class _AuthPageState extends State<AuthPage> {
           ),
         ),
       ),
+      ),
     );
   }
 
@@ -448,7 +425,7 @@ class _AuthPageState extends State<AuthPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-         Text(
+        Text(
           'Alamat Email',
           style: TextStyle(
             fontWeight: FontWeight.w600,
@@ -470,7 +447,7 @@ class _AuthPageState extends State<AuthPage> {
           validator: (value) => (value == null || !value.contains('@'))
               ? 'Email tidak valid'
               : null,
-              style: TextStyle(color: context.colors.textPrimary),
+          style: TextStyle(color: context.colors.textPrimary),
         ),
       ],
     );
@@ -481,7 +458,7 @@ class _AuthPageState extends State<AuthPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-         Text(
+        Text(
           'Password',
           style: TextStyle(
             fontWeight: FontWeight.w600,
@@ -538,7 +515,7 @@ class _AuthPageState extends State<AuthPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-         Text(
+        Text(
           'Konfirmasi Password',
           style: TextStyle(
             fontWeight: FontWeight.w600,
@@ -585,98 +562,6 @@ class _AuthPageState extends State<AuthPage> {
     );
   }
 
-  Widget _buildPasswordStrength() {
-    final labels = ['Lemah', 'Cukup', 'Baik', 'Kuat'];
-    final colors = [
-      AppColors.error,
-      AppColors.warning,
-      AppColors.info,
-      AppColors.success,
-    ];
-    final score = _passwordStrength;
-    final show = _passwordController.text.isNotEmpty;
-    return AnimatedOpacity(
-      opacity: show ? 1 : 0.3,
-      duration: const Duration(milliseconds: 200),
-      child: Row(
-        children: [
-          Expanded(
-            child: Row(
-              children: List.generate(4, (i) {
-                final active = i < score;
-                return Expanded(
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    height: 4,
-                    margin: const EdgeInsets.only(right: 6),
-                    decoration: BoxDecoration(
-                      color: active ? colors[score.clamp(1, 4) - 1] : AppColors.slate200,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                );
-              }),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            show ? labels[score.clamp(1, 4) - 1] : 'Keamanan password',
-            style: TextStyle(
-              fontSize: 12,
-              color: show
-                  ? colors[score.clamp(1, 4) - 1]
-                  : context.colors.textSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRememberMeRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            SizedBox(
-              width: 24,
-              height: 24,
-              child: Checkbox(
-                value: _rememberMe,
-                activeColor: AppColors.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                onChanged: (val) => setState(() => _rememberMe = val ?? false),
-              ),
-            ),
-            const SizedBox(width: 8),
-             Text(
-              'Ingat Saya',
-              style: TextStyle(
-                color: context.colors.textPrimary,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-        TextButton(
-          onPressed: _showForgotPasswordSheet,
-          child:  Text(
-            'Lupa Kata Sandi',
-            style: TextStyle(
-              color: context.colors.textPrimary,
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   void _showOAuthNotice(String provider) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -687,9 +572,6 @@ class _AuthPageState extends State<AuthPage> {
   }
 
   void _showForgotPasswordSheet() {
-    final controller = TextEditingController(text: _emailController.text);
-    final formKey = GlobalKey<FormState>();
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -697,131 +579,13 @@ class _AuthPageState extends State<AuthPage> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (sheetContext) => Padding(
-        padding: EdgeInsets.only(
-          left: 24,
-          right: 24,
-          top: 24,
-          bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 32,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.slate200,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Lupa Kata Sandi',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: context.colors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Masukkan email Anda. Kami akan mengirimkan tautan untuk mereset kata sandi.',
-              style: TextStyle(
-                fontSize: 13,
-                color: context.colors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Form(
-              key: formKey,
-              child: TextFormField(
-                controller: controller,
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.done,
-                autofillHints: const [AutofillHints.email],
-                onFieldSubmitted: (_) => _submitForgotPassword(
-                  sheetContext,
-                  formKey,
-                  controller,
-                ),
-                decoration: _buildInputDecoration(
-                  'Masukkan alamat email Anda',
-                  prefixIcon: _prefixIcon(Icons.email_outlined),
-                ),
-                validator: (value) => (value == null || !value.contains('@'))
-                    ? 'Email tidak valid'
-                    : null,
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              onPressed: () => _submitForgotPassword(
-                sheetContext,
-                formKey,
-                controller,
-              ),
-              child: const Text(
-                'Kirim Tautan Reset',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _submitForgotPassword(
-    BuildContext sheetContext,
-    GlobalKey<FormState> formKey,
-    TextEditingController controller,
-  ) {
-    if (!formKey.currentState!.validate()) return;
-    Navigator.of(sheetContext).pop();
-    context.read<AuthBloc>().add(
-          AuthForgotPasswordRequested(email: controller.text.trim()),
-        );
-  }
-
-  Widget _buildOAuthButton(String label, Widget icon, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(24),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.black12),
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            icon,
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style:  TextStyle(
-                fontWeight: FontWeight.bold,
-                color: context.colors.textPrimary,
-              ),
-            ),
-          ],
-        ),
+      builder: (sheetContext) => ForgotPasswordSheet(
+        initialEmail: _emailController.text,
+        onSend: (email) {
+          context.read<AuthBloc>().add(
+                AuthForgotPasswordRequested(email: email),
+              );
+        },
       ),
     );
   }

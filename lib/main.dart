@@ -43,13 +43,17 @@ class MainApp extends StatelessWidget {
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider<AuthRepository>(create: (_) => AuthRepository()),
+
         RepositoryProvider<ProductRepository>(
           create: (_) => ProductRepository(),
         ),
+
         RepositoryProvider<WishlistRepository>(
           create: (_) => WishlistRepository(),
         ),
+
         RepositoryProvider<AdminRepository>(create: (_) => AdminRepository()),
+        
         RepositoryProvider<AdminAnalyticsRepository>(
           create: (_) => const SupabaseAdminAnalyticsRepository(),
         ),
@@ -82,9 +86,9 @@ class MainApp extends StatelessWidget {
           BlocProvider(create: (_) => CartBloc()),
 
           BlocProvider(
-            create: (context) => WishlistBloc(
-              repository: context.read<WishlistRepository>(),
-            )..add(WishlistLoad()),
+            create: (context) =>
+                WishlistBloc(repository: context.read<WishlistRepository>())
+                  ..add(WishlistLoad()),
           ),
         ],
         child: MaterialApp.router(

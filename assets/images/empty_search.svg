@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 360" width="400" height="360">
+  <!-- Background blobs -->
+  <circle cx="200" cy="150" r="130" fill="#EAF4FF" opacity="0.9"/>
+  <circle cx="120" cy="85" r="55" fill="#F5E8C7" opacity="0.5"/>
+  <circle cx="300" cy="245" r="70" fill="#D9F3FB" opacity="0.7"/>
+
+  <!-- Sparkles -->
+  <path d="M80 60 l4 10 10 4 -10 4 -4 10 -4 -10 -10 -4 10 -4z" fill="#FACC15"/>
+  <path d="M325 65 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3z" fill="#22D3EE"/>
+
+  <!-- Magnifier -->
+  <circle cx="180" cy="165" r="62" fill="#0A84FF"/>
+  <circle cx="180" cy="165" r="48" fill="#3B82F6"/>
+  <circle cx="180" cy="165" r="20" fill="#93C5FD"/>
+  <circle cx="180" cy="165" r="10" fill="#DBEAFE"/>
+  <!-- Lens shine -->
+  <path d="M150 130 a34 34 0 0 1 22 -8" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" fill="none" opacity="0.6"/>
+  <!-- Handle -->
+  <path d="M228 214 l54 54" stroke="#0F172A" stroke-width="22" stroke-linecap="round"/>
+  <path d="M228 214 l54 54" stroke="#1E293B" stroke-width="22" stroke-linecap="round" opacity="0.25"/>
+  <path d="M228 214 l54 54" stroke="#64748B" stroke-width="12" stroke-linecap="round"/>
+
+  <!-- Question mark -->
+  <text x="180" y="172" font-family="Arial" font-size="30" font-weight="bold" fill="#FFFFFF" text-anchor="middle">?</text>
+
+  <!-- Floating products -->
+  <rect x="300" y="100" width="36" height="26" rx="10" fill="#F97316"/>
+  <rect x="300" y="106" width="36" height="8" rx="4" fill="#FDBA74"/>
+
+  <rect x="60" y="235" width="34" height="52" rx="7" fill="#8B5CF6"/>
+  <rect x="65" y="241" width="24" height="38" rx="4" fill="#A78BFA"/>
+  <circle cx="77" cy="283" r="2.5" fill="#FFFFFF"/>
+
+  <path d="M70 50 a15 15 0 0 1 30 0 v17 h-30z" fill="#06B6D4"/>
+  <rect x="70" y="65" width="7" height="17" rx="3.5" fill="#0F172A"/>
+  <rect x="93" y="65" width="7" height="17" rx="3.5" fill="#0F172A"/>
+  <rect x="66" y="67" width="14" height="10" rx="5" fill="#0F172A"/>
+  <rect x="90" y="67" width="14" height="10" rx="5" fill="#0F172A"/>
+</svg>

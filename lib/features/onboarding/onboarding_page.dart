@@ -100,6 +100,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 children: [
                   Image.asset(
                     item.imagePath,
+                    fit: BoxFit.cover,
                     errorBuilder: (_, _, _) => Container(
                       color: Colors.grey[900],
                       child: const Center(

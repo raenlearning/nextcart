@@ -1,10 +1,15 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nextcart/core/constants/order_status.dart';
-import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/core/helper/currency_formatter.dart';
+import 'package:nextcart/core/helper/date_formatter.dart';
+import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/data/repository/review_repository.dart';
+import 'package:nextcart/features/order/presentation/widgets/info_card.dart';
+import 'package:nextcart/features/order/presentation/widgets/order_item_tile.dart';
+import 'package:nextcart/features/order/presentation/widgets/order_timeline.dart';
+import 'package:nextcart/features/order/presentation/widgets/payment_countdown.dart';
+import 'package:nextcart/features/order/presentation/widgets/section_title.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OrderDetailPage extends StatefulWidget {
@@ -19,6 +24,45 @@ class OrderDetailPage extends StatefulWidget {
 class _OrderDetailPageState extends State<OrderDetailPage> {
   late Map<String, dynamic> _order = widget.order;
   bool _isConfirming = false;
+  final ReviewRepository _reviewRepository = ReviewRepository();
+  final Set<String> _reviewedProductIds = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReviewStatus();
+  }
+
+  Future<void> _loadReviewStatus() async {
+    final items = _order['order_items'] as List<dynamic>? ?? [];
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) return;
+
+    try {
+      final productIds = items
+          .map((e) =>
+              (e as Map<String, dynamic>)['products'] as Map<String, dynamic>?)
+          .whereType<Map<String, dynamic>>()
+          .map((p) => p['id'] as String?)
+          .whereType<String>()
+          .toSet();
+
+      final data = await Supabase.instance.client
+          .from('reviews')
+          .select('product_id')
+          .inFilter('product_id', productIds.toList())
+          .eq('user_id', userId);
+
+      final reviewed = (data as List)
+          .map((e) => (e as Map<String, dynamic>)['product_id'] as String)
+          .toSet();
+
+      if (mounted) {
+        setState(() => _reviewedProductIds.addAll(reviewed));
+      }
+    } catch (_) {
+    }
+  }
 
   Future<void> _reload() async {
     try {
@@ -56,7 +100,6 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         setState(() => _order = Map<String, dynamic>.from(data));
       }
     } catch (_) {
-      // Abaikan; tetap pakai data lama.
     }
   }
 
@@ -75,7 +118,10 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Terima', style: TextStyle(color: AppColors.success)),
+            child: const Text(
+              'Terima',
+              style: TextStyle(color: AppColors.success),
+            ),
           ),
         ],
       ),
@@ -101,7 +147,9 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(map['error']?.toString() ?? 'Gagal konfirmasi pesanan.'),
+              content: Text(
+                map['error']?.toString() ?? 'Gagal konfirmasi pesanan.',
+              ),
               backgroundColor: AppColors.error,
             ),
           );
@@ -145,41 +193,25 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         elevation: 0,
         title: Text(
           'Detail Pesanan',
-          style: TextStyle(color: colors.textPrimary, fontWeight: FontWeight.bold, fontSize: 18),
+          style: TextStyle(
+            color: colors.textPrimary,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
         ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Status card
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: statusColor.withValues(alpha: 0.3)),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.info_outline, color: statusColor, size: 22),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'Status : ${OrderStatus.label(status)}',
-                    style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 15),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _buildStatusCard(colors, statusColor, status),
           if (status == OrderStatus.waitingPayment && createdAt != null) ...[
             const SizedBox(height: 12),
-            _PaymentCountdown(createdAt: createdAt),
+            PaymentCountdown(createdAt: createdAt),
           ],
           const SizedBox(height: 20),
 
           if (status != OrderStatus.cancelled)
-            _OrderTimeline(currentStatus: status),
+            OrderTimeline(currentStatus: status),
           const SizedBox(height: 20),
 
           if (status == OrderStatus.delivered) ...[
@@ -212,45 +244,37 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             const SizedBox(height: 20),
           ],
 
-          _buildSectionTitle(colors, 'Informasi Pesanan'),
-
+          SectionTitle(colors: colors, title: 'Informasi Pesanan'),
           const SizedBox(height: 8),
-          
-          _buildInfoCard(colors, [
-            _InfoRow('No. Invoice', 'INV/${orderId.substring(0, orderId.length >= 8 ? 8 : orderId.length)}'),
-            if (createdAt != null) _InfoRow('Tanggal Pesan', _formatDateTime(createdAt)),
-            if (paymentMethod != null) _InfoRow('Metode Bayar', paymentMethod.replaceAll('_', ' ').toUpperCase()),
-            if (paidAt != null) _InfoRow('Dibayar Pada', _formatDateTime(paidAt)),
-          ]),
-          const SizedBox(height: 20),
-
-          _buildSectionTitle(colors, 'Alamat Pengiriman'),
-          const SizedBox(height: 8),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: colors.card,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: colors.border),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.location_on_outlined, color: colors.textSecondary, size: 20),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    order['shipping_address'] ?? '-',
-                    style: TextStyle(color: colors.textPrimary, fontSize: 13.5, height: 1.4),
-                  ),
+          InfoCard(
+            colors: colors,
+            rows: [
+              InfoRow(
+                'No. Invoice',
+                'INV/${orderId.substring(0, orderId.length >= 8 ? 8 : orderId.length)}',
+              ),
+              if (createdAt != null)
+                InfoRow('Tanggal Pesan', formatDateTime(createdAt)),
+              if (paymentMethod != null)
+                InfoRow(
+                  'Metode Bayar',
+                  paymentMethod.replaceAll('_', ' ').toUpperCase(),
                 ),
-              ],
-            ),
+              if (paidAt != null)
+                InfoRow('Dibayar Pada', formatDateTime(paidAt)),
+            ],
           ),
           const SizedBox(height: 20),
 
-          _buildSectionTitle(colors, 'Produk Dipesan (${items.length})'),
+          SectionTitle(colors: colors, title: 'Alamat Pengiriman'),
+          const SizedBox(height: 8),
+          _buildAddressCard(colors, order['shipping_address'] ?? '-'),
+          const SizedBox(height: 20),
+
+          SectionTitle(
+            colors: colors,
+            title: 'Produk Dipesan (${items.length})',
+          ),
           const SizedBox(height: 8),
           Container(
             decoration: BoxDecoration(
@@ -264,8 +288,19 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                 final isLast = index == items.length - 1;
                 return Column(
                   children: [
-                    _buildProductRow(colors, item, status: status),
-                    if (!isLast) Divider(height: 1, color: colors.divider, indent: 14, endIndent: 14),
+                    OrderItemTile(
+                      item: item,
+                      status: status,
+                      hasReviewed: _reviewedProductIds.contains(_productIdOf(item)),
+                      onReview: _openReview,
+                    ),
+                    if (!isLast)
+                      Divider(
+                        height: 1,
+                        color: colors.divider,
+                        indent: 14,
+                        endIndent: 14,
+                      ),
                   ],
                 );
               }),
@@ -273,74 +308,94 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           ),
           const SizedBox(height: 20),
 
-          _buildSectionTitle(colors, 'Ringkasan Pembayaran'),
+          SectionTitle(colors: colors, title: 'Ringkasan Pembayaran'),
           const SizedBox(height: 8),
-_buildInfoCard(colors, [
-              _InfoRow(
-                'Subtotal',
-                CurrencyFormatter.rupiah(_calculateSubtotal(items)),
-              ),
+          InfoCard(
+            colors: colors,
+            rows: [
+              InfoRow('Subtotal', CurrencyFormatter.rupiah(_calculateSubtotal(items))),
               if ((order['discount_amount'] as num?) != null &&
                   (order['discount_amount'] as num) > 0)
-                _InfoRow(
+                InfoRow(
                   'Voucher Diskon',
                   '- ${CurrencyFormatter.rupiah(order['discount_amount'])}',
                 ),
               if ((order['delivery_fee'] as num?) != null &&
                   (order['delivery_fee'] as num) > 0)
-                _InfoRow(
+                InfoRow(
                   'Biaya Pengiriman',
                   CurrencyFormatter.rupiah(order['delivery_fee']),
                 ),
               if ((order['tax_amount'] as num?) != null &&
                   (order['tax_amount'] as num) > 0)
-                _InfoRow(
-                  'PPN (11%)',
-                  CurrencyFormatter.rupiah(order['tax_amount']),
-                ),
-            ], footer: _buildTotalRow(colors, order['total_amount'])),
+                InfoRow('PPN (11%)', CurrencyFormatter.rupiah(order['tax_amount'])),
+            ],
+            footer: _buildTotalRow(colors, order['total_amount']),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildSectionTitle(AppColorScheme colors, String title) {
-    return Text(
-      title,
-      style: TextStyle(color: colors.textPrimary, fontWeight: FontWeight.bold, fontSize: 14),
+  Widget _buildStatusCard(
+    AppColorScheme colors,
+    Color statusColor,
+    String status,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: statusColor.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: statusColor.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.info_outline, color: statusColor, size: 22),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Status : ${OrderStatus.label(status)}',
+              style: TextStyle(
+                color: statusColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildInfoCard(AppColorScheme colors, List<_InfoRow> rows, {Widget? footer}) {
+  Widget _buildAddressCard(AppColorScheme colors, String address) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: colors.card,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: colors.border),
       ),
-      child: Column(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ...rows.map((row) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(row.label, style: TextStyle(color: colors.textSecondary, fontSize: 13)),
-                    Flexible(
-                      child: Text(
-                        row.value,
-                        textAlign: TextAlign.right,
-                        style: TextStyle(color: colors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ],
-                ),
-              )),
-          if (footer != null) ...[
-            Divider(height: 20, color: colors.divider),
-            footer,
-          ],
+          Icon(
+            Icons.location_on_outlined,
+            color: colors.textSecondary,
+            size: 20,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              address,
+              style: TextStyle(
+                color: colors.textPrimary,
+                fontSize: 13.5,
+                height: 1.4,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -350,87 +405,44 @@ _buildInfoCard(colors, [
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text('Total Pembayaran', style: TextStyle(color: colors.textPrimary, fontWeight: FontWeight.bold, fontSize: 14)),
+        Text(
+          'Total Pembayaran',
+          style: TextStyle(
+            color: colors.textPrimary,
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
         Text(
           CurrencyFormatter.rupiah(totalAmount),
-          style: TextStyle(color: colors.textPrimary, fontWeight: FontWeight.bold, fontSize: 16),
+          style: TextStyle(
+            color: colors.textPrimary,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildProductRow(AppColorScheme colors, Map<String, dynamic> item, {String status = ''}) {
+  String? _productIdOf(Map<String, dynamic> item) {
     final product = item['products'] as Map<String, dynamic>?;
-    final images = product?['images'] as List<dynamic>? ?? [];
-    final imageUrl = images.isNotEmpty ? images[0] as String : null;
-    final name = product?['name'] as String? ?? 'Produk Tidak Diketahui';
-    final quantity = item['quantity'] as int? ?? 0;
-    final priceAtPurchase = item['price_at_purchase'];
-    final productId = product?['id'] as String?;
+    return product?['id'] as String?;
+  }
 
-    return Padding(
-      padding: const EdgeInsets.all(14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: colors.inputFill,
-                  borderRadius: BorderRadius.circular(10),
-                  image: imageUrl != null
-                      ? DecorationImage(image: NetworkImage(imageUrl), fit: BoxFit.cover)
-                      : null,
-                ),
-                child: imageUrl == null
-                    ? Icon(Icons.shopping_bag_outlined, color: colors.textSecondary, size: 22)
-                    : null,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name,
-                      style: TextStyle(color: colors.textPrimary, fontWeight: FontWeight.w600, fontSize: 13.5),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '$quantity x ${CurrencyFormatter.rupiah(priceAtPurchase)}',
-                      style: TextStyle(color: colors.textSecondary, fontSize: 12.5),
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                CurrencyFormatter.rupiah((priceAtPurchase as num) * quantity),
-                style: TextStyle(color: colors.textPrimary, fontWeight: FontWeight.bold, fontSize: 13.5),
-              ),
-            ],
-          ),
-          if (status == OrderStatus.completed && productId != null) ...[
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                onPressed: () => context.push('/review-form', extra: productId),
-                icon: const Icon(Icons.rate_review_outlined, size: 16),
-                label: const Text('Beri Ulasan'),
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12.5),
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
+  Future<void> _openReview(String productId) async {
+    final hasReviewed = await _reviewRepository.hasAlreadyReviewed(productId);
+    if (!mounted) return;
+
+    if (hasReviewed) {
+      await context.push('/review-list', extra: productId);
+      return;
+    }
+
+    final result = await context.push<bool>('/review-form', extra: productId);
+    if (result == true && mounted) {
+      setState(() => _reviewedProductIds.add(productId));
+    }
   }
 
   double _calculateSubtotal(List<dynamic> items) {
@@ -442,270 +454,5 @@ _buildInfoCard(colors, [
       subtotal += price * qty;
     }
     return subtotal;
-  }
-
-  String _formatDateTime(DateTime date) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    return '${date.day} ${months[date.month - 1]} ${date.year}, ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
-  }
-}
-
-class _InfoRow {
-  final String label;
-  final String value;
-  _InfoRow(this.label, this.value);
-}
-
-class _PaymentCountdown extends StatefulWidget {
-  final DateTime createdAt;
-  const _PaymentCountdown({required this.createdAt});
-
-  @override
-  State<_PaymentCountdown> createState() => _PaymentCountdownState();
-}
-
-class _PaymentCountdownState extends State<_PaymentCountdown> {
-  late final DateTime _deadline = widget.createdAt.add(const Duration(hours: 2));
-  late Timer _timer;
-
-  @override
-  void initState() {
-    super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (mounted) setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final remaining = _deadline.difference(DateTime.now());
-    final expired = remaining.isNegative;
-
-    if (expired) {
-      return Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: AppColors.warning.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
-        ),
-        child: const Row(
-          children: [
-            Icon(Icons.timer_off_outlined, color: AppColors.warning, size: 18),
-            SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'Waktu pembayaran telah habis. Pesanan akan dibatalkan otomatis.',
-                style: TextStyle(
-                  color: AppColors.warning,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    final hours = remaining.inHours;
-    final minutes = remaining.inMinutes.remainder(60);
-    final seconds = remaining.inSeconds.remainder(60);
-    String two(int v) => v.toString().padLeft(2, '0');
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.warning.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.timer_outlined, color: AppColors.warning, size: 18),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              'Selesaikan pembayaran dalam',
-              style: TextStyle(
-                color: colors.textSecondary,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          Text(
-            '${two(hours)}:${two(minutes)}:${two(seconds)}',
-            style: const TextStyle(
-              color: AppColors.warning,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _OrderTimeline extends StatelessWidget {
-  final String currentStatus;
-
-  const _OrderTimeline({required this.currentStatus});
-
-  static const _steps = [
-    OrderStatus.waitingPayment,
-    OrderStatus.processing,
-    OrderStatus.delivered,
-    OrderStatus.completed,
-  ];
-
-  int get _currentIndex {
-    final idx = _steps.indexOf(currentStatus);
-    return idx >= 0 ? idx : 0;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colors.card,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: colors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Status Pesanan',
-            style: TextStyle(
-              color: colors.textPrimary,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(height: 16),
-          for (var i = 0; i < _steps.length; i++) ...[
-            _TimelineItem(
-              step: _steps[i],
-              isDone: i < _currentIndex,
-              isCurrent: i == _currentIndex,
-              isFirst: i == 0,
-              isLast: i == _steps.length - 1,
-            ),
-            if (i != _steps.length - 1) const SizedBox(height: 4),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _TimelineItem extends StatelessWidget {
-  final String step;
-  final bool isDone;
-  final bool isCurrent;
-  final bool isFirst;
-  final bool isLast;
-
-  const _TimelineItem({
-    required this.step,
-    required this.isDone,
-    required this.isCurrent,
-    required this.isFirst,
-    required this.isLast,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final stepColor = OrderStatus.color(step);
-    final color = isDone || isCurrent
-        ? stepColor
-        : colors.textHint.withValues(alpha: 0.4);
-    final topLineColor = isDone || isCurrent ? stepColor : colors.divider;
-    final bottomLineColor = isDone ? stepColor : colors.divider;
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 20,
-          child: Column(
-            children: [
-              if (!isFirst)
-                Container(
-                  width: 2,
-                  height: 6,
-                  color: topLineColor,
-                ),
-              Container(
-                width: 18,
-                height: 18,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isCurrent ? color : (isDone ? color : colors.card),
-                  border: Border.all(color: color, width: isCurrent ? 5 : 2),
-                ),
-                child: isDone
-                    ? const Icon(Icons.check, size: 10, color: Colors.white)
-                    : null,
-              ),
-              if (!isLast)
-                Container(
-                  width: 2,
-                  height: 6,
-                  color: bottomLineColor,
-                ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2),
-            child: Text(
-              OrderStatus.label(step),
-              style: TextStyle(
-                color: isDone || isCurrent
-                    ? colors.textPrimary
-                    : colors.textHint,
-                fontSize: 13,
-                fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
-              ),
-            ),
-          ),
-        ),
-        if (isCurrent)
-          Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                'Saat ini',
-                style: TextStyle(
-                  color: color,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
   }
 }

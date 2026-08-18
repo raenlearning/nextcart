@@ -42,7 +42,7 @@ class RoleFilter extends StatelessWidget {
                 curve: Curves.easeOutCubic,
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
-                  color: isActive ? Colors.black : Colors.transparent,
+                  color: isActive ? AppColors.primary : Colors.transparent,
                   borderRadius: BorderRadius.circular(11),
                 ),
                 alignment: Alignment.center,

@@ -34,12 +34,12 @@ class HomeCategoryChips extends StatelessWidget {
         itemCount: categories.length,
         itemBuilder: (context, index) {
           final cat = categories[index];
-          final id   = cat['id'] as String;
+          final id = cat['id'] as String;
           final name = cat['name'] as String;
           return _CategoryChip(
-            label     : name,
-            isActive  : selectedId == id,
-            onTap     : () => onSelected(id),
+            label: name,
+            isActive: selectedId == id,
+            onTap: () => onSelected(id),
           );
         },
       ),
@@ -64,15 +64,24 @@ class _CategoryChip extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
         margin: const EdgeInsets.only(right: 10),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         decoration: BoxDecoration(
           color: isActive ? AppColors.primary : colors.inputFill,
           borderRadius: BorderRadius.circular(30),
-          border: Border.all(
-            color: isActive ? AppColors.primary : colors.border,
-          ),
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withAlpha(60),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : null,
         ),
         child: Text(
           label,

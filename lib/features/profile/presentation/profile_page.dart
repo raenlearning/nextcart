@@ -1,29 +1,41 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/core/constants/app_assets.dart';
+import 'package:nextcart/core/constants/app_spacing.dart';
+import 'package:nextcart/core/widgets/pressable_scale.dart';
+import 'package:nextcart/features/wishlist/bloc/wishlist_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+  final ValueChanged<int>? onTabChange;
+
+  const ProfilePage({super.key, this.onTabChange});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  State<ProfilePage> createState() => ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class ProfilePageState extends State<ProfilePage> {
   final SupabaseClient _supabase = Supabase.instance.client;
   Map<String, dynamic>? _profile;
   bool _isLoading = true;
+  int _activeOrdersCount = 0;
+  int _addressCount = 0;
 
   @override
   void initState() {
     super.initState();
     _fetchProfile();
+    _fetchSummaryCounts();
   }
 
-  Future<void> refresh() => _fetchProfile();
+  Future<void> refresh() async {
+    await Future.wait([_fetchProfile(), _fetchSummaryCounts()]);
+  }
 
   Future<void> _fetchProfile() async {
     setState(() => _isLoading = true);
@@ -38,12 +50,43 @@ class _ProfilePageState extends State<ProfilePage> {
           .select('full_name, email, avatar_url')
           .eq('id', userId)
           .single();
+      if (!mounted) return;
       setState(() {
         _profile = data;
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _fetchSummaryCounts() async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return;
+
+    try {
+      final results = await Future.wait([
+        _supabase
+            .from('orders')
+            .select('id')
+            .inFilter('status', ['waiting_payment', 'processing'])
+            .eq('user_id', userId)
+            .count(CountOption.exact),
+        _supabase
+            .from('shipping_addresses')
+            .select('id')
+            .eq('user_id', userId)
+            .count(CountOption.exact),
+      ]);
+
+      if (!mounted) return;
+      setState(() {
+        _activeOrdersCount = results[0].count;
+        _addressCount = results[1].count;
+      });
+    } catch (_) {
+      // Abaikan error count, biarkan tampil 0.
     }
   }
 
@@ -102,7 +145,7 @@ class _ProfilePageState extends State<ProfilePage> {
               top: true,
               bottom: false,
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, AppSpacing.bottomNavSpace),
                 children: [
                   Text(
                     'Akun',
@@ -122,7 +165,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         radius: 28,
                         backgroundColor: colors.inputFill,
                         backgroundImage: avatarUrl != null
-                            ? NetworkImage(avatarUrl)
+                            ? CachedNetworkImageProvider(avatarUrl)
                             : null,
                         child: avatarUrl == null
                             ? Icon(
@@ -137,26 +180,14 @@ class _ProfilePageState extends State<ProfilePage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                Flexible(
-                                  child: Text(
-                                    name,
-                                    style: TextStyle(
-                                      color: colors.textPrimary,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                const Icon(
-                                  Icons.verified,
-                                  size: 15,
-                                  color: AppColors.info,
-                                ),
-                              ],
+                            Text(
+                              name,
+                              style: TextStyle(
+                                color: colors.textPrimary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 2),
                             Text(
@@ -166,41 +197,15 @@ class _ProfilePageState extends State<ProfilePage> {
                                 fontSize: 12,
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.rating.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.workspace_premium,
-                                    size: 12,
-                                    color: AppColors.rating,
-                                  ),
-                                  SizedBox(width: 4),
-                                  Text(
-                                    'Akun Premium',
-                                    style: TextStyle(
-                                      color: AppColors.rating,
-                                      fontSize: 10.5,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
                           ],
                         ),
                       ),
                     ],
                   ),
+                  const SizedBox(height: 20),
+
+                  // Kartu ringkasan
+                  _buildSummaryCards(colors),
                   const SizedBox(height: 28),
 
                   _buildSectionTitle(colors, 'Pengaturan Akun'),
@@ -228,17 +233,22 @@ class _ProfilePageState extends State<ProfilePage> {
                     _MenuItem(
                       icon: Icons.lock_outline,
                       label: 'Ganti Kata Sandi',
-                      onTap: () {},
+                      onTap: () => context.push('/change-password'),
                     ),
                     _MenuItem(
                       icon: Icons.privacy_tip_outlined,
-                      label: 'Pengaturan Privasi',
-                      onTap: () {},
+                      label: 'Kebijakan Privasi',
+                      onTap: () => context.push('/privacy-policy'),
                     ),
                     _MenuItem(
-                      icon: Icons.notifications_none,
-                      label: 'Pengaturan Notifikasi',
-                      onTap: () {},
+                      icon: Icons.help_outline,
+                      label: 'Pusat Bantuan',
+                      onTap: () => context.push('/help-center'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.info_outline,
+                      label: 'Tentang Aplikasi',
+                      onTap: () => context.push('/about-app'),
                     ),
                   ]),
                   const SizedBox(height: 24),
@@ -250,21 +260,6 @@ class _ProfilePageState extends State<ProfilePage> {
                       icon: Icons.local_shipping_outlined,
                       label: 'Pembaruan Pesanan',
                       onTap: () => context.push('/notifications'),
-                    ),
-                    _MenuItem(
-                      icon: Icons.local_offer_outlined,
-                      label: 'Promosi',
-                      onTap: () {},
-                    ),
-                    _MenuItem(
-                      icon: Icons.account_balance_wallet_outlined,
-                      label: 'Pembaruan Dompet',
-                      onTap: () {},
-                    ),
-                    _MenuItem(
-                      icon: Icons.storefront_outlined,
-                      label: 'Pembaruan Toko',
-                      onTap: () {},
                     ),
                   ]),
                   const SizedBox(height: 32),
@@ -283,7 +278,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                       child: const Text(
-'Keluar',
+                        'Keluar',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
@@ -294,6 +289,46 @@ class _ProfilePageState extends State<ProfilePage> {
                 ],
               ),
             ),
+    );
+  }
+
+  Widget _buildSummaryCards(AppColorScheme colors) {
+    final wishlistState = context.watch<WishlistBloc>().state;
+    final wishlistCount = wishlistState is WishlistLoaded
+        ? wishlistState.productIds.length
+        : 0;
+
+    final items = [
+      _SummaryItem(
+        icon: Icons.local_shipping_outlined,
+        label: 'Pesanan Aktif',
+        count: _activeOrdersCount,
+        color: AppColors.primary,
+        onTap: () => widget.onTabChange?.call(2),
+      ),
+      _SummaryItem(
+        icon: Icons.favorite_outline,
+        label: 'Wishlist',
+        count: wishlistCount,
+        color: AppColors.sale,
+        onTap: () => widget.onTabChange?.call(1),
+      ),
+      _SummaryItem(
+        icon: Icons.location_on_outlined,
+        label: 'Alamat',
+        count: _addressCount,
+        color: AppColors.info,
+        onTap: () => context.push('/address-list'),
+      ),
+    ];
+
+    return Row(
+      children: [
+        for (var i = 0; i < items.length; i++) ...[
+          Expanded(child: items[i]),
+          if (i != items.length - 1) const SizedBox(width: 10),
+        ],
+      ],
     );
   }
 
@@ -330,6 +365,61 @@ class _ProfilePageState extends State<ProfilePage> {
             ],
           );
         }),
+      ),
+    );
+  }
+}
+
+class _SummaryItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final int count;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _SummaryItem({
+    required this.icon,
+    required this.label,
+    required this.count,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return PressableScale(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: colors.card,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: colors.border),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, size: 22, color: color),
+            const SizedBox(height: 8),
+            Text(
+              '$count',
+              style: TextStyle(
+                color: colors.textPrimary,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                color: colors.textSecondary,
+                fontSize: 11,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

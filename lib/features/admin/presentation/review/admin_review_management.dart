@@ -1,5 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:nextcart/core/constants/app_spacing.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/data/repository/review_repository.dart';
 
@@ -112,7 +114,7 @@ class _AdminReviewManagementPageState extends State<AdminReviewManagementPage> {
         scrolledUnderElevation: 0,
         centerTitle: true,
         title: Text(
-          'Kelola Ulasan',
+          'Review',
           style: TextStyle(
             color: colors.textPrimary,
             fontWeight: FontWeight.bold,
@@ -141,7 +143,7 @@ class _AdminReviewManagementPageState extends State<AdminReviewManagementPage> {
                       onRefresh: _load,
                       child: ListView.builder(
                         physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, AppSpacing.bottomNavSpace),
                         itemCount: _reviews.length,
                         itemBuilder: (context, index) => _AdminReviewCard(
                           review: _reviews[index],
@@ -182,7 +184,7 @@ class _AdminReviewCard extends StatelessWidget {
                 radius: 18,
                 backgroundColor: colors.inputFill,
                 backgroundImage: review.userAvatar != null
-                    ? NetworkImage(review.userAvatar!)
+                    ? CachedNetworkImageProvider(review.userAvatar!)
                     : null,
                 child: review.userAvatar == null
                     ? Icon(Icons.person, color: colors.textSecondary, size: 18)
@@ -290,12 +292,17 @@ class _AdminReviewCard extends StatelessWidget {
                     padding: const EdgeInsets.only(right: 6),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        url,
+                      child: CachedNetworkImage(
+                        imageUrl: url,
                         width: 60,
                         height: 60,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => Container(
+                        placeholder: (_, _) => Container(
+                          width: 60,
+                          height: 60,
+                          color: colors.inputFill,
+                        ),
+                        errorWidget: (_, _, _) => Container(
                           width: 60,
                           height: 60,
                           color: colors.inputFill,

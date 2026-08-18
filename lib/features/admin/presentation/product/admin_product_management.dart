@@ -6,6 +6,7 @@ import 'package:nextcart/core/widgets/admin/product_filter_chip.dart';
 import 'package:nextcart/core/widgets/admin/product_filter_sheet.dart';
 import 'package:nextcart/core/widgets/admin/product_list_item.dart';
 import 'package:nextcart/core/widgets/admin/product_search_bar.dart';
+import 'package:nextcart/core/constants/app_spacing.dart';
 import 'package:nextcart/features/admin/bloc/product/admin_product_bloc.dart';
 import 'package:nextcart/features/admin/bloc/product/admin_product_event.dart';
 import 'package:nextcart/features/admin/bloc/product/admin_product_state.dart';
@@ -321,7 +322,7 @@ class _AdminProductManagementPageState
                              )
                           : ListView.builder(
                               padding:
-                                  const EdgeInsets.fromLTRB(0, 4, 0, 100),
+                                  const EdgeInsets.fromLTRB(0, 4, 0, AppSpacing.bottomNavSpace),
                               itemCount: filtered.length,
                               itemBuilder: (context, index) {
                                 final product = filtered[index];

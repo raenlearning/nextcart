@@ -26,17 +26,32 @@ class HomeSectionHeader extends StatelessWidget {
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: colors.textPrimary,
+            letterSpacing: -0.2,
           ),
         ),
-        if (actionLabel != null)
+        if (actionLabel != null && onActionTap != null)
           GestureDetector(
             onTap: onActionTap,
-            child: Text(
-              actionLabel!,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: colors.textSecondary,
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+              child: Row(
+                children: [
+                  Text(
+                    actionLabel!,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(width: 2),
+                  Icon(
+                    Icons.chevron_right,
+                    size: 18,
+                    color: colors.textSecondary,
+                  ),
+                ],
               ),
             ),
           ),

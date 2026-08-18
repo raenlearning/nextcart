@@ -5,7 +5,7 @@ class UserAdminSearchBar extends StatelessWidget {
   final ValueChanged<String> onChanged;
   const UserAdminSearchBar({super.key, required this.onChanged});
 
-  
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -53,7 +53,7 @@ class UserAdminSearchBar extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: Colors.black, width: 1.4),
+            borderSide: const BorderSide(color: AppColors.primary, width: 1.4),
           ),
         ),
       ),

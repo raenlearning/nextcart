@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
@@ -181,7 +182,19 @@ class _MediaPickerSheetState extends State<MediaPickerSheet> {
                               children: [
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
-                                  child: Image.network(url, fit: BoxFit.cover),
+                                  child: CachedNetworkImage(
+                                  imageUrl: url,
+                                  fit: BoxFit.cover,
+                                  placeholder: (_, _) => Container(
+                                    color: Colors.grey.shade200,
+                                  ),
+                                  errorWidget: (_, _, _) => Container(
+                                    color: Colors.grey.shade200,
+                                    child: const Icon(
+                                      Icons.broken_image_outlined,
+                                    ),
+                                  ),
+                                ),
                                 ),
                                 // Tombol Hapus Existing Image
                                 Positioned(

@@ -10,6 +10,8 @@ import 'package:nextcart/data/models/product_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:nextcart/features/admin/bloc/product/admin_product_bloc.dart';
 import 'package:nextcart/features/admin/bloc/product/admin_product_event.dart';
+import 'package:nextcart/features/admin/presentation/product/widgets/category_picker_sheet.dart';
+import 'package:nextcart/features/admin/presentation/product/widgets/product_media_tile.dart';
 
 import '../../../../core/widgets/admin/flat_field.dart';
 import '../../../../core/widgets/admin/form_section.dart';
@@ -229,7 +231,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon:  Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
             size: 18,
             color: context.colors.textPrimary,
@@ -238,7 +240,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
         ),
         title: Text(
           _isEdit ? 'Edit Produk' : 'Buat Produk',
-          style:  TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
             color: context.colors.textPrimary,
@@ -246,7 +248,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
         ),
       ),
       body: _isLoading
-          ?  Center(
+          ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -270,89 +272,10 @@ class _ProductFormPageState extends State<ProductFormPage> {
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
-                  // ── Media ──────────────────────────────────────
                   FormSection(label: "Media"),
-                  GestureDetector(
+                  ProductMediaTile(
+                    totalImages: totalImages,
                     onTap: _openMediaSheet,
-                    child: Container(
-                      margin: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 14,
-                      ),
-                      decoration: BoxDecoration(
-                        color: context.colors.inputFill,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: context.colors.border),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: AppColors.slate200,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child:  Icon(
-                              Icons.photo_library_outlined,
-                              color: context.colors.textSecondary,
-                              size: 18,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                 Text(
-                                  'Tambah Media',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: context.colors.textPrimary,
-                                  ),
-                                ),
-                                Text(
-                                  totalImages == 0
-                                      ? 'Tambah media untuk produk ini'
-                                      : '$totalImages foto dipilih',
-                                  style:  TextStyle(
-                                    fontSize: 12,
-                                    color: context.colors.textSecondary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (totalImages > 0)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: context.colors.textOnPrimary.withAlpha(20),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                '$totalImages',
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                            ),
-                          const SizedBox(width: 6),
-                           Icon(
-                            Icons.chevron_right_rounded,
-                            color: context.colors.textSecondary,
-                            size: 20,
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
 
                   FormSection(label: "Product Name"),
@@ -412,10 +335,18 @@ class _ProductFormPageState extends State<ProductFormPage> {
                         ),
 
                   FormSection(label: "Price"),
-                  FlatField(controller: _priceController, hint: "Rp 0", keyboardType: TextInputType.number),
+                  FlatField(
+                    controller: _priceController,
+                    hint: "Rp 0",
+                    keyboardType: TextInputType.number,
+                  ),
 
                   FormSection(label: "Stock"),
-                  FlatField(controller: _stockController, hint: "0", keyboardType: TextInputType.number),
+                  FlatField(
+                    controller: _stockController,
+                    hint: "0",
+                    keyboardType: TextInputType.number,
+                  ),
 
                   FormSection(label: "Berat (gram)"),
                   FlatField(
@@ -441,7 +372,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
 
       bottomNavigationBar: Container(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
-        decoration:  BoxDecoration(
+        decoration: BoxDecoration(
           color: context.colors.background,
           border: Border(top: BorderSide(color: context.colors.divider)),
         ),
@@ -490,91 +421,22 @@ class _ProductFormPageState extends State<ProductFormPage> {
     );
   }
 
-  void _showCategoryBottomSheet() {
-  showModalBottomSheet(
-    context: context,
-    backgroundColor: context.colors.background,
-    isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
-    builder: (_) {
-      final maxHeight = MediaQuery.of(context).size.height * 0.7;
+  Future<void> _showCategoryBottomSheet() async {
+    final selectedId = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: context.colors.background,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => CategoryPickerSheet(
+        categories: _categoriesList,
+        selectedId: _selectedCategoryId,
+      ),
+    );
 
-      return ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: maxHeight),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.slate200,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Pilih Kategori',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: context.colors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              // Hanya bagian list ini yang scroll, header di atas tetap fixed.
-              Flexible(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  padding: EdgeInsets.zero,
-                  itemCount: _categoriesList.length,
-                  itemBuilder: (context, index) {
-                    final cat = _categoriesList[index];
-                    final id = cat['id'] as String;
-                    final name = cat['name'] as String;
-                    final isSelected = _selectedCategoryId == id;
-                    return ListTile(
-                      onTap: () {
-                        setState(() => _selectedCategoryId = id);
-                        Navigator.pop(context);
-                      },
-                      contentPadding: EdgeInsets.zero,
-                      dense: true,
-                      title: Text(
-                        name,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: isSelected
-                              ? AppColors.primary
-                              : context.colors.textPrimary,
-                          fontWeight: isSelected
-                              ? FontWeight.w600
-                              : FontWeight.normal,
-                        ),
-                      ),
-                      trailing: isSelected
-                          ? const Icon(
-                              Icons.check_rounded,
-                              color: AppColors.primary,
-                              size: 18,
-                            )
-                          : null,
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    },
-  );
-}
+    if (selectedId != null && mounted) {
+      setState(() => _selectedCategoryId = selectedId);
+    }
+  }
 }
