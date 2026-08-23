@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/widgets/shimmer_box.dart';
 
 class HomeCategoryChips extends StatelessWidget {
   final List<Map<String, dynamic>> categories;
@@ -17,12 +18,17 @@ class HomeCategoryChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
     if (isLoading) {
-      return LinearProgressIndicator(
-        color: AppColors.primary,
-        backgroundColor: colors.border,
+      return SizedBox(
+        height: 38,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: 5,
+          separatorBuilder: (context, index) => const SizedBox(width: 10),
+          itemBuilder: (context, index) =>
+              const ShimmerBox(width: 90, height: 38, radius: 30),
+        ),
       );
     }
 

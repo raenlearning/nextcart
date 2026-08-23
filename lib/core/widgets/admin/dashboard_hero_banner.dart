@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/theme/app_fonts.dart';
 import 'package:nextcart/core/widgets/admin/real_time_bar_chart.dart';
 
 class DashboardHeroBanner extends StatelessWidget {
@@ -76,11 +77,13 @@ class DashboardHeroBanner extends StatelessWidget {
           Text(
             formatCompactRupiah(grossRevenue),
             style: TextStyle(
+              fontFamily: AppFonts.secondary,
               color: colors.textPrimary,
               fontSize: 36,
               fontWeight: FontWeight.w800,
               letterSpacing: -0.8,
               height: 1.0,
+              fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
           const SizedBox(height: 22),

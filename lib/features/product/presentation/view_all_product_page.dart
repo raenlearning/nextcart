@@ -4,14 +4,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nextcart/core/constants/app_assets.dart';
 import 'package:nextcart/core/widgets/user/product_grid.dart';
 import 'package:nextcart/core/widgets/shimmer_box.dart';
-import 'package:nextcart/core/widgets/user/promo_banner.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/data/models/product_model.dart';
 import 'package:nextcart/features/product/presentation/widgets/category_grid.dart';
-import 'package:nextcart/features/product/presentation/widgets/flash_sale_banner.dart';
 import 'package:nextcart/features/product/presentation/widgets/sort_chips.dart';
-import 'package:nextcart/features/product/presentation/widgets/trust_badges_row.dart';
+
 
 class ViewAllProductsPage extends StatefulWidget {
   final String title;
@@ -46,7 +44,6 @@ class _ViewAllProductsPageState extends State<ViewAllProductsPage> {
   bool _isLoadingMore = false;
   bool _hasMore = true;
   String? _errorMessage;
-  bool _isExpanded = false;
   final GlobalKey _productGridKey = GlobalKey();
 
   @override
@@ -202,17 +199,6 @@ class _ViewAllProductsPageState extends State<ViewAllProductsPage> {
     _fetchProducts();
   }
 
-  void _scrollToProducts() {
-    final context = _productGridKey.currentContext;
-    if (context == null) return;
-    Scrollable.ensureVisible(
-      context,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeOutCubic,
-      alignment: 0.0,
-    );
-  }
-
   void _onCategoryTap(String? categoryId) {
     if (categoryId == _selectedCategoryId) return;
     setState(() => _selectedCategoryId = categoryId);
@@ -249,24 +235,27 @@ class _ViewAllProductsPageState extends State<ViewAllProductsPage> {
           ),
           slivers: [
             SliverToBoxAdapter(child: _buildSearchBar(colors)),
-            const SliverToBoxAdapter(child: SizedBox(height: 4)),
-            const SliverToBoxAdapter(child: HomeBannerCarousel()),
             SliverToBoxAdapter(
               child: CategoryGrid(
                 categories: _categories,
                 selectedCategoryId: _selectedCategoryId,
                 isLoading: _isLoadingCategories,
-                isExpanded: _isExpanded,
                 onCategoryTap: _onCategoryTap,
-                onToggleExpand: () =>
-                    setState(() => _isExpanded = !_isExpanded),
               ),
             ),
             SliverToBoxAdapter(
-              child: FlashSaleBanner(onCta: _scrollToProducts),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: Text(
+                  'Daftar Produk',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: colors.textPrimary,
+                  ),
+                ),
+              ),
             ),
-            const SliverToBoxAdapter(child: TrustBadgesRow()),
-            const SliverToBoxAdapter(child: SizedBox(height: 12)),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),

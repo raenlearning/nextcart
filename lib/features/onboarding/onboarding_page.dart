@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nextcart/core/constants/app_assets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 
@@ -51,8 +52,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
   bool get _isLastPage => _currentIndex == _slides.length - 1;
   bool get _isFirstPage => _currentIndex == 0;
 
-  void _onFinishOnboarding() {
-    context.go('/auth');
+  void _onFinishOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_completed', true);
+    if (mounted) context.go('/auth');
   }
 
   void _goToPrevious() {

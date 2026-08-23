@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/theme/app_fonts.dart';
 
 class MiniMetricCard extends StatelessWidget {
   final String title;
@@ -49,10 +50,12 @@ class MiniMetricCard extends StatelessWidget {
           Text(
             value,
             style: TextStyle(
+              fontFamily: AppFonts.secondary,
               fontSize: 21,
               fontWeight: FontWeight.w800,
               color: colors.textPrimary,
               letterSpacing: -0.3,
+              fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
           const SizedBox(height: 3),

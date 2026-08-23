@@ -95,7 +95,6 @@ class CartAlertHelper {
               Text(
                 'Berhasil Ditambahkan!',
                 style: TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
                   color: colors.textPrimary,
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -108,7 +107,6 @@ class CartAlertHelper {
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontFamily: 'SF Pro',
                   color: colors.textSecondary,
                   fontSize: 13,
                 ),

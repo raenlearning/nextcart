@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nextcart/core/constants/order_status.dart';
 import 'package:nextcart/core/constants/pricing.dart';
+import 'package:nextcart/core/service/address_store.dart';
 import 'package:nextcart/data/repository/shipping_repository.dart';
 import 'package:nextcart/features/cart/bloc/cart_event.dart';
 import 'package:nextcart/features/cart/bloc/cart_state.dart';
@@ -13,13 +14,16 @@ export 'package:nextcart/features/cart/bloc/cart_event.dart';
 export 'package:nextcart/features/cart/bloc/cart_state.dart';
 
 class CartBloc extends Bloc<CartEvent, CartState> {
-  final SupabaseClient _supabase = Supabase.instance.client;
-  final ShippingRepository _shippingRepository = ShippingRepository();
+  final SupabaseClient _supabase;
+  final ShippingRepository _shippingRepository;
   Timer? _orderPollTimer;
   String? _cachedCartId;
   String? _cachedCartUserId;
 
-  CartBloc() : super(CartInitial()) {
+  CartBloc({SupabaseClient? client, ShippingRepository? shippingRepository})
+      : _supabase = client ?? Supabase.instance.client,
+        _shippingRepository = shippingRepository ?? ShippingRepository(),
+        super(CartInitial()) {
     on<LoadCart>(_onLoadCart);
     on<AddToCart>(_onAddToCart);
     on<UpdateCartQuantity>(_onUpdateQuantity);
@@ -42,9 +46,6 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     _orderPollTimer = null;
   }
 
-  /// Menunggu status pesanan berubah dari `waiting_payment` via polling.
-  /// Mengembalikan status terbaru, atau status fallback setelah timeout.
-  /// Memakai polling bertahap (bukan Realtime) agar tetap jalan di Free Plan.
   Future<String> _waitForOrderStatus(String orderId) {
     final completer = Completer<String>();
     final statuses = {
@@ -167,8 +168,24 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         }
       }
 
-      final keepAddress =
+      Map<String, dynamic>? keepAddress =
           prev is CartLoaded ? prev.selectedAddress : null;
+      if (keepAddress == null) {
+        if (!AddressStore.instance.isLoaded) {
+          await AddressStore.instance.load();
+        }
+        final selected = AddressStore.instance.value;
+        if (selected != null) {
+          keepAddress = {
+            'id': selected.id,
+            'full_address': selected.fullAddress,
+            'province': selected.province,
+            'city': selected.city,
+            'district': selected.district,
+            'postal_code': selected.postalCode,
+          };
+        }
+      }
       emit(CartLoaded(cartItems, total,
           totalWeightGrams: totalWeight, selectedAddress: keepAddress));
 
@@ -617,7 +634,11 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         userMessage = 'Pembayaran gagal atau dibatalkan.';
       }
 
-      emit(CheckoutStatusVerified(orderStatus: status, message: userMessage));
+      emit(CheckoutStatusVerified(
+        orderStatus: status,
+        message: userMessage,
+        orderId: orderId,
+      ));
       add(LoadCart()); // Muat ulang isi keranjang yang sekarang sudah kosong
     } catch (e) {
       emit(CartError('Gagal memproses checkout: ${e.toString()}'));

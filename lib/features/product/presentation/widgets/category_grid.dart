@@ -7,24 +7,18 @@ class CategoryGrid extends StatelessWidget {
   final List<Map<String, dynamic>> categories;
   final String? selectedCategoryId;
   final bool isLoading;
-  final bool isExpanded;
   final ValueChanged<String?> onCategoryTap;
-  final VoidCallback onToggleExpand;
 
   const CategoryGrid({
     super.key,
     required this.categories,
     required this.selectedCategoryId,
     required this.isLoading,
-    required this.isExpanded,
     required this.onCategoryTap,
-    required this.onToggleExpand,
   });
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
     if (isLoading) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 20),
@@ -41,76 +35,38 @@ class CategoryGrid extends StatelessWidget {
       );
     }
 
-    final totalItems = categories.length + 1;
-    final displayedCount =
-        isExpanded ? totalItems : (totalItems > 4 ? 4 : totalItems);
+    return SizedBox(
+      height: 92,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: categories.length + 1,
+        separatorBuilder: (_, _) => const SizedBox(width: 12),
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return CategoryChip(
+              label: 'Semua',
+              imageAsset: null,
+              isSelected: selectedCategoryId == null,
+              onTap: () => onCategoryTap(null),
+            );
+          }
+          final category = categories[index - 1];
+          final categoryId = category['id'] as String;
+          final categoryName = category['name'] as String;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Belanja Sesuai Kategori',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: colors.textPrimary,
-                ),
-              ),
-              if (totalItems > 4)
-                IconButton(
-                  onPressed: onToggleExpand,
-                  icon: Icon(
-                    isExpanded
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    color: colors.textSecondary,
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: displayedCount,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 12,
-              childAspectRatio: 0.82,
-            ),
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return CategoryChip(
-                  label: 'Semua',
-                  isSelected: selectedCategoryId == null,
-                  onTap: () => onCategoryTap(null),
-                  svgAsset: null,
-                );
-              }
-              final category = categories[index - 1];
-              final categoryId = category['id'] as String;
-              final categoryName = category['name'] as String;
-
-              return CategoryChip(
-                label: categoryName,
-                isSelected: selectedCategoryId == categoryId,
-                onTap: () => onCategoryTap(categoryId),
-                svgAsset: _getSvgAsset(categoryName),
-              );
-            },
-          ),
-        ],
+          return CategoryChip(
+            label: categoryName,
+            imageAsset: _getImageAsset(categoryName),
+            isSelected: selectedCategoryId == categoryId,
+            onTap: () => onCategoryTap(categoryId),
+          );
+        },
       ),
     );
   }
 
-  String? _getSvgAsset(String categoryName) {
+  String? _getImageAsset(String categoryName) {
     switch (categoryName.toLowerCase()) {
       case 'smartphone':
         return AppAssets.categorySmartPhone;

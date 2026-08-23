@@ -41,5 +41,10 @@ class CheckoutRedirectReady extends CartState {
 class CheckoutStatusVerified extends CartState {
   final String orderStatus;
   final String message;
-  CheckoutStatusVerified({required this.orderStatus, required this.message});
+  final String orderId;
+  CheckoutStatusVerified({
+    required this.orderStatus,
+    required this.message,
+    required this.orderId,
+  });
 }

@@ -5,11 +5,14 @@ import 'package:go_router/go_router.dart';
 import 'package:nextcart/data/models/product_model.dart';
 import 'package:nextcart/data/repository/product_repository.dart';
 import 'package:nextcart/core/helper/currency_formatter.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/widgets/user/product_grid.dart';
+import 'package:nextcart/core/widgets/user/product/heart_burst_animation.dart';
 import 'package:nextcart/features/product/presentation/widgets/meta_row.dart';
 import 'package:nextcart/features/wishlist/bloc/wishlist_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_fonts.dart';
 import 'widgets/image_hero.dart';
 import 'widgets/name_row.dart';
 import 'widgets/price_row.dart';
@@ -32,6 +35,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   final PageController _pageController = PageController();
   final SupabaseClient _supabase = Supabase.instance.client;
   final GlobalKey _addToCartKey = GlobalKey();
+  final GlobalKey _wishlistIconKey = GlobalKey();
   int _quantity = 1;
 
   double _rating = 0;
@@ -62,11 +66,28 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       );
       return;
     }
-    context.read<WishlistBloc>().add(WishlistToggle(widget.product.id));
+
+    final bloc = context.read<WishlistBloc>();
+    final willAdd = !bloc.contains(widget.product.id);
+    bloc.add(WishlistToggle(widget.product.id));
+
+    if (willAdd) {
+      HeartBurstAnimation.burst(context: context, key: _wishlistIconKey);
+      ToastHelper.showToast(
+        context,
+        '${widget.product.name} ditambahkan ke wishlist',
+        ToastSeverity.success,
+      );
+    } else {
+      ToastHelper.showToast(
+        context,
+        '${widget.product.name} dihapus dari wishlist',
+        ToastSeverity.info,
+      );
+    }
   }
 
   Future<void> _loadDetail() async {
-    // Jalankan fetch rating, kategori, dan produk terkait secara paralel.
     await Future.wait([
       _fetchRating(),
       _fetchCategory(),
@@ -157,21 +178,25 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   label: 'Nama Produk',
                   value: widget.product.name,
                   colors: colors,
+                  fontFamily: AppFonts.secondary,
                 ),
                 SpecRow(
                   label: 'Kategori',
                   value: _categoryLabel ?? '-',
                   colors: colors,
+                  fontFamily: AppFonts.secondary,
                 ),
                 SpecRow(
                   label: 'Harga',
                   value: CurrencyFormatter.rupiah(widget.product.price),
                   colors: colors,
+                  fontFamily: AppFonts.secondary,
                 ),
                 SpecRow(
                   label: 'Stok',
                   value: '${widget.product.stock}',
                   colors: colors,
+                  fontFamily: AppFonts.secondary,
                 ),
               ],
             ),
@@ -260,6 +285,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           colors: colors,
                           isDark: isDark,
                           onWishlistTap: _toggleWishlist,
+                          wishlistIconKey: _wishlistIconKey,
                         ),
                         const SizedBox(height: 10),
 

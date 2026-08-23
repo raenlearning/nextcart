@@ -35,11 +35,11 @@ create table if not exists couriers (
 );
 
 insert into couriers (code, name, service, base_cost, per_kg, eta_min, eta_max) values
-  ('jne_reg',    'JNE',      'REG',    12000, 4000, 2, 4),
-  ('jne_oke',    'JNE',      'OKE',    10000, 3000, 3, 6),
-  ('jnt_express','J&T',      'Express',11000, 3500, 2, 4),
-  ('sicepat_reg','SiCepat',  'REG',    13000, 4000, 2, 5),
-  ('anteraja',   'AnterAja', 'Reguler',10000, 3000, 3, 6)
+  ('jne_reg',    'JNE',      'REG',    15000, 4000, 2, 4),
+  ('jne_oke',    'JNE',      'OKE',    18000, 3000, 3, 6),
+  ('jnt_express','J&T',      'Express',20000, 3500, 2, 4),
+  ('sicepat_reg','SiCepat',  'REG',    22000, 4000, 2, 5),
+  ('anteraja',   'AnterAja', 'Reguler',12000, 3000, 3, 6)
 on conflict (code) do nothing;
 
 -- ============================================================

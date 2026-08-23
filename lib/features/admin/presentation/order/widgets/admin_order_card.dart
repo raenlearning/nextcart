@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:nextcart/core/constants/order_status.dart';
 import 'package:nextcart/core/helper/currency_formatter.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/theme/app_fonts.dart';
 import 'package:nextcart/features/admin/presentation/order/widgets/order_status_action_button.dart';
 
 class AdminOrderCard extends StatelessWidget {
@@ -197,9 +198,11 @@ class AdminOrderCard extends StatelessWidget {
                               Text(
                                 '${item['quantity']} x ${CurrencyFormatter.rupiah(item['price_at_purchase'])}',
                                 style: TextStyle(
+                                  fontFamily: AppFonts.secondary,
                                   color: colors.textSecondary,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
+                                  fontFeatures: const [FontFeature.tabularFigures()],
                                 ),
                               ),
                             ],
@@ -246,10 +249,12 @@ class AdminOrderCard extends StatelessWidget {
                           Text(
                             CurrencyFormatter.rupiah(order['total_amount']),
                             style: TextStyle(
+                              fontFamily: AppFonts.secondary,
                               color: colors.textPrimary,
                               fontWeight: FontWeight.w800,
                               fontSize: 17,
                               letterSpacing: -0.3,
+                              fontFeatures: const [FontFeature.tabularFigures()],
                             ),
                           ),
                         ],

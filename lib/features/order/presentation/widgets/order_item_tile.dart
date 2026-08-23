@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:nextcart/core/constants/order_status.dart';
 import 'package:nextcart/core/helper/currency_formatter.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/theme/app_fonts.dart';
 
 class OrderItemTile extends StatelessWidget {
   final Map<String, dynamic> item;
@@ -79,8 +80,10 @@ class OrderItemTile extends StatelessWidget {
                     Text(
                       '$quantity x ${CurrencyFormatter.rupiah(priceAtPurchase)}',
                       style: TextStyle(
+                        fontFamily: AppFonts.secondary,
                         color: colors.textSecondary,
                         fontSize: 12.5,
+                        fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                     ),
                   ],
@@ -89,9 +92,11 @@ class OrderItemTile extends StatelessWidget {
               Text(
                 CurrencyFormatter.rupiah((priceAtPurchase as num) * quantity),
                 style: TextStyle(
+                  fontFamily: AppFonts.secondary,
                   color: colors.textPrimary,
                   fontWeight: FontWeight.bold,
                   fontSize: 13.5,
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
             ],

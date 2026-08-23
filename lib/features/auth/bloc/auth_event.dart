@@ -21,6 +21,8 @@ class AuthLoginRequested extends AuthEvent {
   AuthLoginRequested({required this.email, required this.password});
 }
 
+class AuthGoogleSignInRequested extends AuthEvent {}
+
 class AuthLogoutRequested extends AuthEvent {}
 
 class AuthForgotPasswordRequested extends AuthEvent {

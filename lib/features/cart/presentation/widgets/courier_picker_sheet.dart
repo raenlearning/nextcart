@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/theme/app_fonts.dart';
 import 'package:nextcart/core/helper/currency_formatter.dart';
 
 class CourierPickerSheet extends StatelessWidget {
@@ -85,9 +86,11 @@ class CourierPickerSheet extends StatelessWidget {
                         (courier['price'] as num?)?.toDouble() ?? 0,
                       ),
                       style: const TextStyle(
+                        fontFamily: AppFonts.secondary,
                         color: AppColors.primary,
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
+                        fontFeatures: [FontFeature.tabularFigures()],
                       ),
                     ),
                     onTap: () => onSelected(courier),

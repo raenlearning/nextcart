@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:nextcart/core/helper/cart_alert_helper.dart';
 import 'package:nextcart/core/helper/currency_formatter.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/theme/app_fonts.dart';
 import 'package:nextcart/core/widgets/cart_fly_animation.dart';
 import 'package:nextcart/data/models/product_model.dart';
 import 'package:nextcart/features/cart/bloc/cart_bloc.dart';
@@ -52,23 +53,6 @@ class BottomBar extends StatelessWidget {
     );
   }
 
-  void _buyNow(BuildContext context) {
-    HapticFeedback.lightImpact();
-
-    context
-        .read<CartBloc>()
-        .add(AddToCart(product.id, quantity: quantity));
-
-    CartFlyAnimation.fly(
-      context: context,
-      startKey: addToCartKey,
-      icon: Icons.shopping_bag,
-      color: Colors.white,
-      backgroundColor: AppColors.primary,
-    );
-
-    context.push('/cart');
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,9 +82,11 @@ class BottomBar extends StatelessWidget {
             Text(
               'Stok menipis, tersisa ${product.stock}',
               style: const TextStyle(
+                fontFamily: AppFonts.secondary,
                 fontSize: 11,
                 fontWeight: FontWeight.bold,
                 color: AppColors.warning,
+                fontFeatures: [FontFeature.tabularFigures()],
               ),
             ),
             const SizedBox(height: 4),
@@ -116,9 +102,11 @@ class BottomBar extends StatelessWidget {
                     Text(
                       CurrencyFormatter.rupiah(price * quantity),
                       style: TextStyle(
+                        fontFamily: AppFonts.secondary,
                         fontSize: 17,
                         fontWeight: FontWeight.w800,
                         color: colors.textPrimary,
+                        fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                     ),
                     if (quantity > 1) ...[
@@ -126,8 +114,10 @@ class BottomBar extends StatelessWidget {
                       Text(
                         '($quantity x ${CurrencyFormatter.rupiah(price)})',
                         style: TextStyle(
+                          fontFamily: AppFonts.secondary,
                           fontSize: 11,
                           color: colors.textHint,
+                          fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
                     ],
@@ -164,12 +154,6 @@ class BottomBar extends StatelessWidget {
                   quantity: quantity,
                   onTap: () => _addToCart(context),
                 ),
-                const SizedBox(width: 10),
-                _BuyNowButton(
-                  quantity: quantity,
-                  colors: colors,
-                  onTap: () => _buyNow(context),
-                ),
               ],
             ],
           ),
@@ -200,69 +184,28 @@ class _CartButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: colors.inputFill,
+          color: AppColors.primary,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: colors.border),
         ),
-        child: Column(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.shopping_bag_outlined,
-              color: colors.textPrimary,
+            const FaIcon(
+              FontAwesomeIcons.bagShopping,
+              color: Colors.white,
               size: 20,
             ),
-            const SizedBox(height: 2),
+
+            const SizedBox(width: 8),
             Text(
               quantity > 1 ? 'Keranjang ($quantity)' : 'Keranjang',
-              style: TextStyle(
-                color: colors.textPrimary,
+              style: const TextStyle(
+                color: Colors.white,
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _BuyNowButton extends StatelessWidget {
-  final int quantity;
-  final AppColorScheme colors;
-  final VoidCallback onTap;
-
-  const _BuyNowButton({
-    required this.quantity,
-    required this.colors,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-        decoration: BoxDecoration(
-          color: AppColors.primary,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.35),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Text(
-          quantity > 1 ? 'Beli $quantity Sekarang' : 'Beli Sekarang',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-          ),
         ),
       ),
     );

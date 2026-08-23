@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nextcart/core/helper/supabase_storage_helper.dart';
+import 'package:nextcart/core/helper/validators.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/core/widgets/admin/category_row.dart';
 import 'package:nextcart/core/widgets/admin/media_picker_sheet.dart';
@@ -160,11 +162,6 @@ class _ProductFormPageState extends State<ProductFormPage> {
       _showSnack('Silakan pilih kategori produk.', AppColors.warning);
       return;
     }
-    final weightInput = int.tryParse(_weightController.text.trim());
-    if (weightInput == null || weightInput <= 0) {
-      _showSnack('Berat produk harus diisi (minimal 1 gram).', AppColors.warning);
-      return;
-    }
 
     setState(() => _isLoading = true);
 
@@ -176,6 +173,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
         );
       }
       final finalImages = [..._existingImages, ...newUrls];
+      final price = double.tryParse(_priceController.text.trim()) ?? 0;
+      final stock = int.tryParse(_stockController.text.trim()) ?? 0;
       final weightGrams = int.tryParse(_weightController.text.trim()) ?? 0;
 
       if (!mounted) return;
@@ -185,8 +184,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
           AddAdminProduct(
             name: _nameController.text.trim(),
             description: _descController.text.trim(),
-            price: double.parse(_priceController.text),
-            stock: int.parse(_stockController.text),
+            price: price,
+            stock: stock,
             categoryId: _selectedCategoryId!,
             images: finalImages,
             isActive: _isActive,
@@ -200,8 +199,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
               id: widget.product!.id,
               name: _nameController.text.trim(),
               description: _descController.text.trim(),
-              price: double.parse(_priceController.text),
-              stock: int.parse(_stockController.text),
+              price: price,
+              stock: stock,
               categoryId: _selectedCategoryId!,
               images: finalImages,
               sellerId: widget.product!.sellerId,
@@ -279,7 +278,12 @@ class _ProductFormPageState extends State<ProductFormPage> {
                   ),
 
                   FormSection(label: "Product Name"),
-                  FlatField(controller: _nameController, hint: "Product name"),
+                  FlatField(
+                    controller: _nameController,
+                    hint: "Product name",
+                    validator: (v) =>
+                        Validators.requiredField(v, message: 'Nama produk wajib diisi'),
+                  ),
 
                   FormSection(label: "Status"),
                   Padding(
@@ -338,7 +342,11 @@ class _ProductFormPageState extends State<ProductFormPage> {
                   FlatField(
                     controller: _priceController,
                     hint: "Rp 0",
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
+                    ],
+                    validator: Validators.price,
                   ),
 
                   FormSection(label: "Stock"),
@@ -346,6 +354,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
                     controller: _stockController,
                     hint: "0",
                     keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    validator: Validators.stock,
                   ),
 
                   FormSection(label: "Berat (gram)"),
@@ -353,6 +363,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
                     controller: _weightController,
                     hint: "cth: 250",
                     keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    validator: Validators.weight,
                   ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),

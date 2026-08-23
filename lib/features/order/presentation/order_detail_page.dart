@@ -4,6 +4,7 @@ import 'package:nextcart/core/constants/order_status.dart';
 import 'package:nextcart/core/helper/currency_formatter.dart';
 import 'package:nextcart/core/helper/date_formatter.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/theme/app_fonts.dart';
 import 'package:nextcart/data/repository/review_repository.dart';
 import 'package:nextcart/features/order/presentation/widgets/info_card.dart';
 import 'package:nextcart/features/order/presentation/widgets/order_item_tile.dart';
@@ -416,9 +417,11 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         Text(
           CurrencyFormatter.rupiah(totalAmount),
           style: TextStyle(
+            fontFamily: AppFonts.secondary,
             color: colors.textPrimary,
             fontWeight: FontWeight.bold,
             fontSize: 16,
+            fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
       ],

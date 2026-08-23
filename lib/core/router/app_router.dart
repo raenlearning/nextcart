@@ -123,10 +123,11 @@ class AppRouter {
       GoRoute(
         path: '/address-form',
         builder: (context, state) {
-          final address = state.extra is ShippingAddress
-              ? state.extra as ShippingAddress
-              : null;
-          return AddressFormPage(address: address);
+          final extra = state.extra;
+          final address =
+              extra is ShippingAddress ? extra : null;
+          final prefill = extra is Map<String, dynamic> ? extra : null;
+          return AddressFormPage(address: address, prefill: prefill);
         },
       ),
       GoRoute(

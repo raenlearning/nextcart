@@ -5,6 +5,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+import 'package:nextcart/core/service/map_tile_provider.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 
 class AddressSelectionPage extends StatefulWidget {
@@ -24,6 +25,9 @@ class _AddressSelectionPageState extends State<AddressSelectionPage> {
   bool _isSearching = false;
   List<Map<String, dynamic>> _searchResults = [];
   Timer? _debounce;
+  Timer? _geocodeDebounce;
+  int _geocodeToken = 0;
+  int _searchToken = 0;
 
   @override
   void initState() {
@@ -35,67 +39,84 @@ class _AddressSelectionPageState extends State<AddressSelectionPage> {
   @override
   void dispose() {
     _debounce?.cancel();
+    _geocodeDebounce?.cancel();
+    _geocodeToken++;
+    _searchToken++;
     _searchController.dispose();
     _searchFocusNode.dispose();
-    _mapController.dispose(); 
+    _mapController.dispose();
     super.dispose();
   }
 
   void _onSearchChanged() {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
-    final query = _searchController.text.trim();
-    if (query.isEmpty) {
+    if (_searchController.text.trim().isEmpty) {
       setState(() => _searchResults = []);
       return;
     }
     _debounce = Timer(const Duration(milliseconds: 600), () {
-      _searchAddress(query);
+      final query = _searchController.text.trim();
+      if (query.isNotEmpty) _searchAddress(query);
     });
   }
 
   Future<void> _determinePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      setState(() {
-        _isLoading = false;
-        _currentAddress = "Layanan lokasi tidak aktif";
-      });
-      return;
-    }
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (!mounted) return;
         setState(() {
           _isLoading = false;
-          _currentAddress = "Izin lokasi ditolak";
+          _currentAddress = "Layanan lokasi tidak aktif";
         });
         return;
       }
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (!mounted) return;
+          setState(() {
+            _isLoading = false;
+            _currentAddress = "Izin lokasi ditolak";
+          });
+          return;
+        }
+      }
+      final Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
+      ).timeout(const Duration(seconds: 12));
+      final userLocation = LatLng(position.latitude, position.longitude);
+      if (!mounted) return;
+      setState(() => _selectedLocation = userLocation);
+      _mapController.move(userLocation, 15.0);
+      _getAddressFromLatLng(userLocation);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _currentAddress = "Gagal mendapatkan lokasi";
+      });
     }
-    Position position = await Geolocator.getCurrentPosition();
-    final userLocation = LatLng(position.latitude, position.longitude);
-    setState(() {
-      _selectedLocation = userLocation;
-    });
-    _mapController.move(userLocation, 15.0);
-    _getAddressFromLatLng(userLocation);
   }
 
   Future<void> _getAddressFromLatLng(LatLng position) async {
+    final token = ++_geocodeToken;
     setState(() => _isLoading = true);
     try {
       final url = Uri.parse(
-          'https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.latitude}&lon=${position.longitude}');
-      final response = await http.get(url, headers: {
-        'User-Agent': 'NextcartApp/1.0',
-      });
+          'https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.latitude}&lon=${position.longitude}&addressdetails=1&accept-language=id');
+      final response = await http
+          .get(url, headers: {'User-Agent': 'NextcartApp/1.0'})
+          .timeout(const Duration(seconds: 12));
+      if (token != _geocodeToken || !mounted) return;
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
-          _currentAddress = data['display_name'] ?? 'Alamat tidak ditemukan';
+          _currentAddress =
+              data['display_name'] ?? 'Alamat tidak ditemukan';
           _isLoading = false;
         });
       } else {
@@ -105,6 +126,7 @@ class _AddressSelectionPageState extends State<AddressSelectionPage> {
         });
       }
     } catch (e) {
+      if (token != _geocodeToken || !mounted) return;
       setState(() {
         _currentAddress = "Gagal mengambil alamat";
         _isLoading = false;
@@ -112,14 +134,23 @@ class _AddressSelectionPageState extends State<AddressSelectionPage> {
     }
   }
 
+  void _scheduleGeocode(LatLng point) {
+    _geocodeDebounce?.cancel();
+    _geocodeDebounce = Timer(const Duration(milliseconds: 350), () {
+      _getAddressFromLatLng(point);
+    });
+  }
+
   Future<void> _searchAddress(String query) async {
+    final token = ++_searchToken;
     setState(() => _isSearching = true);
     try {
       final url = Uri.parse(
-          'https://nominatim.openstreetmap.org/search?format=json&q=$query&limit=6&addressdetails=1');
-      final response = await http.get(url, headers: {
-        'User-Agent': 'NextcartApp/1.0',
-      });
+          'https://nominatim.openstreetmap.org/search?format=json&q=$query&limit=6&addressdetails=1&accept-language=id');
+      final response = await http
+          .get(url, headers: {'User-Agent': 'NextcartApp/1.0'})
+          .timeout(const Duration(seconds: 12));
+      if (token != _searchToken || !mounted) return;
       if (response.statusCode == 200) {
         final List data = json.decode(response.body);
         setState(() {
@@ -130,6 +161,7 @@ class _AddressSelectionPageState extends State<AddressSelectionPage> {
         setState(() => _isSearching = false);
       }
     } catch (e) {
+      if (token != _searchToken || !mounted) return;
       setState(() => _isSearching = false);
     }
   }
@@ -139,20 +171,31 @@ class _AddressSelectionPageState extends State<AddressSelectionPage> {
     final lon = double.tryParse(result['lon'].toString());
     if (lat == null || lon == null) return;
     final location = LatLng(lat, lon);
+    _geocodeDebounce?.cancel();
     setState(() {
       _selectedLocation = location;
       _currentAddress = result['display_name'] ?? _currentAddress;
       _searchResults = [];
       _searchController.clear();
+      _isLoading = false;
     });
     _searchFocusNode.unfocus();
     _mapController.move(location, 16.0);
   }
 
-  // --- FUNGSI PROSES ZOOM HANDLER ---
   void _zoom(double amount) {
     final currentZoom = _mapController.camera.zoom;
     _mapController.move(_mapController.camera.center, currentZoom + amount);
+  }
+
+  void _confirm() {
+    final location = _selectedLocation;
+    if (location == null) return;
+    Navigator.pop(context, {
+      'display_name': _currentAddress,
+      'latitude': location.latitude,
+      'longitude': location.longitude,
+    });
   }
 
   @override
@@ -162,51 +205,54 @@ class _AddressSelectionPageState extends State<AddressSelectionPage> {
       backgroundColor: colors.background,
       body: Stack(
         children: [
-          FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              initialCenter: const LatLng(3.5952, 98.6722),
-              initialZoom: 13.0,
-              interactionOptions: const InteractionOptions(
-                flags: InteractiveFlag.all & ~InteractiveFlag.rotate, // Blokir rotasi jari agar performa UI stabil
-              ),
-              onTap: (tapPosition, point) {
-                setState(() {
-                  _selectedLocation = point;
-                  _searchResults = [];
-                });
-                _searchFocusNode.unfocus();
-                _getAddressFromLatLng(point);
-              },
-            ),
-            children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.nextcart.app',
-                // --- OPTIMASI KINERJA RENDER MEMORI PETA ---
-                keepBuffer: 2, // Menyimpan tile layer ekstra agar tidak kedip/blank putih saat digeser
-                panBuffer: 1,  
-                tileDisplay: const TileDisplay.fadeIn(duration: Duration(milliseconds: 150)), // Animasi fading singkat agar smooth
-              ),
-              if (_selectedLocation != null)
-                MarkerLayer(
-                  markers: [
-                    Marker(
-                      point: _selectedLocation!,
-                      width: 44,
-                      height: 44,
-                      child: const Icon(
-                        Icons.location_pin,
-                        color: AppColors.primary,
-                        size: 44,
-                      ),
-                    ),
-                  ],
+          RepaintBoundary(
+            child: FlutterMap(
+              mapController: _mapController,
+              options: MapOptions(
+                initialCenter: const LatLng(3.5952, 98.6722),
+                initialZoom: 13.0,
+                interactionOptions: const InteractionOptions(
+                  flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
                 ),
-            ],
+                onTap: (tapPosition, point) {
+                  setState(() {
+                    _selectedLocation = point;
+                    _searchResults = [];
+                  });
+                  _searchFocusNode.unfocus();
+                  _scheduleGeocode(point);
+                },
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.nextcart.app',
+                  tileProvider: buildMapTileProvider(),
+                  keepBuffer: 2,
+                  panBuffer: 1,
+                  tileDisplay: const TileDisplay.fadeIn(
+                    duration: Duration(milliseconds: 150),
+                  ),
+                ),
+                if (_selectedLocation != null)
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: _selectedLocation!,
+                        width: 44,
+                        height: 44,
+                        child: const Icon(
+                          Icons.location_pin,
+                          color: AppColors.primary,
+                          size: 44,
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
           ),
-          
-          // Pencarian Lokasi Atas
+
           Positioned(
             top: MediaQuery.of(context).padding.top + 8,
             left: 16,
@@ -258,8 +304,7 @@ class _AddressSelectionPageState extends State<AddressSelectionPage> {
               ],
             ),
           ),
-          
-          // Panel Info Konfirmasi Alamat Bawah
+
           Positioned(
             bottom: 20,
             left: 16,
@@ -271,7 +316,6 @@ class _AddressSelectionPageState extends State<AddressSelectionPage> {
     );
   }
 
-  // ... (_buildTopBar, _buildSearchResults, _buildAddressPanel tetap sama seperti bawaan anda) ...
   Widget _buildTopBar(AppColorScheme colors) {
     return Row(
       children: [
@@ -329,11 +373,11 @@ class _AddressSelectionPageState extends State<AddressSelectionPage> {
         color: colors.card,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-           BoxShadow(
-             color: Colors.black.withValues(alpha: 0.08),
-             blurRadius: 8,
-             offset: const Offset(0, 2),
-           ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: _isSearching
@@ -451,7 +495,7 @@ class _AddressSelectionPageState extends State<AddressSelectionPage> {
               ),
               onPressed: (_isLoading || _selectedLocation == null)
                   ? null
-                  : () => Navigator.pop(context, _currentAddress),
+                  : _confirm,
               child: Text(
                 'Gunakan Alamat Ini',
                 style: TextStyle(

@@ -1,11 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lottie/lottie.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
-import 'package:nextcart/core/constants/app_assets.dart';
 import 'package:nextcart/core/constants/app_spacing.dart';
 import 'package:nextcart/core/widgets/pressable_scale.dart';
+import 'package:nextcart/core/widgets/shimmer_box.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -138,14 +137,7 @@ class ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: colors.background,
       body: _isLoading
-          ? Center(
-              child: Lottie.asset(
-                AppAssets.loadingChart,
-                width: 80,
-                height: 80,
-                repeat: true,
-              ),
-            )
+          ? const _ProfileShimmerSkeleton()
           : SafeArea(
               top: true,
               bottom: false,
@@ -399,8 +391,16 @@ class _SummaryItem extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(icon, size: 22, color: color),
-            const SizedBox(height: 8),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: color.withAlpha(18),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 20, color: color),
+            ),
+            const SizedBox(height: 10),
             Text(
               '$count',
               style: TextStyle(
@@ -456,6 +456,84 @@ class _MenuItem extends StatelessWidget {
             Icon(Icons.chevron_right, size: 18, color: colors.textHint),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ProfileShimmerSkeleton extends StatelessWidget {
+  const _ProfileShimmerSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return SafeArea(
+      top: true,
+      bottom: false,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, AppSpacing.bottomNavSpace),
+        children: [
+          const ShimmerBox(width: 80, height: 20, radius: 6),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              const ShimmerBox(width: 56, height: 56, radius: 28),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const ShimmerBox(width: 140, height: 15, radius: 6),
+                    const SizedBox(height: 6),
+                    ShimmerBox(width: 180, height: 12, radius: 5),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: List.generate(
+              3,
+              (index) => Expanded(
+                child: Container(
+                  margin: EdgeInsets.only(right: index < 2 ? 12 : 0),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: colors.card,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Column(
+                    children: [
+                      const ShimmerBox(width: 36, height: 36, radius: 18),
+                      const SizedBox(height: 8),
+                      const ShimmerBox(width: 40, height: 14, radius: 6),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          ...List.generate(
+            4,
+            (index) => Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: colors.card,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  const ShimmerBox(width: 20, height: 20, radius: 10),
+                  const SizedBox(width: 14),
+                  ShimmerBox(width: 120 + (index * 20).toDouble(), height: 14, radius: 6),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

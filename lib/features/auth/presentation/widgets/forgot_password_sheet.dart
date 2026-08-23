@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nextcart/core/helper/validators.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 
 class ForgotPasswordSheet extends StatefulWidget {
@@ -76,8 +77,7 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
               autofillHints: const [AutofillHints.email],
               onFieldSubmitted: (_) => _submit(),
               decoration: _buildInputDecoration(context),
-              validator: (value) =>
-                  (value == null || !value.contains('@')) ? 'Email tidak valid' : null,
+              validator: Validators.email,
             ),
           ),
           const SizedBox(height: 20),

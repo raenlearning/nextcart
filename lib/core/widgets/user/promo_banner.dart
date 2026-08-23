@@ -50,6 +50,7 @@ class _HomeBannerCarouselState extends State<HomeBannerCarousel> {
   }
 
   void _startAutoPlay() {
+    _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 5), (_) {
       if (!mounted || !_controller.hasClients) return;
       final next = (_current + 1) % _slides.length;
@@ -59,6 +60,16 @@ class _HomeBannerCarouselState extends State<HomeBannerCarousel> {
         curve: Curves.easeOutCubic,
       );
     });
+  }
+
+  void _stopAutoPlay() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
+  void _rescheduleAutoPlay() {
+    _timer?.cancel();
+    _timer = Timer(const Duration(seconds: 4), _startAutoPlay);
   }
 
   @override
@@ -79,17 +90,22 @@ class _HomeBannerCarouselState extends State<HomeBannerCarousel> {
       children: [
         SizedBox(
           height: cardHeight,
-          child: PageView.builder(
-            controller: _controller,
-            physics: const BouncingScrollPhysics(),
-            onPageChanged: (index) => setState(() => _current = index),
-            itemCount: _slides.length,
-            itemBuilder: (context, index) {
-              return _BannerCard(
-                slide: _slides[index],
-                isActive: index == _current,
-              );
-            },
+          child: Listener(
+            onPointerDown: (_) => _stopAutoPlay(),
+            onPointerUp: (_) => _rescheduleAutoPlay(),
+            onPointerCancel: (_) => _rescheduleAutoPlay(),
+            child: PageView.builder(
+              controller: _controller,
+              physics: const BouncingScrollPhysics(),
+              onPageChanged: (index) => setState(() => _current = index),
+              itemCount: _slides.length,
+              itemBuilder: (context, index) {
+                return _BannerCard(
+                  slide: _slides[index],
+                  isActive: index == _current,
+                );
+              },
+            ),
           ),
         ),
         const SizedBox(height: 10),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/theme/app_fonts.dart';
 
 class QuantitySelector extends StatelessWidget {
   final int quantity;
@@ -33,11 +34,13 @@ class QuantitySelector extends StatelessWidget {
             child: Text(
               outOfStock ? 'Stok habis' : 'Stok: $stock',
               style: TextStyle(
+                fontFamily: AppFonts.secondary,
                 color: outOfStock
                     ? AppColors.error
                     : (stock <= 5 ? AppColors.warning : colors.textSecondary),
                 fontWeight: FontWeight.w600,
                 fontSize: 12.5,
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
           ),
@@ -52,9 +55,11 @@ class QuantitySelector extends StatelessWidget {
             child: Text(
               '$quantity',
               style: TextStyle(
+                fontFamily: AppFonts.secondary,
                 color: colors.textPrimary,
                 fontWeight: FontWeight.w800,
                 fontSize: 15,
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
           ),

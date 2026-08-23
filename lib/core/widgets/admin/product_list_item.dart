@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:nextcart/core/helper/currency_formatter.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/theme/app_fonts.dart';
 
 class ProductListItem extends StatelessWidget {
   final dynamic product;
@@ -160,9 +161,11 @@ class _PriceStockRow extends StatelessWidget {
         Text(
           CurrencyFormatter.rupiah(price),
           style: TextStyle(
+            fontFamily: AppFonts.secondary,
             fontSize: 12,
             fontWeight: FontWeight.w700,
             color: context.colors.textPrimary,
+            fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
         const SizedBox(width: 8),

@@ -1,5 +1,8 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:nextcart/features/order/presentation/order_page.dart';
 import 'package:nextcart/features/profile/presentation/profile_page.dart';
 import 'package:nextcart/features/wishlist/bloc/wishlist_bloc.dart';
@@ -26,15 +29,15 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
   final GlobalKey<ProfilePageState> _profileKey =
       GlobalKey<ProfilePageState>();
 
-   late final List<Widget> _pages = [
+  late final List<Widget> _pages = [
     const HomePage(),
     WishlistPage(key: _wishlistKey),
     OrderScreen(key: _orderKey),
     ProfilePage(key: _profileKey, onTabChange: (index) => _onNavTap(index)),
   ];
 
-
   void _onNavTap(int index) {
+    HapticFeedback.selectionClick();
     setState(() => _currentIndex = index);
 
     if (index == 1) {
@@ -42,7 +45,7 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
     }
 
     if (index == 2) {
-      _orderKey.currentState?.refresh(); 
+      _orderKey.currentState?.refresh();
     }
 
     if (index == 3) {
@@ -52,6 +55,7 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final isDark = context.isDark;
 
     return Scaffold(
@@ -59,53 +63,61 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
       body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: SafeArea(
         top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE0F7FA),
-              borderRadius: BorderRadius.circular(32),
-              border: Border.all(
-                color: isDark
-                    ? const Color(0xFF334155)
-                    : const Color(0xFFB2EBF2),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(
-                    alpha: isDark ? 0.3 : 0.06,
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? theme.colorScheme.surface.withValues(alpha: 0.85)
+                      : Colors.white.withValues(alpha: 0.85),
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : Colors.white.withValues(alpha: 0.6),
                   ),
-                  blurRadius: 24,
-                  offset: const Offset(0, 8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 24,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildNavItem(0, Icons.home_outlined),
-                BlocBuilder<WishlistBloc, WishlistState>(
-                  buildWhen: (previous, current) =>
-                      (previous is WishlistLoaded &&
-                       current is WishlistLoaded &&
-                       previous.productIds.length != current.productIds.length) ||
-                      previous is! WishlistLoaded ||
-                      current is! WishlistLoaded,
-                  builder: (context, state) {
-                    final count = state is WishlistLoaded
-                        ? state.productIds.length
-                        : 0;
-                    return _buildNavItem(
-                      1,
-                      Icons.favorite_border_rounded,
-                      badgeCount: count,
-                    );
-                  },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildNavItem(0, FontAwesomeIcons.house, 'Beranda'),
+                    BlocBuilder<WishlistBloc, WishlistState>(
+                      buildWhen: (previous, current) =>
+                          (previous is WishlistLoaded &&
+                           current is WishlistLoaded &&
+                           previous.productIds.length !=
+                               current.productIds.length) ||
+                          previous is! WishlistLoaded ||
+                          current is! WishlistLoaded,
+                      builder: (context, state) {
+                        final count = state is WishlistLoaded
+                            ? state.productIds.length
+                            : 0;
+                        return _buildNavItem(
+                          1,
+                          FontAwesomeIcons.heart,
+                          'Wishlist',
+                          badgeCount: count,
+                        );
+                      },
+                    ),
+                    _buildNavItem(2, FontAwesomeIcons.receipt, 'Pesanan'),
+                    _buildNavItem(3, FontAwesomeIcons.user, 'Profil'),
+                  ],
                 ),
-                _buildNavItem(2, Icons.receipt_rounded),
-                _buildNavItem(3, Icons.person_outline_rounded),
-              ],
+              ),
             ),
           ),
         ),
@@ -115,64 +127,94 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
 
   Widget _buildNavItem(
     int index,
-    IconData icon, {
+    FaIconData icon,
+    String label, {
     int badgeCount = 0,
   }) {
+    final theme = Theme.of(context);
     final isSelected = _currentIndex == index;
-    final isDark = context.isDark;
 
     return InkWell(
-      borderRadius: BorderRadius.circular(28),
+      borderRadius: BorderRadius.circular(18),
       onTap: () => _onNavTap(index),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeOutCubic,
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: isSelected
-              ? AppColors.primary
-              : Colors.transparent,
+        padding: EdgeInsets.symmetric(
+          horizontal: isSelected ? 16 : 12,
+          vertical: 10,
         ),
-        child: Stack(
-          alignment: Alignment.center,
-          clipBehavior: Clip.none,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          color: isSelected ? AppColors.primary : Colors.transparent,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 22,
-              color: isSelected
-                  ? Colors.white
-                  : (isDark
-                      ? Colors.white.withValues(alpha: 0.75)
-                      : const Color(0xFF0F172A)),
-            ),
-            if (badgeCount > 0)
-              Positioned(
-                right: -6,
-                top: -6,
-                child: Container(
-                  constraints: const BoxConstraints(
-                    minWidth: 16,
-                    minHeight: 16,
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.sale,
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    badgeCount > 99 ? '99+' : '$badgeCount',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                FaIcon(
+                  icon,
+                  size: 16,
+                  color: isSelected
+                      ? Colors.white
+                      : theme.textTheme.bodyMedium?.color
+                          ?.withValues(alpha: 0.6),
+                ),
+                if (badgeCount > 0)
+                  Positioned(
+                    right: -6,
+                    top: -6,
+                    child: TweenAnimationBuilder<int>(
+                      tween: IntTween(begin: 0, end: badgeCount),
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.elasticOut,
+                      builder: (context, value, child) {
+                        return Container(
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          decoration: const BoxDecoration(
+                            color: AppColors.sale,
+                            shape: BoxShape.circle,
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            value > 99 ? '99+' : '$value',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
-                ),
-              ),
+              ],
+            ),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOut,
+              child: isSelected
+                  ? Row(
+                      children: [
+                        const SizedBox(width: 8),
+                        Text(
+                          label,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    )
+                  : const SizedBox.shrink(),
+            ),
           ],
         ),
       ),

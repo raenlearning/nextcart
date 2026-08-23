@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nextcart/core/helper/auth_error_helper.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -51,7 +52,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Gagal mengubah kata sandi: $e'),
+          content: Text('Gagal mengubah kata sandi: ${mapAuthErrorMessage(e)}'),
           backgroundColor: AppColors.error,
         ),
       );

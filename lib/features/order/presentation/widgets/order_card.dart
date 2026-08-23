@@ -5,6 +5,7 @@ import 'package:nextcart/core/constants/order_status.dart';
 import 'package:nextcart/core/helper/currency_formatter.dart';
 import 'package:nextcart/core/helper/date_formatter.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/theme/app_fonts.dart';
 import 'package:nextcart/features/order/presentation/widgets/order_action_button.dart';
 import 'package:nextcart/features/order/presentation/widgets/status_pill.dart';
 
@@ -27,6 +28,13 @@ class OrderCard extends StatelessWidget {
     final firstProduct = firstItem?['products'] as Map<String, dynamic>?;
     final images = firstProduct?['images'] as List<dynamic>? ?? [];
     final imageUrl = images.isNotEmpty ? images[0] as String : null;
+
+    final secondItem = items.length > 1
+        ? items[1] as Map<String, dynamic>
+        : null;
+    final secondProduct = secondItem?['products'] as Map<String, dynamic>?;
+    final secondImages = secondProduct?['images'] as List<dynamic>? ?? [];
+    final secondImageUrl = secondImages.isNotEmpty ? secondImages[0] as String : null;
 
     final payment = order['payments'] as Map<String, dynamic>?;
     final paymentStatus = payment?['status'] as String?;
@@ -56,26 +64,77 @@ class OrderCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
+            SizedBox(
               width: 68,
               height: 68,
-              decoration: BoxDecoration(
-                color: colors.inputFill,
-                borderRadius: BorderRadius.circular(14),
-                image: imageUrl != null
-                    ? DecorationImage(
-                        image: CachedNetworkImageProvider(imageUrl),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
-              ),
-              child: imageUrl == null
-                  ? Icon(
-                      Icons.shopping_bag_outlined,
-                      color: colors.textSecondary,
-                      size: 26,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: 62,
+                    height: 62,
+                    decoration: BoxDecoration(
+                      color: colors.inputFill,
+                      borderRadius: BorderRadius.circular(14),
+                      image: imageUrl != null
+                          ? DecorationImage(
+                              image: CachedNetworkImageProvider(imageUrl),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                    ),
+                    child: imageUrl == null
+                        ? Icon(
+                            Icons.shopping_bag_outlined,
+                            color: colors.textSecondary,
+                            size: 26,
+                          )
+                        : null,
+                  ),
+                  if (secondImageUrl != null)
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: colors.card,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: colors.divider, width: 1),
+                          image: DecorationImage(
+                            image: CachedNetworkImageProvider(secondImageUrl),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
                     )
-                  : null,
+                  else if (items.length > 1)
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: colors.card,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: colors.divider, width: 1),
+                        ),
+                        child: Center(
+                          child: Text(
+                            '+${items.length - 1}',
+                            style: TextStyle(
+                              color: colors.textSecondary,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
             const SizedBox(width: 14),
 
@@ -124,9 +183,11 @@ class OrderCard extends StatelessWidget {
                       Text(
                         CurrencyFormatter.rupiah(order['total_amount']),
                         style: TextStyle(
+                          fontFamily: AppFonts.secondary,
                           color: colors.textPrimary,
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
+                          fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
                       OrderActionButton(

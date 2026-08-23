@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/theme/app_fonts.dart';
 
 class InfoRow {
   final String label;
@@ -45,9 +46,11 @@ class InfoCard extends StatelessWidget {
                       row.value,
                       textAlign: TextAlign.right,
                       style: TextStyle(
+                        fontFamily: AppFonts.secondary,
                         color: colors.textPrimary,
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
+                        fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                     ),
                   ),

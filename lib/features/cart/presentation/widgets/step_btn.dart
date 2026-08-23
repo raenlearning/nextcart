@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 
 class StepBtn extends StatelessWidget {
@@ -17,18 +18,24 @@ class StepBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: enabled ? onTap : null,
+    return InkWell(
+      onTap: enabled
+          ? () {
+              HapticFeedback.selectionClick();
+              onTap();
+            }
+          : null,
+      borderRadius: BorderRadius.circular(20),
       child: Container(
-        width: 20,
-        height: 20,
+        width: 36,
+        height: 36,
         decoration: BoxDecoration(
           color: enabled ? colors.card : colors.card.withValues(alpha: 0.5),
           shape: BoxShape.circle,
         ),
         child: Icon(
           icon,
-          size: 12,
+          size: 18,
           color: enabled ? colors.textPrimary : colors.textHint,
         ),
       ),

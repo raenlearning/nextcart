@@ -2,7 +2,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/product_model.dart';
 
 class ProductRepository {
-  final SupabaseClient _supabase = Supabase.instance.client;
+  final SupabaseClient _supabase;
+
+  ProductRepository({SupabaseClient? client})
+      : _supabase = client ?? Supabase.instance.client;
 
   Future<List<Product>> getPopularProducts() async {
     try {

@@ -1,9 +1,30 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class WishlistRepository {
-  final SupabaseClient _supabase = Supabase.instance.client;
+  final SupabaseClient _supabase;
+
+  WishlistRepository({SupabaseClient? client})
+      : _supabase = client ?? Supabase.instance.client;
 
   String? get _userId => _supabase.auth.currentUser?.id;
+
+  /// Nama kolom yang dipakai untuk sorting daftar wishlist.
+  ///
+  /// Sorting berdasarkan harga memakai sintaks PostgREST yang benar
+  /// untuk kolom relasi: `products(price)`, BUKAN `products.price`
+  /// (yang akan memicu error PGRST100 di server).
+  @visibleForTesting
+  static String sortColumn(String sortBy) {
+    return (sortBy == 'price_low' || sortBy == 'price_high')
+        ? 'products(price)'
+        : 'created_at';
+  }
+
+  @visibleForTesting
+  static bool isPriceSort(String sortBy) {
+    return sortBy == 'price_low' || sortBy == 'price_high';
+  }
 
   /// Ambil semua id wishlist milik user (untuk status heart di card/detail).
   Future<Set<String>> fetchWishlistedProductIds() async {
@@ -57,12 +78,9 @@ class WishlistRepository {
 
     final start = (page - 1) * pageSize;
 
-    final data = await (sortBy == 'price_low' || sortBy == 'price_high'
-            ? query.order(
-                'products(price)',
-                ascending: sortBy == 'price_low',
-              )
-            : query.order('created_at', ascending: false))
+    final data = await (isPriceSort(sortBy)
+            ? query.order(sortColumn(sortBy), ascending: sortBy == 'price_low')
+            : query.order(sortColumn(sortBy), ascending: false))
         .range(start, start + pageSize - 1);
 
     return List<Map<String, dynamic>>.from(data);

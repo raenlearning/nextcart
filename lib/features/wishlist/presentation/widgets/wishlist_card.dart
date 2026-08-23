@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:nextcart/core/helper/currency_formatter.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/theme/app_fonts.dart';
 
 class WishlistCard extends StatelessWidget {
   final Map<String, dynamic> wishlistItem;
@@ -87,9 +88,11 @@ class WishlistCard extends StatelessWidget {
           Text(
             CurrencyFormatter.rupiah(price),
             style: TextStyle(
+              fontFamily: AppFonts.secondary,
               color: colors.textPrimary,
               fontWeight: FontWeight.bold,
               fontSize: 13,
+              fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
           const SizedBox(height: 10),

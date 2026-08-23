@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nextcart/core/service/address_store.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/core/widgets/pressable_scale.dart';
+import 'package:nextcart/core/widgets/user/home_address_sheet.dart';
 import 'package:nextcart/features/cart/bloc/cart_bloc.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomeAppBar extends StatefulWidget {
   final VoidCallback onLogoutTap;
@@ -16,56 +18,19 @@ class HomeAppBar extends StatefulWidget {
 }
 
 class _HomeAppBarState extends State<HomeAppBar> {
-  String _address = 'Memuat alamat...';
-  final supabase = Supabase.instance.client;
-
   @override
   void initState() {
     super.initState();
-    _fetchUserAddress();
+    AddressStore.instance.load();
   }
 
-  Future<void> _fetchUserAddress() async {
-    final user = supabase.auth.currentUser;
-    if (user != null) {
-      try {
-        final data = await supabase
-            .from('profiles')
-            .select('address')
-            .eq('id', user.id)
-            .single();
-
-        setState(() {
-          _address = data['address'] ?? 'Belum ada alamat (Pilih di sini)';
-        });
-      } catch (e) {
-        setState(() {
-          _address = 'Gagal memuat alamat';
-        });
-      }
-    }
-  }
-
-  Future<void> _updateAddress(String newAddress) async {
-    final user = supabase.auth.currentUser;
-    if (user != null) {
-      try {
-        await supabase
-            .from('profiles')
-            .update({'address': newAddress})
-            .eq('id', user.id);
-
-        setState(() {
-          _address = newAddress;
-        });
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Gagal menyimpan alamat ke database')),
-          );
-        }
-      }
-    }
+  Future<void> _openAddressPicker() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => const HomeAddressSheet(),
+    );
   }
 
   @override
@@ -77,60 +42,58 @@ class _HomeAppBarState extends State<HomeAppBar> {
       children: [
         Expanded(
           child: PressableScale(
-            onTap: () async {
-              final selectedAddress = await context.push<String>(
-                '/address-selection',
-              );
-
-              if (selectedAddress != null) {
-                await _updateAddress(selectedAddress);
-              }
-            },
+            onTap: _openAddressPicker,
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 4.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+              child: ValueListenableBuilder(
+                valueListenable: AddressStore.instance,
+                builder: (context, selected, _) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.location_on_outlined,
-                        size: 15,
-                        color: colors.textSecondary,
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on_outlined,
+                            size: 15,
+                            color: colors.textSecondary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Kirim ke',
+                            style: TextStyle(
+                              color: colors.textSecondary,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Kirim ke',
-                        style: TextStyle(
-                          color: colors.textSecondary,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          _address,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              selected?.displayName ??
+                                  'Pilih alamat pengiriman',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                color: colors.textPrimary,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Icon(
+                            Icons.keyboard_arrow_down,
+                            size: 18,
                             color: colors.textPrimary,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Icon(
-                        Icons.keyboard_arrow_down,
-                        size: 18,
-                        color: colors.textPrimary,
+                        ],
                       ),
                     ],
-                  ),
-                ],
+                  );
+                },
               ),
             ),
           ),
@@ -167,11 +130,12 @@ class _HomeAppBarState extends State<HomeAppBar> {
                   clipBehavior: Clip.none,
                   alignment: Alignment.center,
                   children: [
-                    Icon(
-                      Icons.shopping_bag_outlined,
+                    FaIcon(
+                      FontAwesomeIcons.bagShopping,
                       size: 20,
                       color: colors.textPrimary,
                     ),
+
                     if (uniqueProductsCount > 0)
                       Positioned(
                         right: 4,

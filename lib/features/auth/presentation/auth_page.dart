@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nextcart/core/helper/validators.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/features/auth/bloc/auth_bloc.dart';
 import 'package:nextcart/features/auth/bloc/auth_state.dart';
@@ -120,7 +121,7 @@ class _AuthPageState extends State<AuthPage> {
             end: Alignment.bottomCenter,
             colors: context.isDark
                 ? [
-                    const Color(0xFF16233F),
+                    AppColors.authGradientDark,
                     context.colors.background,
                   ]
                 : [
@@ -131,8 +132,15 @@ class _AuthPageState extends State<AuthPage> {
           ),
         ),
         child: SafeArea(
+        child: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          padding: EdgeInsets.only(
+            left: 24.0,
+            right: 24.0,
+            top: 16.0,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
+          ),
           child: BlocConsumer<AuthBloc, AuthState>(
             listener: (context, state) {
               final isLogin = _currentMode == AuthMode.login;
@@ -145,7 +153,7 @@ class _AuthPageState extends State<AuthPage> {
                     backgroundColor: AppColors.secondary,
                   ),
                 );
-                context.go('/auth');
+                context.go('/');
               }
               if (state is AuthFailure) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -342,7 +350,7 @@ class _AuthPageState extends State<AuthPage> {
                           child: Divider(color: context.colors.divider),
                         ),
                         Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
                             'Atau lanjutkan dengan',
                             style: TextStyle(
@@ -368,7 +376,9 @@ class _AuthPageState extends State<AuthPage> {
                               size: 20,
                               color: context.colors.textPrimary,
                             ),
-                            onTap: () => _showOAuthNotice('Google'),
+                            onTap: () => context
+                                .read<AuthBloc>()
+                                .add(AuthGoogleSignInRequested()),
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -416,6 +426,7 @@ class _AuthPageState extends State<AuthPage> {
             },
           ),
         ),
+        ),
       ),
       ),
     );
@@ -444,9 +455,7 @@ class _AuthPageState extends State<AuthPage> {
             'Masukkan alamat email Anda',
             prefixIcon: _prefixIcon(Icons.email_outlined),
           ),
-          validator: (value) => (value == null || !value.contains('@'))
-              ? 'Email tidak valid'
-              : null,
+          validator: Validators.email,
           style: TextStyle(color: context.colors.textPrimary),
         ),
       ],

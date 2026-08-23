@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class PressableScale extends StatefulWidget {
   final Widget child;
@@ -28,7 +29,10 @@ class _PressableScaleState extends State<PressableScale> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: (_) => _setPressed(true),
+      onTapDown: (_) {
+        if (widget.onTap != null) HapticFeedback.selectionClick();
+        _setPressed(true);
+      },
       onTapUp: (_) => _setPressed(false),
       onTapCancel: () => _setPressed(false),
       onTap: widget.onTap,

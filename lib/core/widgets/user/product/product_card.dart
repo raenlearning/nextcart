@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:nextcart/core/helper/currency_formatter.dart';
 import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/theme/app_fonts.dart';
 import 'package:nextcart/core/widgets/cart_fly_animation.dart';
+import 'package:nextcart/core/widgets/pressable_scale.dart';
 import 'package:nextcart/core/widgets/user/product/add_to_cart_button.dart';
 import 'package:nextcart/core/widgets/user/product/low_stock_badge.dart';
 import 'package:nextcart/core/widgets/user/product/product_image.dart';
@@ -52,7 +54,7 @@ class _ProductCardState extends State<ProductCard> {
         ? widget.product.images.first
         : null;
 
-    return GestureDetector(
+    return PressableScale(
       onTap: () => context.push('/product-detail', extra: widget.product),
       child: Container(
         clipBehavior: Clip.antiAlias,
@@ -75,22 +77,25 @@ class _ProductCardState extends State<ProductCard> {
           children: [
             // ── Image area (full-bleed)
             Expanded(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  ProductImage(imageUrl: imageUrl),
-                  if (widget.product.stock <= 5)
-                    const Positioned(
+              child: Hero(
+                tag: 'product-image-${widget.product.id}',
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    ProductImage(imageUrl: imageUrl),
+                    if (widget.product.stock <= 5)
+                      const Positioned(
+                        top: 8,
+                        left: 8,
+                        child: LowStockBadge(),
+                      ),
+                    Positioned(
                       top: 8,
-                      left: 8,
-                      child: LowStockBadge(),
+                      right: 8,
+                      child: WishlistButton(product: widget.product),
                     ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: WishlistButton(product: widget.product),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
 
@@ -123,9 +128,11 @@ class _ProductCardState extends State<ProductCard> {
                         child: Text(
                           CurrencyFormatter.rupiah(widget.product.price),
                           style: TextStyle(
+                            fontFamily: AppFonts.secondary,
                             fontSize: 12,
                             fontWeight: FontWeight.w800,
                             color: colors.textPrimary,
+                            fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
                       ),

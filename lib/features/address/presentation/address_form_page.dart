@@ -5,8 +5,9 @@ import 'package:nextcart/data/repository/address_repository.dart';
 
 class AddressFormPage extends StatefulWidget {
   final ShippingAddress? address;
+  final Map<String, dynamic>? prefill;
 
-  const AddressFormPage({super.key, this.address});
+  const AddressFormPage({super.key, this.address, this.prefill});
 
   @override
   State<AddressFormPage> createState() => _AddressFormPageState();
@@ -25,6 +26,8 @@ class _AddressFormPageState extends State<AddressFormPage> {
   final AddressRepository _repository = AddressRepository();
   bool _isDefault = false;
   bool _isSaving = false;
+  double? _latitude;
+  double? _longitude;
 
   bool get _isEditing => widget.address != null;
 
@@ -42,6 +45,16 @@ class _AddressFormPageState extends State<AddressFormPage> {
       _districtController.text = a.district ?? '';
       _postalCodeController.text = a.postalCode ?? '';
       _isDefault = a.isDefault;
+      _latitude = a.latitude;
+      _longitude = a.longitude;
+    } else {
+      final prefill = widget.prefill;
+      if (prefill != null) {
+        _addressController.text =
+            (prefill['full_address'] as String?)?.trim() ?? '';
+        _latitude = prefill['latitude'] as double?;
+        _longitude = prefill['longitude'] as double?;
+      }
     }
   }
 
@@ -83,12 +96,15 @@ class _AddressFormPageState extends State<AddressFormPage> {
             ? null
             : _postalCodeController.text.trim(),
         'is_default': _isDefault,
+        'latitude': _latitude,
+        'longitude': _longitude,
       };
 
+      ShippingAddress? created;
       if (_isEditing) {
         await _repository.updateAddress(widget.address!.id, fields);
       } else {
-        await _repository.createAddress(fields);
+        created = await _repository.createAddress(fields);
       }
 
       if (mounted) {
@@ -99,7 +115,7 @@ class _AddressFormPageState extends State<AddressFormPage> {
                 : 'Alamat berhasil ditambahkan!'),
           ),
         );
-        context.pop({'saved': true});
+        context.pop(created ?? {'saved': true});
       }
     } catch (e) {
       if (mounted) {

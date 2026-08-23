@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/theme/app_fonts.dart';
 import 'package:nextcart/core/helper/currency_formatter.dart';
 import 'package:nextcart/features/cart/bloc/cart_bloc.dart';
 import 'package:nextcart/features/cart/presentation/widgets/address_picker_sheet.dart';
@@ -43,9 +44,11 @@ class ShippingSection extends StatelessWidget {
               trailing: Text(
                 CurrencyFormatter.rupiah(state.shippingFee),
                 style: const TextStyle(
+                  fontFamily: AppFonts.secondary,
                   color: AppColors.primary,
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
+                  fontFeatures: [FontFeature.tabularFigures()],
                 ),
               ),
               onTap: (address == null || state.shippingRates.isEmpty)

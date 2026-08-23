@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nextcart/core/constants/app_assets.dart';
 import 'package:nextcart/core/widgets/user/app_bar.dart';
@@ -9,6 +8,7 @@ import 'package:nextcart/core/widgets/user/header_section.dart';
 import 'package:nextcart/core/widgets/user/product_grid.dart';
 import 'package:nextcart/core/widgets/user/promo_banner.dart';
 import 'package:nextcart/core/widgets/user/search_bar.dart';
+import 'package:nextcart/core/widgets/app_empty_state.dart';
 import 'package:nextcart/core/widgets/shimmer_box.dart';
 import 'package:nextcart/core/constants/app_spacing.dart';
 import 'package:nextcart/features/product/bloc/product_bloc.dart';
@@ -61,10 +61,10 @@ class _HomePageState extends State<HomePage> {
     await _fetchCategories();
     if (!mounted) return;
     context.read<ProductBloc>().add(
-          _selectedCategoryId == 'all'
-              ? FetchPopularProducts()
-              : FetchProductsByCategory(_selectedCategoryId),
-        );
+      _selectedCategoryId == 'all'
+          ? FetchPopularProducts()
+          : FetchProductsByCategory(_selectedCategoryId),
+    );
   }
 
   void _onCategorySelected(String categoryId) {
@@ -103,16 +103,19 @@ class _HomePageState extends State<HomePage> {
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, AppSpacing.bottomNavSpace),
+          padding: const EdgeInsets.fromLTRB(
+            20,
+            20,
+            20,
+            AppSpacing.bottomNavSpace,
+          ),
           child: SafeArea(
             top: true,
             bottom: false,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                HomeAppBar(
-                  onLogoutTap: _logout,
-                ),
+                HomeAppBar(onLogoutTap: _logout),
                 const SizedBox(height: 24),
 
                 Text(
@@ -175,19 +178,20 @@ class _HomePageState extends State<HomePage> {
                         message: state.message,
                         onRetry: () {
                           context.read<ProductBloc>().add(
-                                _selectedCategoryId == 'all'
-                                    ? FetchPopularProducts()
-                                    : FetchProductsByCategory(
-                                        _selectedCategoryId,
-                                      ),
-                              );
+                            _selectedCategoryId == 'all'
+                                ? FetchPopularProducts()
+                                : FetchProductsByCategory(_selectedCategoryId),
+                          );
                         },
                       );
                     }
                     if (state is ProductLoaded) {
                       final products = state.products;
                       if (products.isEmpty) {
-                        return _EmptyProducts(colors: colors);
+                        return const AppEmptyState(
+                          svgAsset: AppAssets.emptySearch,
+                          title: 'Belum ada produk di kategori ini.',
+                        );
                       }
                       return HomeProductGrid(products: products);
                     }
@@ -248,35 +252,6 @@ class _ErrorRetry extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyProducts extends StatelessWidget {
-  final AppColorScheme colors;
-
-  const _EmptyProducts({required this.colors});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 24),
-        child: Column(
-          children: [
-            SvgPicture.asset(
-              AppAssets.emptySearch,
-              width: 160,
-              height: 145,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Belum ada produk di kategori ini.',
-              style: TextStyle(color: colors.textSecondary, fontSize: 13),
             ),
           ],
         ),

@@ -128,7 +128,6 @@ class ProfileDetailPageState extends State<ProfileDetailPage> {
         title: const Text(
           'Edit Profil',
           style: TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
             fontWeight: FontWeight.bold,
             fontSize: 16,
           ),
@@ -191,7 +190,6 @@ class ProfileDetailPageState extends State<ProfileDetailPage> {
               Text(
                 'Nama Lengkap',
                 style: TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
                   color: colors.textPrimary,
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
@@ -201,7 +199,6 @@ class ProfileDetailPageState extends State<ProfileDetailPage> {
               TextFormField(
                 controller: _nameController,
                 style: TextStyle(
-                  fontFamily: 'SF Pro',
                   color: colors.textPrimary,
                   fontSize: 14,
                 ),
@@ -234,7 +231,6 @@ class ProfileDetailPageState extends State<ProfileDetailPage> {
                       : const Text(
                           'Simpan Perubahan',
                           style: TextStyle(
-                            fontFamily: 'Plus Jakarta Sans',
                             fontWeight: FontWeight.bold,
                           ),
                         ),

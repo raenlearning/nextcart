@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nextcart/core/service/address_store.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/data/repository/address_repository.dart';
 
@@ -42,7 +43,10 @@ class _AddressListPageState extends State<AddressListPage> {
       '/address-form',
       extra: address,
     );
-    if (result != null) await _load();
+    if (result != null) {
+      await _load();
+      await AddressStore.instance.refresh();
+    }
   }
 
   Future<void> _confirmDelete(ShippingAddress address) async {
@@ -73,6 +77,7 @@ class _AddressListPageState extends State<AddressListPage> {
       try {
         await _repository.deleteAddress(address.id);
         await _load();
+        await AddressStore.instance.refresh();
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -89,6 +94,7 @@ class _AddressListPageState extends State<AddressListPage> {
   Future<void> _setDefault(ShippingAddress address) async {
     try {
       await _repository.updateAddress(address.id, {'is_default': true});
+      await AddressStore.instance.select(address);
       await _load();
     } catch (e) {
       if (mounted) {
@@ -234,6 +240,33 @@ class _AddressCard extends StatelessWidget {
                   ),
                 ),
               ],
+              ValueListenableBuilder<ShippingAddress?>(
+                valueListenable: AddressStore.instance,
+                builder: (context, selected, _) {
+                  if (selected == null || selected.id != address.id) {
+                    return const SizedBox.shrink();
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.info.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text(
+                        'Aktif',
+                        style: TextStyle(
+                          color: AppColors.info,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
               const Spacer(),
               GestureDetector(
                 onTap: onDelete,

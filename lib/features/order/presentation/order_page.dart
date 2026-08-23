@@ -11,7 +11,9 @@ import 'package:nextcart/features/order/presentation/widgets/order_status_tabs.d
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OrderScreen extends StatefulWidget {
-  const OrderScreen({super.key});
+  final SupabaseClient? supabaseClient;
+
+  const OrderScreen({super.key, this.supabaseClient});
 
   @override
   State<OrderScreen> createState() => OrderScreenState();
@@ -21,7 +23,8 @@ class OrderScreenState extends State<OrderScreen>
     with SingleTickerProviderStateMixin {
   static const int _pageSize = 5;
 
-  final SupabaseClient _supabase = Supabase.instance.client;
+  late final SupabaseClient _supabase =
+      widget.supabaseClient ?? Supabase.instance.client;
   late final TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
