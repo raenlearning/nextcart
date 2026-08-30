@@ -24,7 +24,7 @@ class UserAdminSearchBar extends StatelessWidget {
       child: TextField(
         style: TextStyle(
           color: colors.textPrimary,
-          fontSize: 14,
+          fontSize: 13,
           fontWeight: FontWeight.w500,
         ),
         onChanged: onChanged,
@@ -32,7 +32,7 @@ class UserAdminSearchBar extends StatelessWidget {
           hintText: 'Cari nama atau email pengguna...',
           hintStyle: TextStyle(
             color: colors.textHint,
-            fontSize: 13.5,
+            fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
           prefixIcon: Icon(

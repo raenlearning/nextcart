@@ -156,14 +156,14 @@ class _AdminProductManagementPageState
               style: TextStyle(
                 color: context.colors.textPrimary,
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: 15,
               ),
             ),
           ],
         ),
         content:  Text(
           'Produk akan dihapus secara permanen dan tidak bisa dikembalikan.',
-          style: TextStyle(color: context.colors.textSecondary, fontSize: 14),
+          style: TextStyle(color: context.colors.textSecondary, fontSize: 13),
         ),
         actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         actions: [
@@ -309,7 +309,7 @@ class _AdminProductManagementPageState
                                           : 'Belum ada produk',
                                       style: TextStyle(
                                         color: context.colors.textSecondary,
-                                        fontSize: 13.5,
+                                        fontSize: 13,
                                       ),
                                     ),
                                    const SizedBox(height: 12),
@@ -371,7 +371,7 @@ class _Header extends StatelessWidget {
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
-                fontSize: 13,
+                fontSize: 12.5,
               ),
             ),
             style: TextButton.styleFrom(
@@ -440,7 +440,7 @@ class _FilterChipRow extends StatelessWidget {
             child: const Text(
               'Reset',
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 11.5,
                 color: AppColors.error,
                 fontWeight: FontWeight.w500,
               ),

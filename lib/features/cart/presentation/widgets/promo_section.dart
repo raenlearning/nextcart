@@ -37,20 +37,20 @@ class PromoSection extends StatelessWidget {
                         style: TextStyle(
                           color: colors.textPrimary,
                           fontWeight: FontWeight.w600,
-                          fontSize: 13.5,
+                          fontSize: 13,
                         ),
                       )
                     : TextField(
                         controller: controller,
                         style: TextStyle(
                           color: colors.textPrimary,
-                          fontSize: 12,
+                          fontSize: 11.5,
                         ),
                         decoration: InputDecoration(
                           hintText: 'Masukkan kode voucher',
                           hintStyle: TextStyle(
                             color: colors.textHint,
-                            fontSize: 12,
+                            fontSize: 11.5,
                           ),
                           border: InputBorder.none,
                           isDense: true,

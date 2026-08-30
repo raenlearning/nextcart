@@ -206,7 +206,7 @@ class OrderScreenState extends State<OrderScreen>
           style: TextStyle(
             color: colors.textPrimary,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 17,
           ),
         ),
         bottom: PreferredSize(
@@ -242,7 +242,7 @@ class OrderScreenState extends State<OrderScreen>
                     'Memuat pesanan...',
                     style: TextStyle(
                       color: colors.textSecondary,
-                      fontSize: 13,
+                      fontSize: 12.5,
                     ),
                   ),
                 ],

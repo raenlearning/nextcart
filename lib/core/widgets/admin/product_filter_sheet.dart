@@ -45,7 +45,7 @@ class ProductFilterSheet extends StatelessWidget {
               title,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: 15,
                 color: context.colors.textPrimary,
               ),
             ),
@@ -89,7 +89,7 @@ class _SheetOptionItem extends StatelessWidget {
       title: Text(
         label,
         style: TextStyle(
-          fontSize: 14,
+          fontSize: 13,
           color: selected ? AppColors.primary : context.colors.textPrimary,
           fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
         ),

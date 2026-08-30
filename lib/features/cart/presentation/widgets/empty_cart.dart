@@ -26,7 +26,7 @@ class EmptyCart extends StatelessWidget {
               'Keranjang anda masih kosong',
               style: TextStyle(
                 color: colors.textPrimary,
-                fontSize: 16,
+                fontSize: 15,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -36,7 +36,7 @@ class EmptyCart extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: colors.textSecondary,
-                fontSize: 13,
+                fontSize: 12.5,
                 height: 1.4,
               ),
             ),

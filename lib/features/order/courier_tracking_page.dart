@@ -266,7 +266,7 @@ class _CourierTrackingPageState extends State<CourierTrackingPage> {
                   'Kurir telah sampai di lokasi pengiriman.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 13.5,
+                    fontSize: 13,
                     color: colors.textSecondary,
                     height: 1.4,
                   ),
@@ -288,7 +288,7 @@ class _CourierTrackingPageState extends State<CourierTrackingPage> {
                       'OK',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                        fontSize: 13,
                       ),
                     ),
                   ),
@@ -412,7 +412,7 @@ class _CourierTrackingPageState extends State<CourierTrackingPage> {
                                     '(${(_progress * 100).round()}%)',
                             style: const TextStyle(
                               color: AppColors.success,
-                              fontSize: 12,
+                              fontSize: 11.5,
                             ),
                           ),
                           const SizedBox(height: 6),

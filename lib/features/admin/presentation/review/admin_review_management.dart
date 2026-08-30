@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:nextcart/core/constants/app_spacing.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/data/repository/review_repository.dart';
+import 'package:nextcart/features/admin/presentation/dashboard/admin_sidebar.dart';
 
 class AdminReviewManagementPage extends StatefulWidget {
   const AdminReviewManagementPage({super.key});
@@ -14,36 +16,111 @@ class AdminReviewManagementPage extends StatefulWidget {
 }
 
 class _AdminReviewManagementPageState extends State<AdminReviewManagementPage> {
+  static const int _pageSize = 15;
+
   final ReviewRepository _repository = ReviewRepository();
+  final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  Timer? _debounce;
+
   List<ProductReview> _reviews = [];
+  int _total = 0;
+  int _page = 1;
   bool _isLoading = true;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
   String? _error;
+
+  String _searchQuery = '';
+  int? _ratingFilter;
+  String _replyFilter = 'all';
 
   @override
   void initState() {
     super.initState();
-    _load();
+    _scrollController.addListener(_onScroll);
+    _load(reset: true);
   }
 
-  Future<void> _load() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
-    try {
-      final data = await _repository.fetchAllReviews();
-      if (mounted) setState(() => _reviews = data);
-    } catch (e) {
-      if (mounted) setState(() => _error = 'Gagal memuat ulasan: $e');
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchController.dispose();
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.extentAfter < 400) {
+      _loadMore();
     }
   }
 
+  void _onSearchChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      if (_searchQuery == value.trim()) return;
+      setState(() => _searchQuery = value.trim());
+      _load(reset: true);
+    });
+  }
+
+  void _onRatingFilter(int? value) {
+    setState(() => _ratingFilter = value);
+    _load(reset: true);
+  }
+
+  void _onReplyFilter(String value) {
+    if (_replyFilter == value) return;
+    setState(() => _replyFilter = value);
+    _load(reset: true);
+  }
+
+  Future<void> _load({bool reset = false}) async {
+    if (reset) {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+        _page = 1;
+        _hasMore = true;
+      });
+    }
+
+    try {
+      final result = await _repository.fetchReviewsPage(
+        page: _page,
+        pageSize: _pageSize,
+        search: _searchQuery,
+        ratingFilter: _ratingFilter,
+        replyFilter: _replyFilter,
+      );
+      if (!mounted) return;
+      setState(() {
+        _total = result.total;
+        _reviews = reset ? result.items : [..._reviews, ...result.items];
+        _hasMore = result.items.length >= _pageSize;
+        _page++;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = 'Gagal memuat ulasan: $e';
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loadMore() async {
+    if (_isLoadingMore || _isLoading || !_hasMore) return;
+    setState(() => _isLoadingMore = true);
+    await _load();
+    if (mounted) setState(() => _isLoadingMore = false);
+  }
+
   Future<void> _reply(ProductReview review) async {
-    final controller = TextEditingController(
-      text: review.replyText ?? '',
-    );
+    final controller = TextEditingController(text: review.replyText ?? '');
     final submitted = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -84,12 +161,34 @@ class _AdminReviewManagementPageState extends State<AdminReviewManagementPage> {
 
     try {
       await _repository.replyReview(review.id, text);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Balasan berhasil disimpan!')),
-        );
-        await _load();
+      if (!mounted) return;
+
+      final index = _reviews.indexWhere((r) => r.id == review.id);
+      if (index != -1) {
+        setState(() {
+          _reviews[index] = ProductReview(
+            id: review.id,
+            productId: review.productId,
+            userId: review.userId,
+            rating: review.rating,
+            title: review.title,
+            comment: review.comment,
+            images: review.images,
+            replyText: text,
+            replyAt: DateTime.now(),
+            createdAt: review.createdAt,
+            userName: review.userName,
+            userAvatar: review.userAvatar,
+            productName: review.productName,
+          );
+        });
       }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Balasan berhasil disimpan!')),
+      );
+
+      AdminSidebar.refreshTrigger.value++;
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -112,45 +211,331 @@ class _AdminReviewManagementPageState extends State<AdminReviewManagementPage> {
         backgroundColor: colors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
-        centerTitle: true,
+        centerTitle: false,
         title: Text(
           'Review',
           style: TextStyle(
             color: colors.textPrimary,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 22,
+            fontFamily: 'Geist',
+            letterSpacing: -0.4,
           ),
         ),
       ),
-      body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(
-                  color: AppColors.primary, strokeWidth: 2))
-          : _error != null
-              ? Center(
-                  child: Text(_error!,
-                      style: TextStyle(color: colors.textSecondary)),
-                )
-              : _reviews.isEmpty
-                  ? Center(
-                      child: Text(
-                        'Belum ada ulasan',
-                        style: TextStyle(color: colors.textHint, fontSize: 14),
+      body: RefreshIndicator(
+        color: AppColors.primary,
+        onRefresh: () => _load(reset: true),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+              child: TextField(
+                controller: _searchController,
+                onChanged: _onSearchChanged,
+                style: TextStyle(color: colors.textPrimary, fontSize: 13),
+                decoration: InputDecoration(
+                  hintText: 'Cari produk, pembeli, atau isi ulasan...',
+                  hintStyle: TextStyle(color: colors.textHint, fontSize: 12.5),
+                  prefixIcon: Icon(
+                    Icons.search_rounded,
+                    color: colors.textSecondary,
+                  ),
+                  suffixIcon: _searchController.text.isEmpty
+                      ? null
+                      : IconButton(
+                          icon: Icon(
+                            Icons.close_rounded,
+                            color: colors.textSecondary,
+                            size: 18,
+                          ),
+                          onPressed: () {
+                            _searchController.clear();
+                            _onSearchChanged('');
+                          },
+                        ),
+                  filled: true,
+                  fillColor: colors.inputFill,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 34,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: [
+                  _RatingChip(
+                    label: 'Semua',
+                    selected: _ratingFilter == null,
+                    onTap: () => _onRatingFilter(null),
+                  ),
+                  for (final rating in const [5, 4, 3, 2, 1])
+                    _RatingChip(
+                      label: '$rating',
+                      showStar: true,
+                      selected: _ratingFilter == rating,
+                      onTap: () => _onRatingFilter(rating),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 34,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: [
+                  _StatusChip(
+                    label: 'Semua',
+                    color: colors.textSecondary,
+                    selected: _replyFilter == 'all',
+                    onTap: () => _onReplyFilter('all'),
+                  ),
+                  _StatusChip(
+                    label: 'Belum dibalas',
+                    color: AppColors.warning,
+                    selected: _replyFilter == 'unreplied',
+                    onTap: () => _onReplyFilter('unreplied'),
+                  ),
+                  _StatusChip(
+                    label: 'Sudah dibalas',
+                    color: AppColors.success,
+                    selected: _replyFilter == 'replied',
+                    onTap: () => _onReplyFilter('replied'),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+              child: Row(
+                children: [
+                  Text(
+                    _isLoading ? 'Memuat...' : '$_total ulasan',
+                    style: TextStyle(
+                      color: colors.textSecondary,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                        strokeWidth: 2,
                       ),
                     )
-                  : RefreshIndicator(
-                      color: AppColors.primary,
-                      onRefresh: _load,
-                      child: ListView.builder(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, AppSpacing.bottomNavSpace),
-                        itemCount: _reviews.length,
-                        itemBuilder: (context, index) => _AdminReviewCard(
+                  : _error != null
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _error!,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: colors.textSecondary,
+                              fontSize: 12.5,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          ElevatedButton(
+                            onPressed: () => _load(reset: true),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                            ),
+                            child: const Text('Coba Lagi'),
+                          ),
+                        ],
+                      ),
+                    )
+                  : _reviews.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.rate_review_outlined,
+                            size: 44,
+                            color: colors.textHint,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Belum ada ulasan yang cocok',
+                            style: TextStyle(
+                              color: colors.textSecondary,
+                              fontSize: 13,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Coba ubah kata kunci atau filter.',
+                            style: TextStyle(
+                              color: colors.textHint,
+                              fontSize: 11.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.separated(
+                      controller: _scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(
+                        16,
+                        4,
+                        16,
+                        AppSpacing.bottomNavSpace,
+                      ),
+                      itemCount: _reviews.length + (_isLoadingMore ? 1 : 0),
+                      separatorBuilder: (_, _) => const SizedBox(height: 0),
+                      itemBuilder: (context, index) {
+                        if (index >= _reviews.length) {
+                          return const Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.primary,
+                                strokeWidth: 2,
+                              ),
+                            ),
+                          );
+                        }
+                        return _AdminReviewCard(
                           review: _reviews[index],
                           onReply: () => _reply(_reviews[index]),
-                        ),
-                      ),
+                        );
+                      },
                     ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RatingChip extends StatelessWidget {
+  final String label;
+  final bool showStar;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _RatingChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.showStar = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
+          decoration: BoxDecoration(
+            color: selected ? AppColors.primary : colors.inputFill,
+            borderRadius: BorderRadius.circular(30),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (showStar) ...[
+                Icon(
+                  Icons.star_rounded,
+                  size: 13,
+                  color: selected ? Colors.white : AppColors.rating,
+                ),
+                const SizedBox(width: 3),
+              ],
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                  color: selected ? Colors.white : colors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  final String label;
+  final Color color;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _StatusChip({
+    required this.label,
+    required this.color,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
+          decoration: BoxDecoration(
+            color: selected ? color : colors.inputFill,
+            borderRadius: BorderRadius.circular(30),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 6,
+                height: 6,
+                margin: const EdgeInsets.only(right: 6),
+                decoration: BoxDecoration(
+                  color: selected ? Colors.white : color,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                  color: selected ? Colors.white : colors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -200,7 +585,7 @@ class _AdminReviewCard extends StatelessWidget {
                       style: TextStyle(
                         color: colors.textPrimary,
                         fontWeight: FontWeight.w600,
-                        fontSize: 13.5,
+                        fontSize: 13,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -210,14 +595,16 @@ class _AdminReviewCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: colors.textSecondary,
-                        fontSize: 12,
+                        fontSize: 11.5,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      DateFormat('d MMM yyyy', 'id_ID')
-                          .format(review.createdAt),
-                      style: TextStyle(color: colors.textHint, fontSize: 11),
+                      DateFormat(
+                        'd MMM yyyy',
+                        'id_ID',
+                      ).format(review.createdAt),
+                      style: TextStyle(color: colors.textHint, fontSize: 10.5),
                     ),
                   ],
                 ),
@@ -242,7 +629,9 @@ class _AdminReviewCard extends StatelessWidget {
                   const SizedBox(height: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 2),
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: hasReply
                           ? AppColors.success.withValues(alpha: 0.12)
@@ -252,9 +641,8 @@ class _AdminReviewCard extends StatelessWidget {
                     child: Text(
                       hasReply ? 'Sudah dibalas' : 'Belum dibalas',
                       style: TextStyle(
-                        color:
-                            hasReply ? AppColors.success : AppColors.warning,
-                        fontSize: 10,
+                        color: hasReply ? AppColors.success : AppColors.warning,
+                        fontSize: 9.5,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -270,7 +658,7 @@ class _AdminReviewCard extends StatelessWidget {
               style: TextStyle(
                 color: colors.textPrimary,
                 fontWeight: FontWeight.bold,
-                fontSize: 13,
+                fontSize: 12.5,
               ),
             ),
           ],
@@ -278,7 +666,7 @@ class _AdminReviewCard extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               review.comment!,
-              style: TextStyle(color: colors.textSecondary, fontSize: 12.5),
+              style: TextStyle(color: colors.textSecondary, fontSize: 12),
             ),
           ],
           if (review.images.isNotEmpty) ...[
@@ -306,8 +694,11 @@ class _AdminReviewCard extends StatelessWidget {
                           width: 60,
                           height: 60,
                           color: colors.inputFill,
-                          child: Icon(Icons.broken_image_outlined,
-                              color: colors.textHint, size: 20),
+                          child: Icon(
+                            Icons.broken_image_outlined,
+                            color: colors.textHint,
+                            size: 20,
+                          ),
                         ),
                       ),
                     ),
@@ -327,7 +718,7 @@ class _AdminReviewCard extends StatelessWidget {
               ),
               child: Text(
                 'Balasan: ${review.replyText}',
-                style: TextStyle(color: colors.textPrimary, fontSize: 12.5),
+                style: TextStyle(color: colors.textPrimary, fontSize: 12),
               ),
             ),
           ],
@@ -341,9 +732,14 @@ class _AdminReviewCard extends StatelessWidget {
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.primary,
                 side: const BorderSide(color: AppColors.primary),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 textStyle: const TextStyle(
-                    fontWeight: FontWeight.w600, fontSize: 12),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 11.5,
+                ),
               ),
             ),
           ),

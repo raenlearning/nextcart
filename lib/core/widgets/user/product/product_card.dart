@@ -110,7 +110,7 @@ class _ProductCardState extends State<ProductCard> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 13.5,
+                      fontSize: 13,
                       fontWeight: FontWeight.w700,
                       color: colors.textPrimary,
                     ),
@@ -129,7 +129,7 @@ class _ProductCardState extends State<ProductCard> {
                           CurrencyFormatter.rupiah(widget.product.price),
                           style: TextStyle(
                             fontFamily: AppFonts.secondary,
-                            fontSize: 12,
+                            fontSize: 10.5,
                             fontWeight: FontWeight.w800,
                             color: colors.textPrimary,
                             fontFeatures: const [FontFeature.tabularFigures()],

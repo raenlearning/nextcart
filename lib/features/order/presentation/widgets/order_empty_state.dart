@@ -28,7 +28,7 @@ class OrderEmptyState extends StatelessWidget {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: TextStyle(color: colors.textSecondary, fontSize: 13.5),
+            style: TextStyle(color: colors.textSecondary, fontSize: 13),
           ),
         ],
       ),

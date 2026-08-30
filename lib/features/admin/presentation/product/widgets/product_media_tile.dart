@@ -49,7 +49,7 @@ class ProductMediaTile extends StatelessWidget {
                   Text(
                     'Tambah Media',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: context.colors.textPrimary,
                     ),
@@ -59,7 +59,7 @@ class ProductMediaTile extends StatelessWidget {
                         ? 'Tambah media untuk produk ini'
                         : '$totalImages foto dipilih',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 11.5,
                       color: context.colors.textSecondary,
                     ),
                   ),
@@ -79,7 +79,7 @@ class ProductMediaTile extends StatelessWidget {
                 child: Text(
                   '$totalImages',
                   style: const TextStyle(
-                    fontSize: 11,
+                    fontSize: 10.5,
                     fontWeight: FontWeight.bold,
                     color: AppColors.primary,
                   ),

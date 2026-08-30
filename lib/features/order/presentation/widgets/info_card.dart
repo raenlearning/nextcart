@@ -39,7 +39,7 @@ class InfoCard extends StatelessWidget {
                 children: [
                   Text(
                     row.label,
-                    style: TextStyle(color: colors.textSecondary, fontSize: 13),
+                    style: TextStyle(color: colors.textSecondary, fontSize: 12.5),
                   ),
                   Flexible(
                     child: Text(
@@ -48,7 +48,7 @@ class InfoCard extends StatelessWidget {
                       style: TextStyle(
                         fontFamily: AppFonts.secondary,
                         color: colors.textPrimary,
-                        fontSize: 13,
+                        fontSize: 12.5,
                         fontWeight: FontWeight.w600,
                         fontFeatures: const [FontFeature.tabularFigures()],
                       ),

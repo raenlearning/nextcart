@@ -77,7 +77,7 @@ class WishlistCard extends StatelessWidget {
                   style: TextStyle(
                     color: colors.textPrimary,
                     fontWeight: FontWeight.w700,
-                    fontSize: 13.5,
+                    fontSize: 13,
                     height: 1.2,
                   ),
                 ),
@@ -91,7 +91,7 @@ class WishlistCard extends StatelessWidget {
               fontFamily: AppFonts.secondary,
               color: colors.textPrimary,
               fontWeight: FontWeight.bold,
-              fontSize: 13,
+              fontSize: 12.5,
               fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
@@ -107,7 +107,7 @@ class WishlistCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: AppColors.favorite,
-                    fontSize: 11.5,
+                    fontSize: 11,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

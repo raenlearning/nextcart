@@ -4,6 +4,9 @@ import 'package:nextcart/data/repository/address_repository.dart';
 import 'package:nextcart/features/address/presentation/address_list_page.dart';
 import 'package:nextcart/features/address/presentation/address_form_page.dart';
 import 'package:nextcart/features/admin/presentation/admin_navigation_container.dart';
+import 'package:nextcart/features/admin/presentation/category/admin_category_page.dart';
+import 'package:nextcart/features/admin/presentation/review/admin_review_management.dart';
+import 'package:nextcart/features/admin/presentation/voucher/admin_voucher_page.dart';
 import 'package:nextcart/features/admin/presentation/product/product_form.dart';
 import 'package:nextcart/features/cart/presentation/cart_page.dart';
 import 'package:nextcart/features/location/address_selection_page.dart';
@@ -17,6 +20,7 @@ import 'package:nextcart/features/profile/presentation/static_info_page.dart';
 import 'package:nextcart/features/review/presentation/review_form_page.dart';
 import 'package:nextcart/features/review/presentation/review_list_page.dart';
 import 'package:nextcart/features/splash/splash_page.dart';
+import 'package:nextcart/features/store/presentation/store_profile_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:nextcart/features/home/main_navigation_container.dart';
 import 'package:nextcart/features/notification/presentation/notification_list_page.dart';
@@ -173,6 +177,22 @@ class AppRouter {
       GoRoute(
         path: '/notifications',
         builder: (context, state) => const NotificationListPage(),
+      ),
+      GoRoute(
+        path: '/store-profile',
+        builder: (context, state) => const StoreProfilePage(),
+      ),
+      GoRoute(
+        path: '/admin-vouchers',
+        builder: (context, state) => const AdminVoucherPage(),
+      ),
+      GoRoute(
+        path: '/admin-categories',
+        builder: (context, state) => const AdminCategoryPage(),
+      ),
+      GoRoute(
+        path: '/admin-reviews',
+        builder: (context, state) => const AdminReviewManagementPage(),
       ),
     ],
   );

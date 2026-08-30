@@ -333,7 +333,7 @@ class _AdminOrderPageState extends State<AdminOrderPage> {
                 Text(
                   '${_orders.length} pesanan tercatat',
                   style: TextStyle(
-                    fontSize: 12.5,
+                    fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: colors.textSecondary,
                   ),
@@ -386,7 +386,7 @@ class _AdminOrderPageState extends State<AdminOrderPage> {
             'Tidak ada pesanan di kategori ini.',
             style: TextStyle(
               color: colors.textSecondary,
-              fontSize: 13.5,
+              fontSize: 13,
               fontWeight: FontWeight.w500,
             ),
           ),

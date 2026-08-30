@@ -10,7 +10,7 @@ class NameRow extends StatefulWidget {
   final bool isDark;
   final VoidCallback onWishlistTap;
   final Key? wishlistIconKey;
-
+  
   const NameRow({
     super.key,
     required this.name,
@@ -25,29 +25,17 @@ class NameRow extends StatefulWidget {
   State<NameRow> createState() => _NameRowState();
 }
 
-class _NameRowState extends State<NameRow>
-    with SingleTickerProviderStateMixin {
+class _NameRowState extends State<NameRow> with SingleTickerProviderStateMixin {
   late final AnimationController _popController = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 450),
   );
 
   late final Animation<double> _popScale = TweenSequence<double>([
-    TweenSequenceItem(
-      tween: Tween(begin: 1.0, end: 1.5),
-      weight: 40,
-    ),
-    TweenSequenceItem(
-      tween: Tween(begin: 1.5, end: 0.9),
-      weight: 30,
-    ),
-    TweenSequenceItem(
-      tween: Tween(begin: 0.9, end: 1.0),
-      weight: 30,
-    ),
-  ]).animate(
-    CurvedAnimation(parent: _popController, curve: Curves.easeOut),
-  );
+    TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.5), weight: 40),
+    TweenSequenceItem(tween: Tween(begin: 1.5, end: 0.9), weight: 30),
+    TweenSequenceItem(tween: Tween(begin: 0.9, end: 1.0), weight: 30),
+  ]).animate(CurvedAnimation(parent: _popController, curve: Curves.easeOut));
 
   @override
   void didUpdateWidget(covariant NameRow oldWidget) {
@@ -76,7 +64,7 @@ class _NameRowState extends State<NameRow>
               fontWeight: FontWeight.bold,
               color: widget.colors.textPrimary,
               height: 1.3,
-              fontFamily: AppFonts.secondary
+              fontFamily: AppFonts.secondary,
             ),
           ),
         ),

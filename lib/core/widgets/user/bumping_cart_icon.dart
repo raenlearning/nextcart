@@ -97,7 +97,7 @@ class _BumpingCartIconState extends State<BumpingCartIcon>
                       widget.count.toString(),
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 9,
+                        fontSize: 8.5,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

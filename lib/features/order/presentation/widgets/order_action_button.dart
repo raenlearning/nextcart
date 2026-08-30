@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nextcart/core/constants/order_status.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/features/cart/bloc/cart_bloc.dart';
 import 'package:nextcart/features/order/courier_tracking_page.dart';
 
 class OrderActionButton extends StatelessWidget {
@@ -41,7 +44,7 @@ class OrderActionButton extends StatelessWidget {
                 ? colors.textHint
                 : (outlineColor ?? colors.background),
             fontWeight: FontWeight.bold,
-            fontSize: 12,
+            fontSize: 11.5,
           ),
         ),
       ),
@@ -58,7 +61,7 @@ class OrderActionButton extends StatelessWidget {
       case OrderStatus.completed:
         return ('Beli Lagi', true, null);
       case OrderStatus.cancelled:
-        return ('Dibatalkan', false, null);
+        return ('Beli Lagi', true, null);
       default:
         return ('Detail', true, null);
     }
@@ -75,10 +78,41 @@ class OrderActionButton extends StatelessWidget {
           ),
         ),
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Fitur "$label" segera hadir')),
-      );
+      return;
     }
+
+    if (status == OrderStatus.completed || status == OrderStatus.cancelled) {
+      _reorder(context);
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Fitur "$label" segera hadir')),
+    );
+  }
+
+  void _reorder(BuildContext context) {
+    final items = (order['order_items'] as List?) ?? const [];
+    final bloc = context.read<CartBloc>();
+
+    var added = 0;
+    for (final raw in items) {
+      final item = Map<String, dynamic>.from(raw as Map);
+      final product = item['products'] as Map<String, dynamic>?;
+      final productId =
+          (product?['id'] ?? item['product_id'])?.toString() ?? '';
+      final quantity = (item['quantity'] as num?)?.toInt() ?? 1;
+      if (productId.isEmpty) continue;
+      bloc.add(AddToCart(productId, quantity: quantity));
+      added++;
+    }
+
+    ToastHelper.showToast(
+      context,
+      added > 0
+          ? '$added produk ditambahkan ke keranjang'
+          : 'Produk sudah tidak tersedia',
+      added > 0 ? ToastSeverity.success : ToastSeverity.warning,
+    );
   }
 }

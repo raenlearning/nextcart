@@ -63,7 +63,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
                             'Kirim ke',
                             style: TextStyle(
                               color: colors.textSecondary,
-                              fontSize: 12,
+                              fontSize: 11.5,
                             ),
                           ),
                         ],
@@ -77,7 +77,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
                                   'Pilih alamat pengiriman',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 14,
+                                fontSize: 13,
                                 color: colors.textPrimary,
                               ),
                               maxLines: 1,
@@ -157,7 +157,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
                             textAlign: TextAlign.center,
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 9,
+                              fontSize: 8.5,
                               fontWeight: FontWeight.bold,
                             ),
                           ),

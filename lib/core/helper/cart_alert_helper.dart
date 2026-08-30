@@ -97,7 +97,7 @@ class CartAlertHelper {
                 style: TextStyle(
                   color: colors.textPrimary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                  fontSize: 15,
                 ),
               ),
               const SizedBox(height: 4),
@@ -108,7 +108,7 @@ class CartAlertHelper {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: colors.textSecondary,
-                  fontSize: 13,
+                  fontSize: 12.5,
                 ),
               ),
             ],

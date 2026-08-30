@@ -50,7 +50,7 @@ class ProductListItem extends StatelessWidget {
                   Text(
                     product.name,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 12.5,
                       fontWeight: FontWeight.w600,
                       color: context.colors.textPrimary,
                     ),
@@ -134,7 +134,7 @@ class _ActiveBadge extends StatelessWidget {
           Text(
             isActive ? 'Aktif' : 'Tidak Aktif',
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 9.5,
               fontWeight: FontWeight.w600,
               color: isActive ? const Color(0xFF16A34A) : AppColors.slate500,
             ),
@@ -162,7 +162,7 @@ class _PriceStockRow extends StatelessWidget {
           CurrencyFormatter.rupiah(price),
           style: TextStyle(
             fontFamily: AppFonts.secondary,
-            fontSize: 12,
+            fontSize: 11.5,
             fontWeight: FontWeight.w700,
             color: context.colors.textPrimary,
             fontFeatures: const [FontFeature.tabularFigures()],
@@ -188,7 +188,7 @@ class _PriceStockRow extends StatelessWidget {
             child: Text(
               stockValue == 0 ? 'Stok habis' : 'Stok menipis ($stockValue)',
               style: const TextStyle(
-                fontSize: 11,
+                fontSize: 10.5,
                 fontWeight: FontWeight.w700,
                 color: AppColors.error,
               ),
@@ -198,7 +198,7 @@ class _PriceStockRow extends StatelessWidget {
           Text(
             '$stockValue stok',
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 11.5,
               color: context.colors.textSecondary,
             ),
           ),

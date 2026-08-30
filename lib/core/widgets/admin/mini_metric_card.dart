@@ -51,7 +51,7 @@ class MiniMetricCard extends StatelessWidget {
             value,
             style: TextStyle(
               fontFamily: AppFonts.secondary,
-              fontSize: 21,
+              fontSize: 20,
               fontWeight: FontWeight.w800,
               color: colors.textPrimary,
               letterSpacing: -0.3,
@@ -62,7 +62,7 @@ class MiniMetricCard extends StatelessWidget {
           Text(
             title,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 11.5,
               color: colors.textSecondary,
               fontWeight: FontWeight.w500,
             ),

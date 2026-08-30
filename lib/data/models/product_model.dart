@@ -56,12 +56,12 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      id: json['id'] as String,
-      name: json['name'] as String,
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
       description: json['description'] as String? ?? '',
-      price: (json['price'] as num).toDouble(),
-      stock: json['stock'] as int,
-      categoryId: json['category_id'] as String,
+      price: (json['price'] as num?)?.toDouble() ?? 0,
+      stock: json['stock'] as int? ?? 0,
+      categoryId: json['category_id'] as String? ?? '',
       images: List<String>.from(json['images'] ?? []),
       sellerId: json['seller_id'] as String? ?? '',
       isActive: json['is_active'] as bool? ?? true,

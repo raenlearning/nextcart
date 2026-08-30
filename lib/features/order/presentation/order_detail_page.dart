@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nextcart/core/constants/order_status.dart';
+import 'package:nextcart/core/constants/store_info.dart';
 import 'package:nextcart/core/helper/currency_formatter.dart';
 import 'package:nextcart/core/helper/date_formatter.dart';
+import 'package:nextcart/core/helper/whatsapp_helper.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/core/theme/app_fonts.dart';
 import 'package:nextcart/data/repository/review_repository.dart';
@@ -197,9 +200,21 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           style: TextStyle(
             color: colors.textPrimary,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 17,
           ),
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Hubungi toko',
+            onPressed: () => WhatsAppHelper.openChat(
+              'Halo ${StoreInfo.name}, saya ingin bertanya tentang pesanan '
+              '#${widget.order['id'].toString().substring(0, 6)}.',
+            ),
+            icon: const FaIcon(FontAwesomeIcons.whatsapp, size: 20),
+            color: AppColors.success,
+          ),
+          const SizedBox(width: 4),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -327,9 +342,6 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   'Biaya Pengiriman',
                   CurrencyFormatter.rupiah(order['delivery_fee']),
                 ),
-              if ((order['tax_amount'] as num?) != null &&
-                  (order['tax_amount'] as num) > 0)
-                InfoRow('PPN (11%)', CurrencyFormatter.rupiah(order['tax_amount'])),
             ],
             footer: _buildTotalRow(colors, order['total_amount']),
           ),
@@ -360,7 +372,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               style: TextStyle(
                 color: statusColor,
                 fontWeight: FontWeight.bold,
-                fontSize: 15,
+                fontSize: 14,
               ),
             ),
           ),
@@ -392,7 +404,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               address,
               style: TextStyle(
                 color: colors.textPrimary,
-                fontSize: 13.5,
+                fontSize: 13,
                 height: 1.4,
               ),
             ),
@@ -411,7 +423,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           style: TextStyle(
             color: colors.textPrimary,
             fontWeight: FontWeight.bold,
-            fontSize: 14,
+            fontSize: 13,
           ),
         ),
         Text(
@@ -420,7 +432,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             fontFamily: AppFonts.secondary,
             color: colors.textPrimary,
             fontWeight: FontWeight.bold,
-            fontSize: 16,
+            fontSize: 15,
             fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),

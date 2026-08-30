@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
@@ -18,8 +19,7 @@ class CategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-    final isAll = imageAsset == null && label == 'Semua';
+    final isAll = label == 'Semua';
     final hasImage = imageAsset != null;
 
     return GestureDetector(
@@ -28,31 +28,37 @@ class CategoryChip extends StatelessWidget {
         scale: isSelected ? 1.05 : 1.0,
         duration: const Duration(milliseconds: 200),
         child: SizedBox(
-          width: 72,
-          height: 72,
+          width: 60,
+          height: 60,
           child: Stack(
             fit: StackFit.expand,
             children: [
               if (hasImage)
                 ClipRRect(
                   borderRadius: BorderRadius.circular(14),
-                  child: Image.asset(
-                    imageAsset!,
-                    fit: BoxFit.cover,
-                  ),
+                  child: imageAsset!.startsWith('http')
+                      ? CachedNetworkImage(
+                          imageUrl: imageAsset!,
+                          fit: BoxFit.cover,
+                          placeholder: (_, _) =>
+                              Container(color: AppColors.primary.withValues(alpha: 0.12)),
+                          errorWidget: (_, _, _) =>
+                              Container(color: AppColors.primary.withValues(alpha: 0.12)),
+                        )
+                      : Image.asset(
+                          imageAsset!,
+                          fit: BoxFit.cover,
+                        ),
                 )
               else
                 Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
-                    gradient: isAll
-                        ? const LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [AppColors.primary, Color(0xFF0F766E)],
-                          )
-                        : null,
-                    color: isAll ? null : colors.inputFill,
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(14)),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [AppColors.primary, Color(0xFF0F766E)],
+                    ),
                   ),
                 ),
               Container(
@@ -68,10 +74,12 @@ class CategoryChip extends StatelessWidget {
                   ),
                 ),
               ),
-              if (isAll)
+              if (!hasImage)
                 Center(
                   child: FaIcon(
-                    FontAwesomeIcons.shapes,
+                    isAll
+                        ? FontAwesomeIcons.shapes
+                        : FontAwesomeIcons.boxOpen,
                     color: Colors.white,
                     size: 24,
                   ),
@@ -90,7 +98,7 @@ class CategoryChip extends StatelessWidget {
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      fontSize: 10,
+                      fontSize: 9.5,
                     ),
                   ),
                 ),

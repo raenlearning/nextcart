@@ -13,6 +13,8 @@ import 'home_page.dart';
 class MainNavigationContainer extends StatefulWidget {
   const MainNavigationContainer({super.key});
 
+  static final ValueNotifier<int> tabNotifier = ValueNotifier<int>(0);
+
   @override
   State<MainNavigationContainer> createState() =>
       _MainNavigationContainerState();
@@ -35,6 +37,24 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
     OrderScreen(key: _orderKey),
     ProfilePage(key: _profileKey, onTabChange: (index) => _onNavTap(index)),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    MainNavigationContainer.tabNotifier.addListener(_onExternalTabChange);
+  }
+
+  @override
+  void dispose() {
+    MainNavigationContainer.tabNotifier.removeListener(_onExternalTabChange);
+    super.dispose();
+  }
+
+  void _onExternalTabChange() {
+    final index = MainNavigationContainer.tabNotifier.value;
+    if (index == _currentIndex || index < 0 || index >= _pages.length) return;
+    _onNavTap(index);
+  }
 
   void _onNavTap(int index) {
     HapticFeedback.selectionClick();
@@ -186,7 +206,7 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
                             value > 99 ? '99+' : '$value',
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 9,
+                              fontSize: 8.5,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -208,7 +228,7 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                            fontSize: 11.5,
                           ),
                         ),
                       ],

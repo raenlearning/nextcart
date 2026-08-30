@@ -26,7 +26,7 @@ class TabItem extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 11.5,
               fontWeight: FontWeight.w600,
               color: selected ? context.colors.textPrimary : context.colors.textSecondary,
             ),

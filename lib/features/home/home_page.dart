@@ -5,8 +5,8 @@ import 'package:nextcart/core/constants/app_assets.dart';
 import 'package:nextcart/core/widgets/user/app_bar.dart';
 import 'package:nextcart/core/widgets/user/category_chips.dart';
 import 'package:nextcart/core/widgets/user/header_section.dart';
+import 'package:nextcart/core/widgets/user/home_bento_section.dart';
 import 'package:nextcart/core/widgets/user/product_grid.dart';
-import 'package:nextcart/core/widgets/user/promo_banner.dart';
 import 'package:nextcart/core/widgets/user/search_bar.dart';
 import 'package:nextcart/core/widgets/app_empty_state.dart';
 import 'package:nextcart/core/widgets/shimmer_box.dart';
@@ -40,7 +40,7 @@ class _HomePageState extends State<HomePage> {
     try {
       final response = await _supabase
           .from('categories')
-          .select('id, name')
+          .select('id, name, image_url, products(id, images)')
           .order('name', ascending: true);
 
       if (mounted) {
@@ -119,7 +119,7 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 24),
 
                 Text(
-                  'Teknologi Gen-Baru',
+                  'Next-Gen Tech',
                   style: TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
@@ -129,7 +129,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 Text(
-                  'Tanpa Ribet',
+                  'Zero Hassle',
                   style: TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
@@ -142,10 +142,10 @@ class _HomePageState extends State<HomePage> {
 
                 // ── Search
                 const HomeSearchBar(),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
 
-                // ── Promo banner
-                const HomeBannerCarousel(),
+                // ── Bento section
+                const HomeBentoSection(),
                 const SizedBox(height: 24),
 
                 // ── Category chips
@@ -165,7 +165,7 @@ class _HomePageState extends State<HomePage> {
                     context.push('/view-all');
                   },
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
 
                 // ── Product grid
                 BlocBuilder<ProductBloc, ProductState>(

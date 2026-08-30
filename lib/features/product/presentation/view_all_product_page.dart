@@ -93,7 +93,7 @@ class _ViewAllProductsPageState extends State<ViewAllProductsPage> {
     try {
       final data = await _supabase
           .from('categories')
-          .select('id, name')
+          .select('id, name, image_url, products(id, images)')
           .order('name', ascending: true);
 
       List<Map<String, dynamic>> fetchedList = List<Map<String, dynamic>>.from(
@@ -219,7 +219,7 @@ class _ViewAllProductsPageState extends State<ViewAllProductsPage> {
           style: TextStyle(
             color: colors.textPrimary,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 17,
           ),
         ),
       ),
@@ -249,7 +249,7 @@ class _ViewAllProductsPageState extends State<ViewAllProductsPage> {
                 child: Text(
                   'Daftar Produk',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.bold,
                     color: colors.textPrimary,
                   ),
@@ -266,7 +266,7 @@ class _ViewAllProductsPageState extends State<ViewAllProductsPage> {
                       Text(
                         'Menampilkan ${_products.length} produk',
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 10.5,
                           color: colors.textHint,
                         ),
                       ),
@@ -306,10 +306,10 @@ class _ViewAllProductsPageState extends State<ViewAllProductsPage> {
         child: TextField(
           controller: _searchController,
           focusNode: _searchFocusNode,
-          style: TextStyle(color: colors.textPrimary, fontSize: 14),
+          style: TextStyle(color: colors.textPrimary, fontSize: 13),
           decoration: InputDecoration(
             hintText: 'Cari produk...',
-            hintStyle: TextStyle(color: colors.textHint, fontSize: 14),
+            hintStyle: TextStyle(color: colors.textHint, fontSize: 13),
             prefixIcon: Icon(
               Icons.search,
               color: colors.textSecondary,
@@ -402,13 +402,13 @@ class _ViewAllProductsPageState extends State<ViewAllProductsPage> {
                   _searchQuery.isNotEmpty
                       ? 'Tidak ada produk untuk "$_searchQuery"'
                       : 'Belum ada produk di kategori ini',
-                  style: TextStyle(color: colors.textSecondary, fontSize: 13.5),
+                  style: TextStyle(color: colors.textSecondary, fontSize: 13),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Coba kata kunci atau kategori lain ya',
-                  style: TextStyle(color: colors.textHint, fontSize: 12),
+                  style: TextStyle(color: colors.textHint, fontSize: 11.5),
                   textAlign: TextAlign.center,
                 ),
               ],

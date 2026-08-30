@@ -13,7 +13,7 @@ class FormSection extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 13,
+          fontSize: 12.5,
           fontWeight: FontWeight.w600,
           color: context.colors.textPrimary,
         ),

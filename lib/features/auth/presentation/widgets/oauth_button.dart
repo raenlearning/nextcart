@@ -23,7 +23,6 @@ class OAuthButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: colors.card,
           border: Border.all(color: colors.border),
           borderRadius: BorderRadius.circular(16),
         ),
@@ -36,7 +35,7 @@ class OAuthButton extends StatelessWidget {
               label,
               style: TextStyle(
                 fontWeight: FontWeight.w700,
-                fontSize: 14,
+                fontSize: 13,
                 color: colors.textPrimary,
               ),
             ),

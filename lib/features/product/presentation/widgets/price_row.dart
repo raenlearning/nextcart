@@ -17,7 +17,7 @@ class PriceRow extends StatelessWidget {
         Text(
           'Harga',
           style: TextStyle(
-            fontSize: 12,
+            fontSize: 11.5,
             fontWeight: FontWeight.w600,
             color: colors.textSecondary,
           ),
@@ -30,7 +30,7 @@ class PriceRow extends StatelessWidget {
               CurrencyFormatter.rupiah(price),
               style: TextStyle(
                 fontFamily: AppFonts.secondary,
-                fontSize: 24,
+                fontSize: 22,
                 fontWeight: FontWeight.w800,
                 color: AppColors.price,
                 height: 1.1,
@@ -43,7 +43,7 @@ class PriceRow extends StatelessWidget {
               child: Text(
                 'termasuk PPN',
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 10.5,
                   color: colors.textHint,
                 ),
               ),

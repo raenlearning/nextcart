@@ -63,7 +63,7 @@ class CartItemTile extends StatelessWidget {
                     style: TextStyle(
                       color: colors.textPrimary,
                       fontWeight: FontWeight.w600,
-                      fontSize: 14,
+                      fontSize: 13,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -73,7 +73,7 @@ class CartItemTile extends StatelessWidget {
                     storeName,
                     style: const TextStyle(
                       color: AppColors.success,
-                      fontSize: 11.5,
+                      fontSize: 11,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -106,7 +106,7 @@ class CartItemTile extends StatelessWidget {
                         'Stok habis, silakan hapus produk',
                         style: TextStyle(
                           color: AppColors.error,
-                          fontSize: 10.5,
+                          fontSize: 10,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -119,7 +119,7 @@ class CartItemTile extends StatelessWidget {
                         style: const TextStyle(
                           fontFamily: AppFonts.secondary,
                           color: AppColors.warning,
-                          fontSize: 10.5,
+                          fontSize: 10,
                           fontWeight: FontWeight.w600,
                           fontFeatures: [FontFeature.tabularFigures()],
                         ),
@@ -134,7 +134,7 @@ class CartItemTile extends StatelessWidget {
                 fontFamily: AppFonts.secondary,
                 color: colors.textPrimary,
                 fontWeight: FontWeight.bold,
-                fontSize: 13.5,
+                fontSize: 13,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),

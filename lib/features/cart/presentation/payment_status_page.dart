@@ -153,7 +153,7 @@ class _PaymentStatusPageState extends State<PaymentStatusPage> {
                       _title,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 24,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: colors.textPrimary,
                         height: 1.2,
@@ -180,7 +180,7 @@ class _PaymentStatusPageState extends State<PaymentStatusPage> {
                           label: const Text(
                             'Lacak Pesanan',
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: 14,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -210,7 +210,7 @@ class _PaymentStatusPageState extends State<PaymentStatusPage> {
                         child: const Text(
                           'Kembali ke Beranda',
                           style: TextStyle(
-                            fontSize: 15,
+                            fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
                         ),

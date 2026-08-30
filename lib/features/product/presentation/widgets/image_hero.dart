@@ -154,7 +154,7 @@ class _ImageCounterPill extends StatelessWidget {
             '$current/$total',
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 12,
+              fontSize: 11.5,
               fontWeight: FontWeight.w600,
             ),
           ),

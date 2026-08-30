@@ -97,7 +97,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
     try {
       final response = await _supabase
           .from('categories')
-          .select('id, name')
+          .select('id, name, image_url, products(id, images)')
           .order('name', ascending: true);
       if (mounted) {
         setState(() {
@@ -105,6 +105,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
             return {
               'id': item['id'].toString(),
               'name': item['name'].toString(),
+              'image_url': item['image_url'],
+              'products': item['products'],
             };
           }).toList();
           _isLoadingCategories = false;
@@ -240,7 +242,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
         title: Text(
           _isEdit ? 'Edit Produk' : 'Buat Produk',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.bold,
             color: context.colors.textPrimary,
           ),
@@ -260,7 +262,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
                     'Sedang memproses...',
                     style: TextStyle(
                       color: context.colors.textSecondary,
-                      fontSize: 13,
+                      fontSize: 12.5,
                     ),
                   ),
                 ],
@@ -371,7 +373,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
                     child: Text(
                       'Berat dipakai untuk menghitung ongkos kirim.',
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: 10.5,
                         color: context.colors.textSecondary,
                       ),
                     ),

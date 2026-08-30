@@ -26,6 +26,7 @@ class AppAssets {
   static const categoryComputer = 'assets/images/categories/computer.jpg';
   static const categoryGaming = 'assets/images/categories/gaming.jpg';
   static const categoryTelevision = 'assets/images/categories/television.jpg';
+  static const categoryOther = 'assets/images/categories/other.jpg';
   static const cartIcon = 'assets/svg/cartIcon.svg';
 
   // Animation (Lottie)

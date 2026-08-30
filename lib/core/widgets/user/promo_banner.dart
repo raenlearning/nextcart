@@ -4,6 +4,51 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nextcart/core/constants/app_assets.dart';
 
+class BannerSlideData {
+  final String badge;
+  final String title;
+  final String cta;
+  final String image;
+
+  const BannerSlideData({
+    required this.badge,
+    required this.title,
+    required this.cta,
+    required this.image,
+  });
+}
+
+class HomeBannerSlides {
+  HomeBannerSlides._();
+
+  static const List<BannerSlideData> all = [
+    BannerSlideData(
+      badge: 'Diskon 25%',
+      title: 'Temukan\nProduk Terbaru',
+      cta: 'Belanja Sekarang',
+      image: AppAssets.bannerTech1,
+    ),
+    BannerSlideData(
+      badge: 'Promo Spesial',
+      title: 'Gadget Favorit\nMakin Hemat',
+      cta: 'Lihat Promo',
+      image: AppAssets.bannerTech2,
+    ),
+    BannerSlideData(
+      badge: 'Gratis Ongkir',
+      title: 'Belanja Puas\nTanpa Biaya Kirim',
+      cta: 'Cek Syarat',
+      image: AppAssets.bannerTech3,
+    ),
+    BannerSlideData(
+      badge: 'Hari Ini Saja',
+      title: 'Flash Sale\nSampai Stok Habis',
+      cta: 'Grab It Fast',
+      image: AppAssets.bannerTech4,
+    ),
+  ];
+}
+
 class HomeBannerCarousel extends StatefulWidget {
   const HomeBannerCarousel({super.key});
 
@@ -190,7 +235,7 @@ class _BannerCard extends StatelessWidget {
                     child: Text(
                       slide.badge,
                       style: const TextStyle(
-                        fontSize: 11,
+                        fontSize: 10.5,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -200,7 +245,7 @@ class _BannerCard extends StatelessWidget {
                   Text(
                     slide.title,
                     style: const TextStyle(
-                      fontSize: 17,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                       height: 1.2,
                       color: Colors.white,
@@ -228,7 +273,7 @@ class _BannerCard extends StatelessWidget {
                     child: Text(
                       slide.cta,
                       style: const TextStyle(
-                        fontSize: 12,
+                        fontSize: 11.5,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

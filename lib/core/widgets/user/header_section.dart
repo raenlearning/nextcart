@@ -23,7 +23,7 @@ class HomeSectionHeader extends StatelessWidget {
         Text(
           title,
           style: TextStyle(
-            fontSize: 18,
+            fontSize: 17,
             fontWeight: FontWeight.bold,
             color: colors.textPrimary,
             letterSpacing: -0.2,
@@ -40,7 +40,7 @@ class HomeSectionHeader extends StatelessWidget {
                   Text(
                     actionLabel!,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 12.5,
                       fontWeight: FontWeight.w600,
                       color: colors.textSecondary,
                     ),

@@ -143,7 +143,7 @@ class _AnimatedToastState extends State<_AnimatedToast>
                       widget.message,
                       style: TextStyle(
                         color: colors.textPrimary,
-                        fontSize: 13,
+                        fontSize: 12.5,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

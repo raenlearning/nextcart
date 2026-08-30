@@ -91,7 +91,7 @@ class _HomeAddressSheetState extends State<HomeAddressSheet> {
               'Pilih Alamat',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: 15,
                 color: colors.textPrimary,
               ),
             ),
@@ -134,7 +134,7 @@ class _HomeAddressSheetState extends State<HomeAddressSheet> {
                               'Pilih di peta atau tambah alamat baru.',
                               style: TextStyle(
                                 color: colors.textHint,
-                                fontSize: 12,
+                                fontSize: 11.5,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -167,7 +167,7 @@ class _HomeAddressSheetState extends State<HomeAddressSheet> {
                                     style: TextStyle(
                                       color: colors.textPrimary,
                                       fontWeight: FontWeight.w600,
-                                      fontSize: 13,
+                                      fontSize: 12.5,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -191,7 +191,7 @@ class _HomeAddressSheetState extends State<HomeAddressSheet> {
                                         'Utama',
                                         style: TextStyle(
                                           color: AppColors.primary,
-                                          fontSize: 9,
+                                          fontSize: 8.5,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -215,7 +215,7 @@ class _HomeAddressSheetState extends State<HomeAddressSheet> {
                                         'Aktif',
                                         style: TextStyle(
                                           color: AppColors.success,
-                                          fontSize: 9,
+                                          fontSize: 8.5,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -228,7 +228,7 @@ class _HomeAddressSheetState extends State<HomeAddressSheet> {
                                   .trim(),
                               style: TextStyle(
                                 color: colors.textSecondary,
-                                fontSize: 11,
+                                fontSize: 10.5,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,

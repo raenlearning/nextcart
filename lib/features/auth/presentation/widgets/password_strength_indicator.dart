@@ -52,7 +52,7 @@ class PasswordStrengthIndicator extends StatelessWidget {
           Text(
             hasText ? _labels[clamped] : 'Keamanan password',
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 11.5,
               color: hasText
                   ? _colors[clamped]
                   : context.colors.textSecondary,

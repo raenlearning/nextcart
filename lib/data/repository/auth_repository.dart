@@ -2,6 +2,14 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:nextcart/core/helper/auth_error_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+class AccountBlockedException implements Exception {
+  final String message;
+  AccountBlockedException(this.message);
+
+  @override
+  String toString() => message;
+}
+
 class AuthRepository {
   final SupabaseClient _supabase;
 
@@ -34,15 +42,17 @@ class AuthRepository {
     required String email,
     required String password,
   }) async {
+    final AuthResponse response;
     try {
-      final response = await _supabase.auth.signInWithPassword(
+      response = await _supabase.auth.signInWithPassword(
         email: email,
         password: password,
       );
-      return response;
     } catch (e) {
       throw Exception(mapAuthErrorMessage(e));
     }
+    await _ensureNotBlocked(response.user);
+    return response;
   }
 
   Future<User> signInWithGoogle() async {
@@ -64,19 +74,40 @@ class AuthRepository {
       throw Exception('Login Google gagal: $e');
     }
 
+    User user;
     try {
       final response = await _supabase.auth.signInWithIdToken(
         provider: OAuthProvider.google,
         idToken: idToken,
         accessToken: accessToken,
       );
-      final user = response.user;
-      if (user == null) {
-        throw Exception('Gagal masuk dengan Google.');
-      }
-      return user;
+      user = response.user!;
     } catch (e) {
       throw Exception(mapAuthErrorMessage(e));
+    }
+
+    await _ensureNotBlocked(user);
+    return user;
+  }
+
+  Future<void> _ensureNotBlocked(User? user) async {
+    if (user == null) return;
+    try {
+      final data = await _supabase
+          .from('profiles')
+          .select('is_blocked')
+          .eq('id', user.id)
+          .maybeSingle();
+      if ((data?['is_blocked'] as bool?) == true) {
+        await signOut();
+        throw AccountBlockedException(
+          'Akun Anda diblokir. Hubungi toko untuk informasi lebih lanjut.',
+        );
+      }
+    } on AccountBlockedException {
+      rethrow;
+    } catch (_) {
+      // Gagal cek (offline dll) — biarkan login lanjut.
     }
   }
 

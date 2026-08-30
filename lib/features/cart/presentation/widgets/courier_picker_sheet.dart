@@ -40,7 +40,7 @@ class CourierPickerSheet extends StatelessWidget {
               'Pilih Kurir',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: 15,
                 color: colors.textPrimary,
               ),
             ),
@@ -71,14 +71,14 @@ class CourierPickerSheet extends StatelessWidget {
                       style: TextStyle(
                         color: colors.textPrimary,
                         fontWeight: FontWeight.w600,
-                        fontSize: 13,
+                        fontSize: 12.5,
                       ),
                     ),
                     subtitle: Text(
                       'Estimasi $eta',
                       style: TextStyle(
                         color: colors.textSecondary,
-                        fontSize: 12,
+                        fontSize: 11.5,
                       ),
                     ),
                     trailing: Text(
@@ -89,7 +89,7 @@ class CourierPickerSheet extends StatelessWidget {
                         fontFamily: AppFonts.secondary,
                         color: AppColors.primary,
                         fontWeight: FontWeight.bold,
-                        fontSize: 13,
+                        fontSize: 12.5,
                         fontFeatures: [FontFeature.tabularFigures()],
                       ),
                     ),

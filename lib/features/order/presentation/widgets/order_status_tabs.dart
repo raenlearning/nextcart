@@ -27,10 +27,10 @@ class OrderStatusTabs extends StatelessWidget {
         ),
         labelColor: colors.background,
         unselectedLabelColor: colors.textPrimary.withValues(alpha: 0.6),
-        labelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+        labelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 11.5),
         unselectedLabelStyle: TextStyle(
           fontWeight: FontWeight.w500,
-          fontSize: 12,
+          fontSize: 11.5,
         ),
         splashFactory: NoSplash.splashFactory,
         overlayColor: WidgetStatePropertyAll(Colors.transparent),

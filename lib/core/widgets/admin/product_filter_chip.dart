@@ -32,7 +32,7 @@ class ProductFilterChip extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 11.5,
                 fontWeight: FontWeight.w500,
                 color: active ? AppColors.primary : context.colors.textSecondary,
               ),

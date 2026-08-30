@@ -36,7 +36,7 @@ class RoleSelectionDialog extends StatelessWidget {
               'Ubah Role Pengguna',
               style: TextStyle(
                 color: colors.textPrimary,
-                fontSize: 17,
+                fontSize: 16,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.2,
               ),
@@ -46,7 +46,7 @@ class RoleSelectionDialog extends StatelessWidget {
               'Pilih peran baru untuk pengguna ini',
               style: TextStyle(
                 color: colors.textSecondary,
-                fontSize: 12.5,
+                fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -86,7 +86,7 @@ class RoleSelectionDialog extends StatelessWidget {
                                 style: TextStyle(
                                   color: selected ? Colors.white : colors.textPrimary,
                                   fontWeight: FontWeight.w700,
-                                  fontSize: 14,
+                                  fontSize: 13,
                                 ),
                               ),
                               const SizedBox(height: 2),
@@ -94,7 +94,7 @@ class RoleSelectionDialog extends StatelessWidget {
                                 r.desc,
                                 style: TextStyle(
                                   color: selected ? Colors.white70 : colors.textSecondary,
-                                  fontSize: 11.5,
+                                  fontSize: 11,
                                 ),
                               ),
                             ],
@@ -118,7 +118,7 @@ class RoleSelectionDialog extends StatelessWidget {
                   style: TextStyle(
                     color: colors.textSecondary,
                     fontWeight: FontWeight.w600,
-                    fontSize: 13,
+                    fontSize: 12.5,
                   ),
                 ),
               ),

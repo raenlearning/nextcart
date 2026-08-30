@@ -9,11 +9,6 @@ class WishlistRepository {
 
   String? get _userId => _supabase.auth.currentUser?.id;
 
-  /// Nama kolom yang dipakai untuk sorting daftar wishlist.
-  ///
-  /// Sorting berdasarkan harga memakai sintaks PostgREST yang benar
-  /// untuk kolom relasi: `products(price)`, BUKAN `products.price`
-  /// (yang akan memicu error PGRST100 di server).
   @visibleForTesting
   static String sortColumn(String sortBy) {
     return (sortBy == 'price_low' || sortBy == 'price_high')
@@ -41,12 +36,10 @@ class WishlistRepository {
         .toSet();
   }
 
-  /// Ambil daftar wishlist lengkap dengan produk + kategori,
-  /// mendukung search, filter kategori, sort, dan pagination.
   Future<List<Map<String, dynamic>>> fetchWishlist({
     String? search,
     String? categoryId,
-    String sortBy = 'newest', // newest | price_low | price_high
+    String sortBy = 'newest', 
     int page = 1,
     int pageSize = 20,
   }) async {

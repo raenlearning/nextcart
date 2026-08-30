@@ -161,7 +161,7 @@ class WishlistPageState extends State<WishlistPage> {
           style: TextStyle(
             color: colors.textPrimary,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 17,
           ),
         ),
         actions: [
@@ -297,7 +297,7 @@ class WishlistPageState extends State<WishlistPage> {
                   'Wishlist kamu masih kosong',
                   style: TextStyle(
                     color: colors.textSecondary,
-                    fontSize: 14,
+                    fontSize: 13,
                   ),
                 ),
               ],
@@ -320,7 +320,7 @@ class WishlistPageState extends State<WishlistPage> {
             child: Text(
               'Gagal memuat wishlist',
               textAlign: TextAlign.center,
-              style: TextStyle(color: colors.textSecondary, fontSize: 14),
+              style: TextStyle(color: colors.textSecondary, fontSize: 13),
             ),
           ),
           const SizedBox(height: 16),

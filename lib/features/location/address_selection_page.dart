@@ -341,10 +341,10 @@ class _AddressSelectionPageState extends State<AddressSelectionPage> {
             child: TextField(
               controller: _searchController,
               focusNode: _searchFocusNode,
-              style: TextStyle(color: colors.textPrimary, fontSize: 14),
+              style: TextStyle(color: colors.textPrimary, fontSize: 13),
               decoration: InputDecoration(
                 hintText: 'Cari alamat, jalan, atau tempat...',
-                hintStyle: TextStyle(color: colors.textHint, fontSize: 14),
+                hintStyle: TextStyle(color: colors.textHint, fontSize: 13),
                 prefixIcon: Icon(Icons.search, color: colors.textSecondary, size: 20),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
@@ -403,7 +403,7 @@ class _AddressSelectionPageState extends State<AddressSelectionPage> {
                   leading: Icon(Icons.location_on_outlined, color: colors.textSecondary, size: 20),
                   title: Text(
                     result['display_name'] ?? '',
-                    style: TextStyle(color: colors.textPrimary, fontSize: 13),
+                    style: TextStyle(color: colors.textPrimary, fontSize: 12.5),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -452,7 +452,7 @@ class _AddressSelectionPageState extends State<AddressSelectionPage> {
                       'Alamat Terpilih',
                       style: TextStyle(
                         color: colors.textSecondary,
-                        fontSize: 11,
+                        fontSize: 10.5,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -473,7 +473,7 @@ class _AddressSelectionPageState extends State<AddressSelectionPage> {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: colors.textPrimary,
-                              fontSize: 13.5,
+                              fontSize: 13,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -503,7 +503,7 @@ class _AddressSelectionPageState extends State<AddressSelectionPage> {
                       ? colors.textHint
                       : Colors.white,
                   fontWeight: FontWeight.w600,
-                  fontSize: 14,
+                  fontSize: 13,
                 ),
               ),
             ),

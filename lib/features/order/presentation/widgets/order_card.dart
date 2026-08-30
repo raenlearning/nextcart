@@ -126,7 +126,7 @@ class OrderCard extends StatelessWidget {
                             '+${items.length - 1}',
                             style: TextStyle(
                               color: colors.textSecondary,
-                              fontSize: 9,
+                              fontSize: 8.5,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -150,7 +150,7 @@ class OrderCard extends StatelessWidget {
                         style: TextStyle(
                           color: colors.textPrimary,
                           fontWeight: FontWeight.bold,
-                          fontSize: 15,
+                          fontSize: 14,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -173,7 +173,7 @@ class OrderCard extends StatelessWidget {
                     '${createdAt != null ? formatDate(createdAt) : ''} · ${items.length} item',
                     style: TextStyle(
                       color: colors.textSecondary,
-                      fontSize: 12.5,
+                      fontSize: 12,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -186,7 +186,7 @@ class OrderCard extends StatelessWidget {
                           fontFamily: AppFonts.secondary,
                           color: colors.textPrimary,
                           fontWeight: FontWeight.bold,
-                          fontSize: 15,
+                          fontSize: 14,
                           fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),

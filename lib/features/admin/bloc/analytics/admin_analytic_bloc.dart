@@ -47,6 +47,7 @@ class AdminAnalyticsBloc extends Bloc<AdminAnalyticsEvent, AdminAnalyticsState> 
         topProducts: topProducts,
         orderStatusBreakdown: summary.orderStatusBreakdown,
         period: event.period,
+        lowStockProducts: summary.lowStockProducts,
       ));
     } catch (e) {
       emit(AdminAnalyticsError('Gagal memuat data: $e'));

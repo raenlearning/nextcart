@@ -30,7 +30,7 @@ class ProductSearchBar extends StatelessWidget {
         controller: controller,
         focusNode: focusNode,
         textAlignVertical: TextAlignVertical.center,
-        style: TextStyle(color: context.colors.textPrimary, fontSize: 13),
+        style: TextStyle(color: context.colors.textPrimary, fontSize: 12.5),
         decoration: InputDecoration(
           hintText: 'Cari Produk...',
           hintStyle:

@@ -72,7 +72,7 @@ class TimelineItem extends StatelessWidget {
                 color: isDone || isCurrent
                     ? colors.textPrimary
                     : colors.textHint,
-                fontSize: 13,
+                fontSize: 12.5,
                 fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
               ),
             ),
@@ -91,7 +91,7 @@ class TimelineItem extends StatelessWidget {
                 'Saat ini',
                 style: TextStyle(
                   color: color,
-                  fontSize: 10,
+                  fontSize: 9.5,
                   fontWeight: FontWeight.w700,
                 ),
               ),

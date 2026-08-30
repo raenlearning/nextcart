@@ -60,7 +60,7 @@ class CheckoutBar extends StatelessWidget {
             }
             return const Text(
               'Beli Sekarang',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             );
           },
         ),

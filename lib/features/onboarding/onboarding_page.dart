@@ -166,7 +166,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         Text(
                           item.title,
                           style: const TextStyle(
-                            fontSize: 24,
+                            fontSize: 22,
                             fontWeight: FontWeight.w800,
                             color: Colors.white,
                             height: 1.25,
@@ -177,7 +177,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         Text(
                           item.description,
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 13,
                             fontWeight: FontWeight.w400,
                             color: Colors.white.withValues(alpha: 0.75),
                             height: 1.5,
@@ -202,7 +202,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     'NEXTCART',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 15,
+                      fontSize: 14,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1.5,
                     ),
@@ -218,7 +218,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           'Skip',
                           style: TextStyle(
                             color: Colors.white70,
-                            fontSize: 14,
+                            fontSize: 13,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -269,7 +269,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                 'Kembali',
                                 style: TextStyle(
                                   color: Colors.white70,
-                                  fontSize: 14,
+                                  fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -294,7 +294,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             child: Text(
                               _isLastPage ? 'Mulai' : 'Lanjut',
                               style: const TextStyle(
-                                fontSize: 15,
+                                fontSize: 14,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),

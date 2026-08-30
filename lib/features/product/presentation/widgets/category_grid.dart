@@ -36,7 +36,7 @@ class CategoryGrid extends StatelessWidget {
     }
 
     return SizedBox(
-      height: 92,
+      height: 90,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -44,26 +44,49 @@ class CategoryGrid extends StatelessWidget {
         separatorBuilder: (_, _) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
           if (index == 0) {
-            return CategoryChip(
-              label: 'Semua',
-              imageAsset: null,
-              isSelected: selectedCategoryId == null,
-              onTap: () => onCategoryTap(null),
+            return Padding(
+              padding: EdgeInsetsGeometry.symmetric(vertical: 5),
+              child: CategoryChip(
+                label: 'Semua',
+                imageAsset: null,
+                isSelected: selectedCategoryId == null,
+                onTap: () => onCategoryTap(null),
+              ),
             );
           }
-          final category = categories[index - 1];
-          final categoryId = category['id'] as String;
-          final categoryName = category['name'] as String;
+                  final category = categories[index - 1];
+                  final categoryId = (category['id'] ?? '').toString();
+                  final categoryName = (category['name'] ?? '').toString();
 
-          return CategoryChip(
-            label: categoryName,
-            imageAsset: _getImageAsset(categoryName),
-            isSelected: selectedCategoryId == categoryId,
-            onTap: () => onCategoryTap(categoryId),
+          return Padding(
+            padding: EdgeInsetsGeometry.symmetric(vertical: 5),
+            child: CategoryChip(
+              label: categoryName,
+              imageAsset: _resolveImage(category, categoryName),
+              isSelected: selectedCategoryId == categoryId,
+              onTap: () => onCategoryTap(categoryId),
+            ),
           );
         },
       ),
     );
+  }
+
+  String? _resolveImage(Map<String, dynamic> category, String categoryName) {
+    String? image = category['image_url']?.toString();
+    if (image == null || image.isEmpty) {
+      final products = category['products'] as List?;
+      if (products != null && products.isNotEmpty) {
+        final img = (products.first as Map<String, dynamic>)['images'];
+        if (img is List && img.isNotEmpty) {
+          image = img.first?.toString();
+        } else if (img != null) {
+          image = img.toString();
+        }
+      }
+    }
+    if (image == null || image.isEmpty) image = _getImageAsset(categoryName);
+    return (image == null || image.isEmpty) ? null : image;
   }
 
   String? _getImageAsset(String categoryName) {
@@ -81,9 +104,16 @@ class CategoryGrid extends StatelessWidget {
       case 'computer':
         return AppAssets.categoryComputer;
       case 'television':
+      case 'tv':
+      case 'televisi':
         return AppAssets.categoryTelevision;
       case 'camera':
+      case 'kamera':
         return AppAssets.categoryCamera;
+      case 'other':
+      case 'others':
+      case 'lainnya':
+        return AppAssets.categoryOther;
       default:
         return null;
     }

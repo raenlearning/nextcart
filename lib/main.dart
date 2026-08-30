@@ -17,6 +17,7 @@ import 'package:nextcart/features/wishlist/bloc/wishlist_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:nextcart/core/router/app_router.dart';
 import 'package:nextcart/core/theme/app_theme.dart';
+import 'package:nextcart/core/theme/theme_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -93,14 +94,21 @@ class MainApp extends StatelessWidget {
                 WishlistBloc(repository: context.read<WishlistRepository>())
                   ..add(WishlistLoad()),
           ),
+
+          BlocProvider<ThemeCubit>(create: (_) => ThemeCubit()),
         ],
-        child: MaterialApp.router(
-          title: 'Nextcart E-Commerce',
-          debugShowCheckedModeBanner: false,
-          scaffoldMessengerKey: PushService.instance.messengerKey,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          routerConfig: AppRouter.router,
+        child: BlocBuilder<ThemeCubit, ThemeMode>(
+          builder: (context, themeMode) {
+            return MaterialApp.router(
+              title: 'Nextcart E-Commerce',
+              debugShowCheckedModeBanner: false,
+              scaffoldMessengerKey: PushService.instance.messengerKey,
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: themeMode,
+              routerConfig: AppRouter.router,
+            );
+          },
         ),
       ),
     );

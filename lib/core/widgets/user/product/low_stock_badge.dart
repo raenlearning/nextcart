@@ -21,7 +21,7 @@ class LowStockBadge extends StatelessWidget {
             'Stok Menipis',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 9,
+              fontSize: 8.5,
               fontWeight: FontWeight.w700,
             ),
           ),

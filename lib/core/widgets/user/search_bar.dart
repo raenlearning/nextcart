@@ -15,10 +15,10 @@ class HomeSearchBar extends StatelessWidget {
       child: IgnorePointer(
         child: TextField(
           enabled: false,
-          style: TextStyle(color: colors.textPrimary, fontSize: 14),
+          style: TextStyle(color: colors.textPrimary, fontSize: 13),
           decoration: InputDecoration(
             hintText: 'Cari produk teknologi...',
-            hintStyle: TextStyle(color: colors.textHint, fontSize: 14),
+            hintStyle: TextStyle(color: colors.textHint, fontSize: 13),
             prefixIcon: Icon(Icons.search, color: colors.textSecondary, size: 20),
             suffixIcon: Container(
               margin: const EdgeInsets.all(8),

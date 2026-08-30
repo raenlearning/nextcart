@@ -56,7 +56,7 @@ class StatusRadio extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                fontSize: 13,
+                fontSize: 12.5,
                 fontWeight: FontWeight.w500,
                 color: selected ? AppColors.primary : context.colors.textSecondary,
               ),

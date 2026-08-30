@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nextcart/core/helper/validators.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
@@ -91,7 +91,7 @@ class _AuthPageState extends State<AuthPage> {
       {Widget? prefixIcon, Widget? suffixIcon}) {
     return InputDecoration(
       hintText: hintText,
-      hintStyle: TextStyle(color: context.colors.textSecondary, fontSize: 14),
+      hintStyle: TextStyle(color: context.colors.textSecondary, fontSize: 13),
       filled: true,
       fillColor: context.colors.inputFill,
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
@@ -190,7 +190,7 @@ class _AuthPageState extends State<AuthPage> {
                         key: ValueKey(_currentMode),
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 24,
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
                           height: 1.3,
                           color: context.colors.textPrimary,
@@ -205,7 +205,7 @@ class _AuthPageState extends State<AuthPage> {
                           : 'Gabung dan mulai jelajahi teknologi terbaru',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: 12.5,
                         color: context.colors.textSecondary,
                       ),
                     ),
@@ -338,7 +338,7 @@ class _AuthPageState extends State<AuthPage> {
                               style: TextStyle(
                                 color: AppColors.slate100,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                                fontSize: 15,
                               ),
                             ),
                     ),
@@ -355,7 +355,7 @@ class _AuthPageState extends State<AuthPage> {
                             'Atau lanjutkan dengan',
                             style: TextStyle(
                               color: context.colors.textSecondary,
-                              fontSize: 12,
+                              fontSize: 11.5,
                             ),
                           ),
                         ),
@@ -371,26 +371,14 @@ class _AuthPageState extends State<AuthPage> {
                         Expanded(
                           child: OAuthButton(
                             label: 'Google',
-                            icon: FaIcon(
-                              FontAwesomeIcons.google,
-                              size: 20,
-                              color: context.colors.textPrimary,
+                            icon: SvgPicture.asset(
+                              'assets/images/google_logo.svg',
+                              width: 20,
+                              height: 20,
                             ),
                             onTap: () => context
                                 .read<AuthBloc>()
                                 .add(AuthGoogleSignInRequested()),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: OAuthButton(
-                            label: 'Apple',
-                            icon: FaIcon(
-                              FontAwesomeIcons.apple,
-                              size: 20,
-                              color: context.colors.textPrimary,
-                            ),
-                            onTap: () => _showOAuthNotice('Apple'),
                           ),
                         ),
                       ],
@@ -571,14 +559,6 @@ class _AuthPageState extends State<AuthPage> {
     );
   }
 
-  void _showOAuthNotice(String provider) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Masuk dengan $provider segera hadir.'),
-        backgroundColor: AppColors.info,
-      ),
-    );
-  }
 
   void _showForgotPasswordSheet() {
     showModalBottomSheet(

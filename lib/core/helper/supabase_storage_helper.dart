@@ -4,6 +4,31 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class SupabaseStorageHelper {
   static final SupabaseClient _supabase = Supabase.instance.client;
 
+  static Future<String> uploadCategoryImage(XFile file) async {
+    final fileBytes = await file.readAsBytes();
+    final fileName = '${DateTime.now().millisecondsSinceEpoch}_${file.name}';
+    final path = 'categories/$fileName';
+
+    await _supabase.storage.from('category-images').uploadBinary(
+          path,
+          fileBytes,
+          fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+        );
+
+    return _supabase.storage.from('category-images').getPublicUrl(path);
+  }
+
+  static Future<void> deleteCategoryImageByUrl(String url) async {
+    try {
+      const marker = '/category-images/';
+      if (!url.contains(marker)) return;
+      final path = url.substring(url.indexOf(marker) + marker.length);
+      await _supabase.storage.from('category-images').remove([path]);
+    } catch (_) {
+      // Abaikan kegagalan hapus (gambar mungkin sudah tidak ada).
+    }
+  }
+
   static Future<List<String>> uploadProductImages(List<XFile> files) async {
     List<String> uploadedUrls = [];
     List<String> uploadedPaths = [];

@@ -79,23 +79,22 @@ void main() {
 
     tearDown(() => bloc.close());
 
-    test('computes subtotal + shipping + PPN when no voucher', () {
-      // PPN 11% dari subtotal: 100000 + 0.11*100000 = 111000 + shipping 10000
-      expect(bloc.checkoutTotal(100000, null, 10000), 121000);
+    test('computes subtotal + shipping when no voucher', () {
+      expect(bloc.checkoutTotal(100000, null, 10000), 110000);
     });
 
-    test('computes PPN on discounted subtotal when voucher applied', () {
+    test('applies voucher discount before adding shipping', () {
       const voucher = {
         'discount_type': 'nominal',
         'discount_value': 20000,
       };
-      // discounted = 80000, PPN = 8800, + shipping 0 => 88800
-      expect(bloc.checkoutTotal(100000, voucher, 0), 88800);
+      // discounted = 80000, + shipping 0 => 80000
+      expect(bloc.checkoutTotal(100000, voucher, 0), 80000);
     });
 
     test('rounds consistently with large values', () {
-      // 10000000 + 0.11*10000000 + 25000 = 11125000
-      expect(bloc.checkoutTotal(10000000, null, 25000), 11125000);
+      // 10000000 + 25000 = 10025000
+      expect(bloc.checkoutTotal(10000000, null, 25000), 10025000);
     });
   });
 }

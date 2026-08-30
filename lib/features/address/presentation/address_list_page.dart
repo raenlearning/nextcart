@@ -67,8 +67,10 @@ class _AddressListPageState extends State<AddressListPage> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Hapus',
-                style: TextStyle(color: AppColors.error)),
+            child: const Text(
+              'Hapus',
+              style: TextStyle(color: AppColors.error),
+            ),
           ),
         ],
       ),
@@ -124,42 +126,51 @@ class _AddressListPageState extends State<AddressListPage> {
           style: TextStyle(
             color: colors.textPrimary,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 17,
           ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded,
-              size: 18, color: colors.textPrimary),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 18,
+            color: colors.textPrimary,
+          ),
           onPressed: () => context.pop(),
         ),
       ),
       body: _isLoading
           ? const Center(
               child: CircularProgressIndicator(
-                  color: AppColors.primary, strokeWidth: 2))
+                color: AppColors.primary,
+                strokeWidth: 2,
+              ),
+            )
           : _error != null
-              ? Center(
-                  child: Text(_error!,
-                      style: TextStyle(color: colors.textSecondary)))
-              : _addresses.isEmpty
-                  ? _EmptyState(colors: colors, onAdd: _openForm)
-                  : RefreshIndicator(
-                      color: AppColors.primary,
-                      onRefresh: _load,
-                      child: ListView.builder(
-                        physics:
-                            const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
-                        itemCount: _addresses.length,
-                        itemBuilder: (context, index) =>
-                            _AddressCard(
-                          address: _addresses[index],
-                          onTap: () => _openForm(_addresses[index]),
-                          onDelete: () => _confirmDelete(_addresses[index]),
-                          onSetDefault: () => _setDefault(_addresses[index]),
-                        ),
-                      ),
-                    ),
+          ? Center(
+              child: Text(
+                _error!,
+                style: TextStyle(color: colors.textSecondary),
+              ),
+            )
+          : _addresses.isEmpty
+          ? _EmptyState(colors: colors, onAdd: _openForm)
+          : RefreshIndicator(
+              color: AppColors.primary,
+              onRefresh: _load,
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
+                itemCount: _addresses.length,
+                itemBuilder: (context, index) => _AddressCard(
+                  address: _addresses[index],
+                  onTap: () => _openForm(_addresses[index]),
+                  onDelete: () => _confirmDelete(_addresses[index]),
+                  onSetDefault: () => _setDefault(_addresses[index]),
+                ),
+              ),
+            ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
@@ -204,19 +215,19 @@ class _AddressCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  address.label?.isNotEmpty == true
-                      ? address.label!
-                      : 'Alamat',
+                  address.label?.isNotEmpty == true ? address.label! : 'Alamat',
                   style: TextStyle(
                     color: AppColors.primary,
-                    fontSize: 11.5,
+                    fontSize: 11,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -225,7 +236,9 @@ class _AddressCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 4),
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.success.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
@@ -234,7 +247,7 @@ class _AddressCard extends StatelessWidget {
                     'Utama',
                     style: TextStyle(
                       color: AppColors.success,
-                      fontSize: 11.5,
+                      fontSize: 11,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -250,7 +263,9 @@ class _AddressCard extends StatelessWidget {
                     padding: const EdgeInsets.only(left: 8),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.info.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(20),
@@ -259,7 +274,7 @@ class _AddressCard extends StatelessWidget {
                         'Aktif',
                         style: TextStyle(
                           color: AppColors.info,
-                          fontSize: 11.5,
+                          fontSize: 11,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -270,29 +285,32 @@ class _AddressCard extends StatelessWidget {
               const Spacer(),
               GestureDetector(
                 onTap: onDelete,
-                child: Icon(Icons.delete_outline,
-                    size: 20, color: AppColors.error),
+                child: Icon(
+                  Icons.delete_outline,
+                  size: 20,
+                  color: AppColors.error,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 12),
-          if (address.recipientName != null ||
-              address.phone != null) ...[
+          if (address.recipientName != null || address.phone != null) ...[
             Text(
-              [address.recipientName, address.phone]
-                  .whereType<String>()
-                  .join(' • '),
+              [
+                address.recipientName,
+                address.phone,
+              ].whereType<String>().join(' • '),
               style: TextStyle(
                 color: colors.textPrimary,
                 fontWeight: FontWeight.w600,
-                fontSize: 13.5,
+                fontSize: 13,
               ),
             ),
             const SizedBox(height: 4),
           ],
           Text(
             address.fullAddress,
-            style: TextStyle(color: colors.textSecondary, fontSize: 13),
+            style: TextStyle(color: colors.textSecondary, fontSize: 12.5),
           ),
           if (!address.isDefault) ...[
             const SizedBox(height: 12),
@@ -324,14 +342,13 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.location_off_outlined,
-                size: 56, color: colors.textHint),
+            Icon(Icons.location_off_outlined, size: 56, color: colors.textHint),
             const SizedBox(height: 16),
             Text(
               'Belum ada alamat tersimpan',
               style: TextStyle(
                 color: colors.textHint,
-                fontSize: 15,
+                fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
             ),

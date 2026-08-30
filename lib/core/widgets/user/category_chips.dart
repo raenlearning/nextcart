@@ -70,7 +70,7 @@ class _CategoryChip extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
-      behavior: HitTestBehavior.opaque,
+      behavior: HitTestBehavior.translucent,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOut,
@@ -89,12 +89,14 @@ class _CategoryChip extends StatelessWidget {
                 ]
               : null,
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isActive ? Colors.white : colors.textSecondary,
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isActive ? Colors.white : colors.textSecondary,
+              fontWeight: FontWeight.bold,
+              fontSize: 11.5,
+            ),
           ),
         ),
       ),

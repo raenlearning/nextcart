@@ -76,7 +76,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           style: TextStyle(
             color: colors.textPrimary,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 17,
           ),
         ),
       ),
@@ -88,7 +88,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             children: [
               Text(
                 'Masukkan kata sandi saat ini dan kata sandi baru kamu.',
-                style: TextStyle(color: colors.textSecondary, fontSize: 13),
+                style: TextStyle(color: colors.textSecondary, fontSize: 12.5),
               ),
               const SizedBox(height: 24),
               _buildPasswordField(
@@ -184,7 +184,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           style: TextStyle(
             color: colors.textPrimary,
             fontWeight: FontWeight.bold,
-            fontSize: 14,
+            fontSize: 13,
           ),
         ),
         const SizedBox(height: 8),
@@ -192,7 +192,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           controller: controller,
           obscureText: obscure,
           validator: validator,
-          style: TextStyle(color: colors.textPrimary, fontSize: 14),
+          style: TextStyle(color: colors.textPrimary, fontSize: 13),
           decoration: InputDecoration(
             suffixIcon: IconButton(
               icon: Icon(

@@ -40,7 +40,7 @@ class QuantityStepper extends StatelessWidget {
                 fontFamily: AppFonts.secondary,
                 color: colors.textPrimary,
                 fontWeight: FontWeight.w600,
-                fontSize: 13,
+                fontSize: 12.5,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),

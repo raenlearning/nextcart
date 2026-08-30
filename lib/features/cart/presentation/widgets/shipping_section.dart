@@ -47,7 +47,7 @@ class ShippingSection extends StatelessWidget {
                   fontFamily: AppFonts.secondary,
                   color: AppColors.primary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 13,
+                  fontSize: 12.5,
                   fontFeatures: [FontFeature.tabularFigures()],
                 ),
               ),

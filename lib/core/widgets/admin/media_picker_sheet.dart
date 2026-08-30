@@ -77,7 +77,7 @@ class _MediaPickerSheetState extends State<MediaPickerSheet> {
                   child: Text(
                     'Tambah Media',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: context.colors.textPrimary,
                     ),
@@ -133,7 +133,7 @@ class _MediaPickerSheetState extends State<MediaPickerSheet> {
                 Text(
                   'Selected $totalSelected',
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 12.5,
                     fontWeight: FontWeight.w500,
                     color: context.colors.textSecondary,
                   ),
@@ -148,7 +148,7 @@ class _MediaPickerSheetState extends State<MediaPickerSheet> {
                     child: const Text(
                       'Hapus semua pilihan',
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: 12.5,
                         color: AppColors.primary,
                         fontWeight: FontWeight.w500,
                       ),
@@ -357,7 +357,7 @@ class _MediaPickerSheetState extends State<MediaPickerSheet> {
             message,
             style: TextStyle(
               color: context.colors.textSecondary,
-              fontSize: 13,
+              fontSize: 12.5,
             ),
           ),
           if (action != null) ...[

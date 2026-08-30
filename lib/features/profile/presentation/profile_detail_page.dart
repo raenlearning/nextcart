@@ -129,7 +129,7 @@ class ProfileDetailPageState extends State<ProfileDetailPage> {
           'Edit Profil',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 16,
+            fontSize: 15,
           ),
         ),
         leading: IconButton(
@@ -192,7 +192,7 @@ class ProfileDetailPageState extends State<ProfileDetailPage> {
                 style: TextStyle(
                   color: colors.textPrimary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 14,
+                  fontSize: 13,
                 ),
               ),
               const SizedBox(height: 8),
@@ -200,7 +200,7 @@ class ProfileDetailPageState extends State<ProfileDetailPage> {
                 controller: _nameController,
                 style: TextStyle(
                   color: colors.textPrimary,
-                  fontSize: 14,
+                  fontSize: 13,
                 ),
                 decoration: const InputDecoration(
                   hintText: 'Masukkan nama lengkap kamu',

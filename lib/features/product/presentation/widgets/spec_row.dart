@@ -26,7 +26,7 @@ class SpecRow extends StatelessWidget {
             width: 100,
             child: Text(
               label,
-              style: TextStyle(color: colors.textSecondary, fontSize: 13),
+              style: TextStyle(color: colors.textSecondary, fontSize: 12.5),
             ),
           ),
           Expanded(
@@ -35,7 +35,7 @@ class SpecRow extends StatelessWidget {
               style: TextStyle(
                 fontFamily: fontFamily,
                 color: colors.textPrimary,
-                fontSize: 13,
+                fontSize: 12.5,
                 fontWeight: FontWeight.w600,
               ),
             ),

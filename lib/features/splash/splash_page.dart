@@ -99,7 +99,7 @@ class _SplashPageState extends State<SplashPage>
               Text(
                 'NextCart',
                 style: TextStyle(
-                  fontFamily: 'Gabarito',
+                  fontFamily: 'Geist',
                   fontWeight: FontWeight.w900,
                   fontSize: 44,
                   color: AppColors.splashCream,

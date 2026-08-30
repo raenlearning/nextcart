@@ -73,7 +73,7 @@ class OrderItemTile extends StatelessWidget {
                       style: TextStyle(
                         color: colors.textPrimary,
                         fontWeight: FontWeight.w600,
-                        fontSize: 13.5,
+                        fontSize: 13,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -82,7 +82,7 @@ class OrderItemTile extends StatelessWidget {
                       style: TextStyle(
                         fontFamily: AppFonts.secondary,
                         color: colors.textSecondary,
-                        fontSize: 12.5,
+                        fontSize: 12,
                         fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                     ),
@@ -95,7 +95,7 @@ class OrderItemTile extends StatelessWidget {
                   fontFamily: AppFonts.secondary,
                   color: colors.textPrimary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 13.5,
+                  fontSize: 13,
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
@@ -113,7 +113,7 @@ class OrderItemTile extends StatelessWidget {
                   foregroundColor: AppColors.primary,
                   textStyle: const TextStyle(
                     fontWeight: FontWeight.w600,
-                    fontSize: 12.5,
+                    fontSize: 12,
                   ),
                 ),
               ),

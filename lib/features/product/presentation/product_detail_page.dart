@@ -6,6 +6,8 @@ import 'package:nextcart/data/models/product_model.dart';
 import 'package:nextcart/data/repository/product_repository.dart';
 import 'package:nextcart/core/helper/currency_formatter.dart';
 import 'package:nextcart/core/helper/toast_helper.dart';
+import 'package:nextcart/core/constants/store_info.dart';
+import 'package:nextcart/core/helper/whatsapp_helper.dart';
 import 'package:nextcart/core/widgets/user/product_grid.dart';
 import 'package:nextcart/core/widgets/user/product/heart_burst_animation.dart';
 import 'package:nextcart/features/product/presentation/widgets/meta_row.dart';
@@ -20,7 +22,6 @@ import 'widgets/description.dart';
 import 'widgets/expandable_section_row.dart';
 import 'widgets/detail_top_bar.dart';
 import 'widgets/bottom_bar.dart';
-import 'widgets/quantity_selector.dart';
 import 'widgets/spec_row.dart';
 
 class ProductDetailPage extends StatefulWidget {
@@ -168,7 +169,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 Text(
                   'Spesifikasi Produk',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.bold,
                     color: colors.textPrimary,
                   ),
@@ -302,18 +303,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           ),
                         ),
 
-                        const SizedBox(height: 20),
-                        Divider(color: colors.divider, height: 1),
-                        const SizedBox(height: 20),
-
-                        QuantitySelector(
-                          quantity: _quantity,
-                          stock: widget.product.stock,
-                          colors: colors,
-                          onChanged: (value) =>
-                              setState(() => _quantity = value),
-                        ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 10),
 
                         Description(
                           description: widget.product.description,
@@ -351,16 +341,22 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             right: 0,
             child: SafeArea(
               bottom: false,
-              child: DetailTopBar(colors: colors, onShare: _shareProduct),
+              child: DetailTopBar(
+                colors: colors,
+                onShare: _shareProduct,
+                onWhatsApp: () => WhatsAppHelper.openChat(
+                  'Halo ${StoreInfo.name}, saya tertarik dengan produk '
+                  '"${widget.product.name}". Apakah stoknya tersedia?',
+                ),
+              ),
             ),
           ),
         ],
       ),
       bottomNavigationBar: BottomBar(
-        price: widget.product.price,
         quantity: _quantity,
+        onQuantityChanged: (value) => setState(() => _quantity = value),
         colors: colors,
-        isDark: isDark,
         product: widget.product,
         addToCartKey: _addToCartKey,
       ),
@@ -391,7 +387,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         Text(
           'Produk Serupa',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.bold,
             color: colors.textPrimary,
           ),

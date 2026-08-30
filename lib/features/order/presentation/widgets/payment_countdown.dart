@@ -64,7 +64,7 @@ class _PaymentCountdownState extends State<PaymentCountdown> {
               'Selesaikan pembayaran dalam',
               style: TextStyle(
                 color: colors.textSecondary,
-                fontSize: 12,
+                fontSize: 11.5,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -73,7 +73,7 @@ class _PaymentCountdownState extends State<PaymentCountdown> {
             '${two(hours)}:${two(minutes)}:${two(seconds)}',
             style: const TextStyle(
               color: AppColors.warning,
-              fontSize: 14,
+              fontSize: 13,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -107,7 +107,7 @@ class _CountdownBox extends StatelessWidget {
               text,
               style: const TextStyle(
                 color: AppColors.warning,
-                fontSize: 12,
+                fontSize: 11.5,
                 fontWeight: FontWeight.w600,
               ),
             ),

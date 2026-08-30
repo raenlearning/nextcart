@@ -53,7 +53,7 @@ class AppEmptyState extends StatelessWidget {
               style: TextStyle(
                 color: colors.textPrimary,
                 fontWeight: FontWeight.bold,
-                fontSize: 15,
+                fontSize: 14,
               ),
             ),
             if (description != null) ...[
@@ -63,7 +63,7 @@ class AppEmptyState extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: colors.textSecondary,
-                  fontSize: 12.5,
+                  fontSize: 12,
                   height: 1.4,
                 ),
               ),

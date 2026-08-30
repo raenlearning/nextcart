@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nextcart/core/constants/order_status.dart';
-import 'package:nextcart/core/constants/pricing.dart';
 import 'package:nextcart/core/service/address_store.dart';
 import 'package:nextcart/data/repository/shipping_repository.dart';
 import 'package:nextcart/features/cart/bloc/cart_event.dart';
@@ -195,8 +194,6 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     }
   }
 
-  double get _vatRate => AppPricing.vatRate;
-
   CartLoaded _copyLoaded(CartLoaded c, {Map<String, dynamic>? voucher}) {
     return CartLoaded(
       c.cartItems,
@@ -298,7 +295,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   ) {
     final discount = calculateDiscount(subtotal, voucher);
     final discounted = subtotal - discount;
-    return discounted + shippingFee + discounted * _vatRate;
+    return discounted + shippingFee;
   }
 
   Future<void> _onApplyVoucher(ApplyVoucher event, Emitter<CartState> emit) async {
@@ -516,11 +513,10 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         voucherCode = redeemResult['code']?.toString();
       }
 
-      // Hitung ongkir & pajak (PPN atas nilai setelah diskon)
+      // Hitung ongkir
       final double discounted = recalculatedTotal - discountAmount;
       final double deliveryFee = shippingFee;
-      final double tax = discounted * _vatRate;
-      final double payableTotal = discounted + deliveryFee + tax;
+      final double payableTotal = discounted + deliveryFee;
       final int grossAmount = payableTotal.round();
 
       // 2. Ambil alamat pengiriman terpilih (fallback ke alamat profil)
@@ -555,7 +551,6 @@ class CartBloc extends Bloc<CartEvent, CartState> {
             'voucher_code': ?voucherCode,
             'discount_amount': discountAmount,
             'delivery_fee': deliveryFee,
-            'tax_amount': tax,
           })
           .select()
           .single();

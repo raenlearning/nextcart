@@ -52,7 +52,7 @@ class _AddressPickerSheetState extends State<AddressPickerSheet> {
               'Pilih Alamat',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: 15,
                 color: colors.textPrimary,
               ),
             ),
@@ -114,14 +114,14 @@ class _AddressPickerSheetState extends State<AddressPickerSheet> {
                           style: TextStyle(
                             color: colors.textPrimary,
                             fontWeight: FontWeight.w600,
-                            fontSize: 13,
+                            fontSize: 12.5,
                           ),
                         ),
                         subtitle: Text(
                           parts.join(', '),
                           style: TextStyle(
                             color: colors.textSecondary,
-                            fontSize: 12,
+                            fontSize: 11.5,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,

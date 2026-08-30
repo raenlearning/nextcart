@@ -141,7 +141,7 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
           style: TextStyle(
             color: colors.textPrimary,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 17,
           ),
         ),
         leading: IconButton(
@@ -161,7 +161,7 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
                 style: TextStyle(
                   color: colors.textPrimary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 15,
+                  fontSize: 14,
                 ),
               ),
               const SizedBox(height: 16),
@@ -192,7 +192,7 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
                 style: TextStyle(
                   color: colors.textPrimary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 14,
+                  fontSize: 13,
                 ),
               ),
               const SizedBox(height: 6),
@@ -269,7 +269,7 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
                                 '${_images.length}/$_maxImages',
                                 style: TextStyle(
                                   color: colors.textHint,
-                                  fontSize: 10,
+                                  fontSize: 9.5,
                                 ),
                               ),
                             ],
@@ -285,13 +285,13 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
                 style: TextStyle(
                   color: colors.textPrimary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 14,
+                  fontSize: 13,
                 ),
               ),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _titleController,
-                style: TextStyle(color: colors.textPrimary, fontSize: 14),
+                style: TextStyle(color: colors.textPrimary, fontSize: 13),
                 decoration: const InputDecoration(
                     hintText: 'cth: Sangat memuaskan'),
               ),
@@ -301,13 +301,13 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
                 style: TextStyle(
                   color: colors.textPrimary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 14,
+                  fontSize: 13,
                 ),
               ),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _commentController,
-                style: TextStyle(color: colors.textPrimary, fontSize: 14),
+                style: TextStyle(color: colors.textPrimary, fontSize: 13),
                 maxLines: 4,
                 decoration: const InputDecoration(
                     hintText: 'Ceritakan pengalamanmu dengan produk ini'),
@@ -338,7 +338,7 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
                       : const Text(
                           'Kirim Ulasan',
                           style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 14),
+                              fontWeight: FontWeight.bold, fontSize: 13),
                         ),
                 ),
               ),
