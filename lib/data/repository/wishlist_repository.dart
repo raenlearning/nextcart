@@ -66,7 +66,15 @@ class WishlistRepository {
     }
 
     if (categoryId != null && categoryId.isNotEmpty) {
-      query = query.eq('products.categories.id', categoryId);
+      final matchingProducts = await _supabase
+          .from('products')
+          .select('id')
+          .eq('category_id', categoryId);
+      final productIds = (matchingProducts as List)
+          .map((p) => p['id'] as String)
+          .toList();
+      if (productIds.isEmpty) return [];
+      query = query.inFilter('product_id', productIds);
     }
 
     final start = (page - 1) * pageSize;

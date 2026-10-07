@@ -118,6 +118,8 @@ class _HomeAddressSheetState extends State<HomeAddressSheet> {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Icon(
                               Icons.location_off_outlined,

@@ -49,8 +49,10 @@ class _WishlistButtonState extends State<WishlistButton>
 
     final userId = Supabase.instance.client.auth.currentUser?.id;
     if (userId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Silakan login terlebih dahulu')),
+      ToastHelper.showToast(
+        context,
+        'Silakan login terlebih dahulu',
+        ToastSeverity.info,
       );
       return;
     }

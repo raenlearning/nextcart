@@ -29,8 +29,10 @@ class _AdminSidebarState extends State<AdminSidebar> {
   String get _initials {
     final name = widget.email.split('@').first;
     if (name.isEmpty) return 'A';
-    final parts =
-        name.split(RegExp(r'[._-]')).where((e) => e.isNotEmpty).toList();
+    final parts = name
+        .split(RegExp(r'[._-]'))
+        .where((e) => e.isNotEmpty)
+        .toList();
     if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
     return name.substring(0, name.length >= 2 ? 2 : 1).toUpperCase();
   }

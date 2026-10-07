@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/data/repository/address_repository.dart';
 
@@ -108,25 +109,18 @@ class _AddressFormPageState extends State<AddressFormPage> {
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              _isEditing
-                  ? 'Alamat berhasil diperbarui!'
-                  : 'Alamat berhasil ditambahkan!',
-            ),
-          ),
+        ToastHelper.showToast(
+          context,
+          _isEditing
+              ? 'Alamat berhasil diperbarui!'
+              : 'Alamat berhasil ditambahkan!',
+          ToastSeverity.success,
         );
         context.pop(created ?? {'saved': true});
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal menyimpan alamat: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ToastHelper.showToast(context, 'Gagal menyimpan alamat: $e', ToastSeverity.error);
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);

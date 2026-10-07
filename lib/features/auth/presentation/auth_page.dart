@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/helper/validators.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/features/auth/bloc/auth_bloc.dart';
@@ -145,32 +146,19 @@ class _AuthPageState extends State<AuthPage> {
             listener: (context, state) {
               final isLogin = _currentMode == AuthMode.login;
               if (state is AuthSuccess) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      isLogin ? 'Login Berhasil!' : 'Registrasi Berhasil!',
-                    ),
-                    backgroundColor: AppColors.secondary,
-                  ),
+                ToastHelper.showTopToast(
+                  context,
+                  isLogin ? 'Login Berhasil!' : 'Registrasi Berhasil!',
                 );
                 context.go('/');
               }
               if (state is AuthFailure) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.errorMessage),
-                    backgroundColor: AppColors.error,
-                  ),
-                );
+                ToastHelper.showToast(context, state.errorMessage, ToastSeverity.error);
               }
               if (state is AuthForgotPasswordSent) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text(
-                      'Tautan reset kata sandi telah dikirim ke email Anda.',
-                    ),
-                    backgroundColor: AppColors.secondary,
-                  ),
+                ToastHelper.showTopToast(
+                  context,
+                  'Tautan reset kata sandi telah dikirim ke email Anda.',
                 );
               }
             },

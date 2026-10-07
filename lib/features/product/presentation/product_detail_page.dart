@@ -62,9 +62,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   void _toggleWishlist() {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Silakan login terlebih dahulu')),
-      );
+      ToastHelper.showToast(context, 'Silakan login terlebih dahulu', ToastSeverity.info);
       return;
     }
 
@@ -218,12 +216,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             '${imageUrl ?? 'Lihat produk di NextCart'}',
       ),
     );
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Link produk disalin ke clipboard'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+    ToastHelper.showToast(context, 'Link produk disalin ke clipboard', ToastSeverity.success);
   }
 
   @override

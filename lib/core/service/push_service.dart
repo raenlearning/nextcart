@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/router/app_router.dart';
 import 'package:nextcart/data/repository/notification_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -79,19 +80,11 @@ class PushService {
     final body = message.notification?.body ?? '';
     if (messenger == null) return;
 
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text('$title\n$body',
-              maxLines: 2, overflow: TextOverflow.ellipsis),
-          behavior: SnackBarBehavior.floating,
-          action: SnackBarAction(
-            label: 'Lihat',
-            onPressed: () => _handleOpenMessage(message.data),
-          ),
-        ),
-      );
+    ToastHelper.showToast(
+      messenger.context,
+      '$title\n$body',
+      ToastSeverity.info,
+    );
   }
 
   void _handleOpenMessage(Map<String, dynamic> data) {

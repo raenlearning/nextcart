@@ -4,11 +4,12 @@ import 'package:nextcart/data/repository/admin_analytic_repository.dart';
 import 'package:nextcart/features/admin/bloc/analytics/admin_analytic_event.dart';
 import 'package:nextcart/features/admin/bloc/analytics/admin_analytic_state.dart';
 
-class AdminAnalyticsBloc extends Bloc<AdminAnalyticsEvent, AdminAnalyticsState> {
+class AdminAnalyticsBloc
+    extends Bloc<AdminAnalyticsEvent, AdminAnalyticsState> {
   final AdminAnalyticsRepository _repository;
 
   AdminAnalyticsBloc({required this._repository})
-      : super(AdminAnalyticsInitial()) {
+    : super(AdminAnalyticsInitial()) {
     on<FetchAdminAnalytics>(_onFetch);
   }
 
@@ -31,24 +32,24 @@ class AdminAnalyticsBloc extends Bloc<AdminAnalyticsEvent, AdminAnalyticsState> 
           .toList();
 
       final List<Map<String, dynamic>> topProducts = summary.topProducts
-          .map((p) => {
-                'image': p.imageUrl,
-                'name': p.name,
-                'qty_sold': p.qtySold,
-              })
+          .map(
+            (p) => {'image': p.imageUrl, 'name': p.name, 'qty_sold': p.qtySold},
+          )
           .toList();
 
-      emit(AdminAnalyticsLoaded(
-        grossRevenue: summary.grossRevenue,
-        completedOrders: summary.completedOrders,
-        totalProducts: summary.totalProducts,
-        totalUsers: summary.totalUsers,
-        revenueChart: revenueChart,
-        topProducts: topProducts,
-        orderStatusBreakdown: summary.orderStatusBreakdown,
-        period: event.period,
-        lowStockProducts: summary.lowStockProducts,
-      ));
+      emit(
+        AdminAnalyticsLoaded(
+          grossRevenue: summary.grossRevenue,
+          completedOrders: summary.completedOrders,
+          totalProducts: summary.totalProducts,
+          totalUsers: summary.totalUsers,
+          revenueChart: revenueChart,
+          topProducts: topProducts,
+          orderStatusBreakdown: summary.orderStatusBreakdown,
+          period: event.period,
+          lowStockProducts: summary.lowStockProducts,
+        ),
+      );
     } catch (e) {
       emit(AdminAnalyticsError('Gagal memuat data: $e'));
     }
@@ -56,12 +57,17 @@ class AdminAnalyticsBloc extends Bloc<AdminAnalyticsEvent, AdminAnalyticsState> 
 
   DateTime _periodStart(String period, DateTime now) {
     switch (period) {
-      case '24h': return now.subtract(const Duration(hours: 24));
-      case '7d': return now.subtract(const Duration(days: 7));
-      case '6m': return now.subtract(const Duration(days: 180));
-      case '1yr': return now.subtract(const Duration(days: 365));
+      case '24h':
+        return now.subtract(const Duration(hours: 24));
+      case '7d':
+        return now.subtract(const Duration(days: 7));
+      case '6m':
+        return now.subtract(const Duration(days: 180));
+      case '1yr':
+        return now.subtract(const Duration(days: 365));
       case '30d':
-      default: return now.subtract(const Duration(days: 30));
+      default:
+        return now.subtract(const Duration(days: 30));
     }
   }
 }

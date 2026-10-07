@@ -5,6 +5,7 @@ import 'package:nextcart/core/constants/order_status.dart';
 import 'package:nextcart/core/constants/store_info.dart';
 import 'package:nextcart/core/helper/currency_formatter.dart';
 import 'package:nextcart/core/helper/date_formatter.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/helper/whatsapp_helper.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/core/theme/app_fonts.dart';
@@ -139,34 +140,21 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         params: {'p_order_id': widget.order['id']},
       );
       final map = Map<String, dynamic>.from(result as Map);
-      if (mounted) {
+        if (mounted) {
         if (map['ok'] == true) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Pesanan selesai. Terima kasih!'),
-              backgroundColor: AppColors.success,
-            ),
-          );
+          ToastHelper.showToast(context, 'Pesanan selesai. Terima kasih!', ToastSeverity.success);
           await _reload();
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                map['error']?.toString() ?? 'Gagal konfirmasi pesanan.',
-              ),
-              backgroundColor: AppColors.error,
-            ),
+          ToastHelper.showToast(
+            context,
+            map['error']?.toString() ?? 'Gagal konfirmasi pesanan.',
+            ToastSeverity.error,
           );
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal konfirmasi pesanan: ${e.toString()}'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ToastHelper.showToast(context, 'Gagal konfirmasi pesanan: ${e.toString()}', ToastSeverity.error);
       }
     } finally {
       if (mounted) setState(() => _isConfirming = false);

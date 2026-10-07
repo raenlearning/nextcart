@@ -30,6 +30,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     on<TriggerCheckout>(_onTriggerCheckout);
     on<ApplyVoucher>(_onApplyVoucher);
     on<ClearVoucher>(_onClearVoucher);
+    on<ClearVoucherError>(_onClearVoucherError);
     on<SelectShippingAddress>(_onSelectShippingAddress);
     on<SelectCourier>(_onSelectCourier);
   }
@@ -194,11 +195,12 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     }
   }
 
-  CartLoaded _copyLoaded(CartLoaded c, {Map<String, dynamic>? voucher}) {
+  CartLoaded _copyLoaded(CartLoaded c, {Map<String, dynamic>? voucher, String? voucherError}) {
     return CartLoaded(
       c.cartItems,
       c.totalPrice,
       voucher: voucher ?? c.voucher,
+      voucherError: voucherError,
       totalWeightGrams: c.totalWeightGrams,
       selectedAddress: c.selectedAddress,
       selectedCourier: c.selectedCourier,
@@ -311,7 +313,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
           .maybeSingle();
 
       if (data == null) {
-        emit(CartError('Kode voucher tidak valid.'));
+        emit(_copyLoaded(current, voucherError: 'Kode voucher tidak valid.'));
         return;
       }
 
@@ -319,38 +321,48 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       final validFrom = DateTime.tryParse(data['valid_from'] as String? ?? '');
       final validUntil = DateTime.tryParse(data['valid_until'] as String? ?? '');
       if (validFrom != null && now.isBefore(validFrom)) {
-        emit(CartError('Voucher belum aktif.'));
+        emit(_copyLoaded(current, voucherError: 'Voucher belum aktif.'));
         return;
       }
       if (validUntil != null && now.isAfter(validUntil)) {
-        emit(CartError('Voucher sudah kedaluwarsa.'));
+        emit(_copyLoaded(current, voucherError: 'Voucher sudah kedaluwarsa.'));
         return;
       }
 
       final minPurchase = (data['min_purchase'] as num?)?.toDouble() ?? 0;
       if (current.totalPrice < minPurchase) {
-        emit(CartError(
-            'Minimal belanja Rp ${minPurchase.round()} untuk voucher ini.'));
+        emit(_copyLoaded(current,
+            voucherError: 'Minimal belanja Rp ${minPurchase.round()} untuk voucher ini.'));
         return;
       }
 
       final usageLimit = (data['usage_limit'] as num?)?.toInt() ?? 0;
       final usedCount = (data['used_count'] as num?)?.toInt() ?? 0;
       if (usageLimit > 0 && usedCount >= usageLimit) {
-        emit(CartError('Voucher sudah habis digunakan.'));
+        emit(_copyLoaded(current, voucherError: 'Voucher sudah habis digunakan.'));
         return;
       }
 
-      emit(_copyLoaded(current, voucher: data));
+      emit(_copyLoaded(current, voucher: data, voucherError: null));
     } catch (e) {
-      emit(CartError('Gagal memakai voucher: ${e.toString()}'));
+      final s = state;
+      if (s is CartLoaded) {
+        emit(_copyLoaded(s, voucherError: 'Gagal memakai voucher: ${e.toString()}'));
+      }
     }
   }
 
   Future<void> _onClearVoucher(ClearVoucher event, Emitter<CartState> emit) async {
     final current = state;
     if (current is CartLoaded) {
-      emit(_copyLoaded(current, voucher: null));
+      emit(_copyLoaded(current, voucher: null, voucherError: null));
+    }
+  }
+
+  void _onClearVoucherError(ClearVoucherError event, Emitter<CartState> emit) {
+    final current = state;
+    if (current is CartLoaded && current.voucherError != null) {
+      emit(_copyLoaded(current, voucherError: null));
     }
   }
 

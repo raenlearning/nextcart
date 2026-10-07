@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/data/repository/notification_repository.dart';
 
@@ -44,10 +45,7 @@ class _NotificationListPageState extends State<NotificationListPage> {
       await _load();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal menandai dibaca: $e'),
-              backgroundColor: AppColors.error),
-        );
+        ToastHelper.showToast(context, 'Gagal menandai dibaca: $e', ToastSeverity.error);
       }
     }
   }

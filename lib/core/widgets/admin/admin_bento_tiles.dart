@@ -151,7 +151,7 @@ class AdminStatTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       color: alert ? AppColors.error.withValues(alpha: 0.08) : null,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           FaIcon(icon, size: 16, color: color),

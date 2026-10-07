@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/core/widgets/shimmer_box.dart';
 import 'package:nextcart/features/cart/bloc/cart_bloc.dart';
@@ -53,13 +54,10 @@ class _CartPageState extends State<CartPage> {
             );
 
             if (context.mounted && isSuccess != true) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Pesanan disimpan ke riwayat, menunggu pembayaran.',
-                  ),
-                  backgroundColor: AppColors.warning,
-                ),
+              ToastHelper.showToast(
+                context,
+                'Pesanan disimpan ke riwayat, menunggu pembayaran.',
+                ToastSeverity.warning,
               );
               Navigator.of(context).popUntil((route) => route.isFirst);
             }
@@ -79,12 +77,7 @@ class _CartPageState extends State<CartPage> {
           }
 
           if (state is CartError && context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.error,
-              ),
-            );
+            ToastHelper.showToast(context, state.message, ToastSeverity.error);
           }
         },
         builder: (context, state) {

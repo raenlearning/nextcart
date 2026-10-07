@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nextcart/core/constants/app_assets.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/constants/app_spacing.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/core/widgets/shimmer_box.dart';
@@ -113,12 +114,7 @@ class WishlistPageState extends State<WishlistPage> {
     context.read<WishlistBloc>().add(WishlistRemove(product['id'] as String));
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Produk dipindahkan ke keranjang'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      ToastHelper.showTopToast(context, 'Produk dipindahkan ke keranjang');
     }
   }
 
@@ -130,20 +126,7 @@ class WishlistPageState extends State<WishlistPage> {
     context.read<WishlistBloc>().add(WishlistRemove(productId));
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Dihapus dari wishlist'),
-        duration: const Duration(seconds: 3),
-        action: SnackBarAction(
-          label: 'Batal',
-          textColor: AppColors.primary,
-          onPressed: () {
-            context.read<WishlistBloc>().add(WishlistToggle(productId));
-            _fetchWishlist(reset: true);
-          },
-        ),
-      ),
-    );
+    ToastHelper.showToast(context, 'Dihapus dari wishlist', ToastSeverity.info);
   }
 
   @override

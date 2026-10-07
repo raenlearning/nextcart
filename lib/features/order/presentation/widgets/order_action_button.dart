@@ -86,9 +86,7 @@ class OrderActionButton extends StatelessWidget {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Fitur "$label" segera hadir')),
-    );
+    ToastHelper.showToast(context, 'Fitur "$label" segera hadir', ToastSeverity.info);
   }
 
   void _reorder(BuildContext context) {

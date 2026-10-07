@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/service/address_store.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/data/repository/address_repository.dart';
@@ -82,12 +83,7 @@ class _AddressListPageState extends State<AddressListPage> {
         await AddressStore.instance.refresh();
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Gagal menghapus alamat: $e'),
-              backgroundColor: AppColors.error,
-            ),
-          );
+          ToastHelper.showToast(context, 'Gagal menghapus alamat: $e', ToastSeverity.error);
         }
       }
     }
@@ -100,12 +96,7 @@ class _AddressListPageState extends State<AddressListPage> {
       await _load();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal mengatur alamat utama: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ToastHelper.showToast(context, 'Gagal mengatur alamat utama: $e', ToastSeverity.error);
       }
     }
   }

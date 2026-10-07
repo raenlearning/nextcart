@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:nextcart/core/helper/currency_formatter.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -39,12 +40,7 @@ class _AdminVoucherPageState extends State<AdminVoucherPage> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Gagal memuat voucher: $e'),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      ToastHelper.showToast(context, 'Gagal memuat voucher: $e', ToastSeverity.error);
     }
   }
 
@@ -69,13 +65,10 @@ class _AdminVoucherPageState extends State<AdminVoucherPage> {
     if (saved == true) {
       await _fetchVouchers();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(existing == null
-              ? 'Voucher berhasil dibuat'
-              : 'Voucher berhasil diperbarui'),
-          backgroundColor: AppColors.success,
-        ),
+      ToastHelper.showToast(
+        context,
+        existing == null ? 'Voucher berhasil dibuat' : 'Voucher berhasil diperbarui',
+        ToastSeverity.success,
       );
     }
   }
@@ -90,12 +83,7 @@ class _AdminVoucherPageState extends State<AdminVoucherPage> {
       await _fetchVouchers();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Gagal mengubah status: $e'),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      ToastHelper.showToast(context, 'Gagal mengubah status: $e', ToastSeverity.error);
     }
   }
 
@@ -134,20 +122,10 @@ class _AdminVoucherPageState extends State<AdminVoucherPage> {
       await _supabase.from('vouchers').delete().eq('id', voucher['id']);
       await _fetchVouchers();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Voucher dihapus'),
-          backgroundColor: AppColors.warning,
-        ),
-      );
+      ToastHelper.showToast(context, 'Voucher dihapus', ToastSeverity.warning);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Gagal menghapus: $e'),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      ToastHelper.showToast(context, 'Gagal menghapus: $e', ToastSeverity.error);
     }
   }
 
@@ -446,21 +424,11 @@ class _VoucherFormSheetState extends State<_VoucherFormSheet> {
         double.tryParse(_maxDiscountController.text.replaceAll(',', '.'));
 
     if (code.isEmpty || name.isEmpty || value == null || value <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Lengkapi kode, nama, dan nilai diskon.'),
-          backgroundColor: AppColors.warning,
-        ),
-      );
+      ToastHelper.showToast(context, 'Lengkapi kode, nama, dan nilai diskon.', ToastSeverity.warning);
       return;
     }
     if (_type == 'percent' && value > 100) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Diskon persen tidak boleh lebih dari 100.'),
-          backgroundColor: AppColors.warning,
-        ),
-      );
+      ToastHelper.showToast(context, 'Diskon persen tidak boleh lebih dari 100.', ToastSeverity.warning);
       return;
     }
 
@@ -486,15 +454,12 @@ class _VoucherFormSheetState extends State<_VoucherFormSheet> {
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            e.toString().contains('duplicate')
-                ? 'Kode voucher sudah dipakai.'
-                : 'Gagal menyimpan: $e',
-          ),
-          backgroundColor: AppColors.error,
-        ),
+      ToastHelper.showToast(
+        context,
+        e.toString().contains('duplicate')
+            ? 'Kode voucher sudah dipakai.'
+            : 'Gagal menyimpan: $e',
+        ToastSeverity.error,
       );
     }
   }

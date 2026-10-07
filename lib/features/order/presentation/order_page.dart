@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:nextcart/core/constants/app_assets.dart';
 import 'package:nextcart/core/constants/order_status.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/features/order/presentation/widgets/order_list.dart';
 import 'package:nextcart/features/order/presentation/widgets/order_search_bar.dart';
@@ -182,12 +183,7 @@ class OrderScreenState extends State<OrderScreen>
         _isLoadingTab[tabIndex] = false;
         _isInitialLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Gagal memuat pesanan: ${e.toString()}'),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      ToastHelper.showToast(context, 'Gagal memuat pesanan: ${e.toString()}', ToastSeverity.error);
     }
   }
 

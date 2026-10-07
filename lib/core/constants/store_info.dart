@@ -2,7 +2,7 @@ class StoreInfo {
   StoreInfo._();
 
   static const String name = 'Nextcart';
-  static const String tagline = 'Teknologi Gen-Baru, Tanpa Ribet';
+  static const String tagline = 'Next-Gen Tech, Zero Hassle';
   static const String description =
       'Nextcart adalah toko elektronik dan gadget pilihan '
       'dengan produk original bergaransi resmi. '

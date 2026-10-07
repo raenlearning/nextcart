@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nextcart/core/constants/app_assets.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/widgets/user/app_bar.dart';
 import 'package:nextcart/core/widgets/user/category_chips.dart';
 import 'package:nextcart/core/widgets/user/header_section.dart';
@@ -81,12 +82,7 @@ class _HomePageState extends State<HomePage> {
     await _supabase.auth.signOut();
     if (mounted) {
       context.go('/auth');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Berhasil keluar dari akun.'),
-          backgroundColor: Colors.orange,
-        ),
-      );
+      ToastHelper.showToast(context, 'Berhasil keluar dari akun.', ToastSeverity.info);
     }
   }
 

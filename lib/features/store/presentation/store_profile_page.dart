@@ -122,13 +122,10 @@ class _HeaderCard extends StatelessWidget {
           Container(
             width: 54,
             height: 54,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-            ),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
             child: SvgPicture.asset(
-              'assets/branding/nextcart_logo.svg',
-               width: 50,
-            height: 50,
+              'assets/branding/nextcart-logo.svg',
+              fit: BoxFit.cover,
             ),
           ),
           const SizedBox(width: 14),

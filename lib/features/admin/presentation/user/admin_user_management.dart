@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nextcart/features/admin/presentation/user/widgets/search_bar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'widgets/role_filter.dart';
 import 'widgets/user_list.dart';
 
@@ -44,12 +45,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal memuat data pengguna: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ToastHelper.showToast(context, 'Gagal memuat data pengguna: $e', ToastSeverity.error);
       }
     }
   }
@@ -126,26 +122,15 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
           .eq('id', user['id']);
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            isBlocked
-                ? '$name berhasil dibuka blokirnya'
-                : '$name telah diblokir',
-          ),
-          backgroundColor:
-              isBlocked ? AppColors.success : AppColors.warning,
-        ),
+      ToastHelper.showToast(
+        context,
+        isBlocked ? '$name berhasil dibuka blokirnya' : '$name telah diblokir',
+        isBlocked ? ToastSeverity.success : ToastSeverity.warning,
       );
       await _fetchUsers();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Gagal memperbarui status: $e'),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      ToastHelper.showToast(context, 'Gagal memperbarui status: $e', ToastSeverity.error);
     }
   }
 
@@ -206,21 +191,11 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
       }
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('$name telah dihapus secara permanen'),
-          backgroundColor: AppColors.success,
-        ),
-      );
+      ToastHelper.showToast(context, '$name telah dihapus secara permanen', ToastSeverity.success);
       await _fetchUsers();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Gagal menghapus pengguna: $e'),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      ToastHelper.showToast(context, 'Gagal menghapus pengguna: $e', ToastSeverity.error);
     }
   }
 

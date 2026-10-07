@@ -12,6 +12,7 @@ import 'package:nextcart/features/admin/bloc/product/admin_product_event.dart';
 import 'package:nextcart/features/admin/bloc/product/admin_product_state.dart';
 import 'package:nextcart/data/models/product_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_assets.dart';
 
@@ -79,15 +80,17 @@ class _AdminProductManagementPageState
   }
 
   void _showSnack(String msg, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg, style: const TextStyle(color: Colors.white)),
-        backgroundColor: color,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      ),
-    );
+    ToastSeverity severity;
+    if (color == AppColors.error) {
+      severity = ToastSeverity.error;
+    } else if (color == AppColors.warning) {
+      severity = ToastSeverity.warning;
+    } else if (color == AppColors.success) {
+      severity = ToastSeverity.success;
+    } else {
+      severity = ToastSeverity.info;
+    }
+    ToastHelper.showToast(context, msg, severity);
   }
 
   void _showStatusFilterSheet() {
@@ -360,6 +363,7 @@ class _Header extends StatelessWidget {
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
                 color: context.colors.textPrimary,
+                fontFamily: 'Geist',
               ),
             ),
           ),

@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/data/repository/review_repository.dart';
 
@@ -49,10 +50,7 @@ class _ReviewListPageState extends State<ReviewListPage> {
     if (!mounted) return;
 
     if (hasAlreadyReviewed) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Kamu sudah memberi ulasan untuk produk ini')),
-      );
+      ToastHelper.showToast(context, 'Kamu sudah memberi ulasan untuk produk ini', ToastSeverity.info);
       return;
     }
 

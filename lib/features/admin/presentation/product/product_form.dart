@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nextcart/core/helper/supabase_storage_helper.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/helper/validators.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/core/widgets/admin/category_row.dart';
@@ -121,15 +122,17 @@ class _ProductFormPageState extends State<ProductFormPage> {
   }
 
   void _showSnack(String msg, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg, style: const TextStyle(color: Colors.white)),
-        backgroundColor: color,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      ),
-    );
+    ToastSeverity severity;
+    if (color == AppColors.error) {
+      severity = ToastSeverity.error;
+    } else if (color == AppColors.warning) {
+      severity = ToastSeverity.warning;
+    } else if (color == AppColors.success) {
+      severity = ToastSeverity.success;
+    } else {
+      severity = ToastSeverity.info;
+    }
+    ToastHelper.showToast(context, msg, severity);
   }
 
   void _openMediaSheet() {

@@ -1,4 +1,3 @@
-// core/helper/toast_helper.dart
 import 'package:flutter/material.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 
@@ -7,15 +6,16 @@ enum ToastSeverity { success, error, warning, info }
 class ToastHelper {
   ToastHelper._();
 
-  static void showTopToast(BuildContext context, String message) {
-    showToast(context, message, ToastSeverity.success);
+  static void showTopToast(BuildContext context, String message, {Duration? duration}) {
+    showToast(context, message, ToastSeverity.success, duration: duration);
   }
 
   static void showToast(
     BuildContext context,
     String message,
-    ToastSeverity severity,
-  ) {
+    ToastSeverity severity, {
+    Duration? duration,
+  }) {
     final overlay = Overlay.of(context);
 
     late OverlayEntry overlayEntry;
@@ -24,6 +24,7 @@ class ToastHelper {
         entry: overlayEntry,
         message: message,
         severity: severity,
+        duration: duration ?? const Duration(seconds: 2),
         onDismissed: () => overlayEntry.remove(),
       ),
     );
@@ -36,12 +37,14 @@ class _AnimatedToast extends StatefulWidget {
   final OverlayEntry entry;
   final String message;
   final ToastSeverity severity;
+  final Duration duration;
   final VoidCallback onDismissed;
 
   const _AnimatedToast({
     required this.entry,
     required this.message,
     required this.severity,
+    required this.duration,
     required this.onDismissed,
   });
 
@@ -71,7 +74,7 @@ class _AnimatedToastState extends State<_AnimatedToast>
   void initState() {
     super.initState();
     _controller.forward();
-    Future.delayed(const Duration(seconds: 2), _dismiss);
+    Future.delayed(widget.duration, _dismiss);
   }
 
   void _dismiss() {

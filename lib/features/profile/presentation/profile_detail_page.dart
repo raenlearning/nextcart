@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 
 class ProfileDetailPage extends StatefulWidget {
@@ -97,21 +98,14 @@ class ProfileDetailPageState extends State<ProfileDetailPage> {
           .eq('id', userId);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profil berhasil diperbarui!')),
-        );
+        ToastHelper.showToast(context, 'Profil berhasil diperbarui!', ToastSeverity.success);
         context.pop(
           true,
         ); 
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal memperbarui profil: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ToastHelper.showToast(context, 'Gagal memperbarui profil: $e', ToastSeverity.error);
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);

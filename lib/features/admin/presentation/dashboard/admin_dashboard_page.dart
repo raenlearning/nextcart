@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:nextcart/core/helper/csv_export_helper.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/core/constants/app_spacing.dart';
 import 'package:nextcart/core/widgets/admin/admin_bento_tiles.dart';
@@ -38,8 +39,9 @@ class _AdminAnalyticsDashboardPageState
     _fetch();
   }
 
-  void _fetch() =>
-      context.read<AdminAnalyticsBloc>().add(FetchAdminAnalytics(period: _period));
+  void _fetch() => context.read<AdminAnalyticsBloc>().add(
+    FetchAdminAnalytics(period: _period),
+  );
 
   void _onPeriodChanged(String p) {
     setState(() => _period = p);
@@ -61,11 +63,10 @@ class _AdminAnalyticsDashboardPageState
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal mengekspor laporan: $e'),
-            backgroundColor: AppColors.error,
-          ),
+        ToastHelper.showToast(
+          context,
+          'Gagal mengekspor laporan: $e',
+          ToastSeverity.error,
         );
       }
     } finally {
@@ -80,10 +81,7 @@ class _AdminAnalyticsDashboardPageState
       builder: (context) => AlertDialog(
         backgroundColor: colors.card,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          'Keluar?',
-          style: TextStyle(color: colors.textPrimary),
-        ),
+        title: Text('Keluar?', style: TextStyle(color: colors.textPrimary)),
         content: Text(
           'Anda akan keluar dari akun admin.',
           style: TextStyle(color: colors.textSecondary, height: 1.4),
@@ -115,7 +113,8 @@ class _AdminAnalyticsDashboardPageState
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final userEmail = Supabase.instance.client.auth.currentUser?.email ??
+    final userEmail =
+        Supabase.instance.client.auth.currentUser?.email ??
         'admin@nextcart.com';
 
     return Scaffold(
@@ -154,8 +153,11 @@ class _AdminAnalyticsDashboardPageState
                               border: Border.all(color: colors.border),
                             ),
                             child: IconButton(
-                              icon: Icon(Icons.menu_rounded,
-                                  color: colors.textPrimary, size: 20),
+                              icon: Icon(
+                                Icons.menu_rounded,
+                                color: colors.textPrimary,
+                                size: 20,
+                              ),
                               tooltip: 'Menu',
                               onPressed: () {
                                 AdminSidebar.refreshTrigger.value++;
@@ -171,7 +173,7 @@ class _AdminAnalyticsDashboardPageState
                                 fontSize: 22,
                                 fontWeight: FontWeight.w700,
                                 color: colors.textPrimary,
-                                fontFamily: 'Inter'
+                                fontFamily: 'Geist',
                               ),
                             ),
                           ),
@@ -198,17 +200,25 @@ class _AdminAnalyticsDashboardPageState
                           children: const [
                             Row(
                               children: [
-                                Expanded(child: ShimmerBox(height: 110, radius: 16)),
+                                Expanded(
+                                  child: ShimmerBox(height: 110, radius: 16),
+                                ),
                                 SizedBox(width: 12),
-                                Expanded(child: ShimmerBox(height: 110, radius: 16)),
+                                Expanded(
+                                  child: ShimmerBox(height: 110, radius: 16),
+                                ),
                               ],
                             ),
                             SizedBox(height: 12),
                             Row(
                               children: [
-                                Expanded(child: ShimmerBox(height: 110, radius: 16)),
+                                Expanded(
+                                  child: ShimmerBox(height: 110, radius: 16),
+                                ),
                                 SizedBox(width: 12),
-                                Expanded(child: ShimmerBox(height: 110, radius: 16)),
+                                Expanded(
+                                  child: ShimmerBox(height: 110, radius: 16),
+                                ),
                               ],
                             ),
                             SizedBox(height: 16),
@@ -228,15 +238,26 @@ class _AdminAnalyticsDashboardPageState
                             Container(
                               width: 72,
                               height: 72,
-                              decoration: BoxDecoration(color: colors.inputFill, shape: BoxShape.circle),
+                              decoration: BoxDecoration(
+                                color: colors.inputFill,
+                                shape: BoxShape.circle,
+                              ),
                               alignment: Alignment.center,
-                              child: Icon(Icons.wifi_off_rounded, size: 32, color: colors.textHint),
+                              child: Icon(
+                                Icons.wifi_off_rounded,
+                                size: 32,
+                                color: colors.textHint,
+                              ),
                             ),
                             const SizedBox(height: 16),
                             Text(
                               state.message,
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: colors.textSecondary, fontSize: 13, height: 1.4),
+                              style: TextStyle(
+                                color: colors.textSecondary,
+                                fontSize: 13,
+                                height: 1.4,
+                              ),
                             ),
                             const SizedBox(height: 20),
                             ElevatedButton.icon(
@@ -247,9 +268,17 @@ class _AdminAnalyticsDashboardPageState
                                 backgroundColor: AppColors.primary,
                                 foregroundColor: Colors.white,
                                 elevation: 0,
-                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                textStyle: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 12,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                textStyle: const TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
                           ],
@@ -294,40 +323,38 @@ class _AdminAnalyticsDashboardPageState
                           child: Row(
                             children: [
                               Expanded(
-                                child: Center(
-                                  child: AdminStatTile(
-                                    icon: FontAwesomeIcons.boxOpen,
-                                    color: AppColors.primary,
-                                    label: 'Produk',
-                                    value: formatCompactCount(state.totalProducts),
+                                child: AdminStatTile(
+                                  icon: FontAwesomeIcons.boxOpen,
+                                  color: AppColors.primary,
+                                  label: 'Produk',
+                                  value: formatCompactCount(
+                                    state.totalProducts,
                                   ),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
-                                child: Center(
-                                  child: AdminStatTile(
-                                    icon: FontAwesomeIcons.users,
-                                    color: AppColors.info,
-                                    label: 'Pengguna',
-                                    value: formatCompactCount(state.totalUsers),
-                                  ),
+                                child: AdminStatTile(
+                                  icon: FontAwesomeIcons.users,
+                                  color: AppColors.info,
+                                  label: 'Pengguna',
+                                  value: formatCompactCount(state.totalUsers),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
-                                child: Center(
-                                  child: AdminStatTile(
-                                    icon: FontAwesomeIcons.triangleExclamation,
-                                    color: AppColors.error,
-                                    label: 'Stok Menipis',
-                                    value: '${state.lowStockProducts.length}',
-                                    alert: state.lowStockProducts.isNotEmpty,
-                                    onTap: state.lowStockProducts.isNotEmpty
-                                        ? () => _showLowStockSheet(
-                                            context, state.lowStockProducts)
-                                        : null,
-                                  ),
+                                child: AdminStatTile(
+                                  icon: FontAwesomeIcons.triangleExclamation,
+                                  color: AppColors.error,
+                                  label: 'Stok Menipis',
+                                  value: '${state.lowStockProducts.length}',
+                                  alert: state.lowStockProducts.isNotEmpty,
+                                  onTap: state.lowStockProducts.isNotEmpty
+                                      ? () => _showLowStockSheet(
+                                          context,
+                                          state.lowStockProducts,
+                                        )
+                                      : null,
                                 ),
                               ),
                             ],
@@ -352,7 +379,9 @@ class _AdminAnalyticsDashboardPageState
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                        child: OrderStatusChart(statusBreakdown: state.orderStatusBreakdown),
+                        child: OrderStatusChart(
+                          statusBreakdown: state.orderStatusBreakdown,
+                        ),
                       ),
                     ),
                     SliverToBoxAdapter(
@@ -361,12 +390,16 @@ class _AdminAnalyticsDashboardPageState
                         child: TopProductsList(products: state.topProducts),
                       ),
                     ),
-                    const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.bottomNavSpace)),
-                  ]
-                  else
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: AppSpacing.bottomNavSpace),
+                    ),
+                  ] else
                     const SliverFillRemaining(
                       child: Center(
-                        child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2.4),
+                        child: CircularProgressIndicator(
+                          color: AppColors.primary,
+                          strokeWidth: 2.4,
+                        ),
                       ),
                     ),
                 ],
@@ -379,10 +412,7 @@ class _AdminAnalyticsDashboardPageState
   }
 }
 
-void _showLowStockSheet(
-  BuildContext context,
-  List<LowStockProduct> products,
-) {
+void _showLowStockSheet(BuildContext context, List<LowStockProduct> products) {
   final colors = context.colors;
   showModalBottomSheet(
     context: context,
@@ -420,10 +450,7 @@ void _showLowStockSheet(
               const SizedBox(height: 4),
               Text(
                 'Segera restock produk berikut (stok ≤ 5).',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: colors.textSecondary,
-                ),
+                style: TextStyle(fontSize: 12, color: colors.textSecondary),
               ),
               const SizedBox(height: 14),
               Flexible(

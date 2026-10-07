@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nextcart/core/constants/app_assets.dart';
 import 'package:nextcart/core/helper/supabase_storage_helper.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -64,15 +65,12 @@ Widget _categoryThumb(String name, double width, double height) {
   if (asset != null) {
     return Image.asset(asset, width: width, height: height, fit: BoxFit.cover);
   }
-  final letter =
-      name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : '?';
+  final letter = name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : '?';
   return Container(
     width: width,
     height: height,
     decoration: BoxDecoration(
-      gradient: LinearGradient(
-        colors: [AppColors.primary],
-      ),
+      gradient: LinearGradient(colors: [AppColors.primary]),
     ),
     alignment: Alignment.center,
     child: Text(
@@ -86,7 +84,12 @@ Widget _categoryThumb(String name, double width, double height) {
   );
 }
 
-Widget _buildCategoryCover(String? url, String name, double width, double height) {
+Widget _buildCategoryCover(
+  String? url,
+  String name,
+  double width,
+  double height,
+) {
   if (url != null && url.isNotEmpty) {
     return CachedNetworkImage(
       imageUrl: url,
@@ -133,11 +136,10 @@ class _AdminCategoryPageState extends State<AdminCategoryPage> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Gagal memuat kategori: $e'),
-          backgroundColor: AppColors.error,
-        ),
+      ToastHelper.showToast(
+        context,
+        'Gagal memuat kategori: $e',
+        ToastSeverity.error,
       );
     }
   }
@@ -149,14 +151,16 @@ class _AdminCategoryPageState extends State<AdminCategoryPage> {
 
   String? _categoryImageUrl(Map<String, dynamic> category) {
     final custom = category['image_url'];
-    if (custom != null && custom.toString().isNotEmpty) return custom.toString();
+    if (custom != null && custom.toString().isNotEmpty)
+      return custom.toString();
     final products = category['products'] as List?;
     if (products != null && products.isNotEmpty) {
       final product = products.first as Map<String, dynamic>;
       final images = product['images'];
       if (images is List && images.isNotEmpty) {
         final first = images.first;
-        if (first != null && first.toString().isNotEmpty) return first.toString();
+        if (first != null && first.toString().isNotEmpty)
+          return first.toString();
       } else if (images != null && images.toString().isNotEmpty) {
         return images.toString();
       }
@@ -173,15 +177,12 @@ class _AdminCategoryPageState extends State<AdminCategoryPage> {
     if (saved == true) {
       await _fetchCategories();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            existing == null
-                ? 'Kategori berhasil dibuat'
-                : 'Kategori berhasil diperbarui',
-          ),
-          backgroundColor: AppColors.success,
-        ),
+      ToastHelper.showToast(
+        context,
+        existing == null
+            ? 'Kategori berhasil dibuat'
+            : 'Kategori berhasil diperbarui',
+        ToastSeverity.success,
       );
     }
   }
@@ -191,14 +192,10 @@ class _AdminCategoryPageState extends State<AdminCategoryPage> {
     final productCount = _productCount(category);
 
     if (productCount > 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Kategori masih memiliki $productCount produk. '
-            'Pindahkan produknya terlebih dahulu.',
-          ),
-          backgroundColor: AppColors.warning,
-        ),
+      ToastHelper.showToast(
+        context,
+        'Kategori masih memiliki $productCount produk. Pindahkan produknya terlebih dahulu.',
+        ToastSeverity.warning,
       );
       return;
     }
@@ -236,19 +233,13 @@ class _AdminCategoryPageState extends State<AdminCategoryPage> {
       await _supabase.from('categories').delete().eq('id', category['id']);
       await _fetchCategories();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Kategori dihapus'),
-          backgroundColor: AppColors.warning,
-        ),
-      );
+      ToastHelper.showToast(context, 'Kategori dihapus', ToastSeverity.warning);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Gagal menghapus: $e'),
-          backgroundColor: AppColors.error,
-        ),
+      ToastHelper.showToast(
+        context,
+        'Gagal menghapus: $e',
+        ToastSeverity.error,
       );
     }
   }
@@ -519,11 +510,10 @@ class _CategoryFormDialogState extends State<_CategoryFormDialog> {
   Future<void> _save() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Nama kategori tidak boleh kosong.'),
-          backgroundColor: AppColors.warning,
-        ),
+      ToastHelper.showToast(
+        context,
+        'Nama kategori tidak boleh kosong.',
+        ToastSeverity.warning,
       );
       return;
     }
@@ -533,13 +523,19 @@ class _CategoryFormDialogState extends State<_CategoryFormDialog> {
       String? finalUrl = _existingImageUrl;
 
       if (_pickedImage != null) {
-        finalUrl = await SupabaseStorageHelper.uploadCategoryImage(_pickedImage!);
+        finalUrl = await SupabaseStorageHelper.uploadCategoryImage(
+          _pickedImage!,
+        );
         if (_existingImageUrl != null && _existingImageUrl != finalUrl) {
-          await SupabaseStorageHelper.deleteCategoryImageByUrl(_existingImageUrl!);
+          await SupabaseStorageHelper.deleteCategoryImageByUrl(
+            _existingImageUrl!,
+          );
         }
       } else if (_removeImage) {
         if (_existingImageUrl != null) {
-          await SupabaseStorageHelper.deleteCategoryImageByUrl(_existingImageUrl!);
+          await SupabaseStorageHelper.deleteCategoryImageByUrl(
+            _existingImageUrl!,
+          );
         }
         finalUrl = null;
       }
@@ -550,22 +546,20 @@ class _CategoryFormDialogState extends State<_CategoryFormDialog> {
             .update({'name': name, 'image_url': finalUrl})
             .eq('id', widget.existing!['id']);
       } else {
-        await supabase
-            .from('categories')
-            .insert({'name': name, 'image_url': finalUrl});
+        await supabase.from('categories').insert({
+          'name': name,
+          'image_url': finalUrl,
+        });
       }
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            e.toString().contains('duplicate')
-                ? 'Kategori dengan nama itu sudah ada.'
-                : 'Gagal menyimpan: $e',
-          ),
-          backgroundColor: AppColors.error,
-        ),
+      ToastHelper.showToast(
+        context,
+        e.toString().contains('duplicate')
+            ? 'Kategori dengan nama itu sudah ada.'
+            : 'Gagal menyimpan: $e',
+        ToastSeverity.error,
       );
     }
   }

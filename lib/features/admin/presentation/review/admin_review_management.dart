@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:nextcart/core/constants/app_spacing.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/data/repository/review_repository.dart';
 import 'package:nextcart/features/admin/presentation/dashboard/admin_sidebar.dart';
 
@@ -150,12 +151,7 @@ class _AdminReviewManagementPageState extends State<AdminReviewManagementPage> {
 
     final text = controller.text.trim();
     if (text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Balasan tidak boleh kosong'),
-          backgroundColor: AppColors.warning,
-        ),
-      );
+      ToastHelper.showToast(context, 'Balasan tidak boleh kosong', ToastSeverity.warning);
       return;
     }
 
@@ -184,19 +180,12 @@ class _AdminReviewManagementPageState extends State<AdminReviewManagementPage> {
         });
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Balasan berhasil disimpan!')),
-      );
+      ToastHelper.showToast(context, 'Balasan berhasil disimpan!', ToastSeverity.success);
 
       AdminSidebar.refreshTrigger.value++;
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal menyimpan balasan: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ToastHelper.showToast(context, 'Gagal menyimpan balasan: $e', ToastSeverity.error);
       }
     }
   }
