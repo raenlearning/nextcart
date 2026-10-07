@@ -1,9 +1,25 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class WishlistRepository {
-  final SupabaseClient _supabase = Supabase.instance.client;
+  final SupabaseClient _supabase;
+
+  WishlistRepository({SupabaseClient? client})
+      : _supabase = client ?? Supabase.instance.client;
 
   String? get _userId => _supabase.auth.currentUser?.id;
+
+  @visibleForTesting
+  static String sortColumn(String sortBy) {
+    return (sortBy == 'price_low' || sortBy == 'price_high')
+        ? 'products(price)'
+        : 'created_at';
+  }
+
+  @visibleForTesting
+  static bool isPriceSort(String sortBy) {
+    return sortBy == 'price_low' || sortBy == 'price_high';
+  }
 
   /// Ambil semua id wishlist milik user (untuk status heart di card/detail).
   Future<Set<String>> fetchWishlistedProductIds() async {
@@ -20,12 +36,10 @@ class WishlistRepository {
         .toSet();
   }
 
-  /// Ambil daftar wishlist lengkap dengan produk + kategori,
-  /// mendukung search, filter kategori, sort, dan pagination.
   Future<List<Map<String, dynamic>>> fetchWishlist({
     String? search,
     String? categoryId,
-    String sortBy = 'newest', // newest | price_low | price_high
+    String sortBy = 'newest', 
     int page = 1,
     int pageSize = 20,
   }) async {
@@ -52,17 +66,22 @@ class WishlistRepository {
     }
 
     if (categoryId != null && categoryId.isNotEmpty) {
-      query = query.eq('products.categories.id', categoryId);
+      final matchingProducts = await _supabase
+          .from('products')
+          .select('id')
+          .eq('category_id', categoryId);
+      final productIds = (matchingProducts as List)
+          .map((p) => p['id'] as String)
+          .toList();
+      if (productIds.isEmpty) return [];
+      query = query.inFilter('product_id', productIds);
     }
 
     final start = (page - 1) * pageSize;
 
-    final data = await (sortBy == 'price_low' || sortBy == 'price_high'
-            ? query.order(
-                'products(price)',
-                ascending: sortBy == 'price_low',
-              )
-            : query.order('created_at', ascending: false))
+    final data = await (isPriceSort(sortBy)
+            ? query.order(sortColumn(sortBy), ascending: sortBy == 'price_low')
+            : query.order(sortColumn(sortBy), ascending: false))
         .range(start, start + pageSize - 1);
 
     return List<Map<String, dynamic>>.from(data);

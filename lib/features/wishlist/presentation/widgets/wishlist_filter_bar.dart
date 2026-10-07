@@ -37,7 +37,7 @@ class WishlistFilterBar extends StatelessWidget {
             onChanged: onSearchChanged,
             decoration: InputDecoration(
               hintText: 'Cari di wishlist...',
-              hintStyle: TextStyle(color: colors.textHint, fontSize: 14),
+              hintStyle: TextStyle(color: colors.textHint, fontSize: 13),
               prefixIcon: Icon(Icons.search, color: colors.textHint, size: 20),
               suffixIcon: ValueListenableBuilder<TextEditingValue>(
                 valueListenable: searchController,
@@ -100,7 +100,7 @@ class WishlistFilterBar extends StatelessWidget {
                     dropdownColor: colors.card,
                     style: TextStyle(
                       color: colors.textPrimary,
-                      fontSize: 12.5,
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
                     icon: Icon(

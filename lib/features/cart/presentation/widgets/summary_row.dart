@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/theme/app_fonts.dart';
 
 class SummaryRow extends StatelessWidget {
   final String label;
@@ -33,9 +34,11 @@ class SummaryRow extends StatelessWidget {
         Text(
           value,
           style: TextStyle(
+            fontFamily: AppFonts.secondary,
             color: valueColor ?? colors.textPrimary,
             fontSize: isTotal ? 15 : 13.5,
             fontWeight: FontWeight.bold,
+            fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
       ],

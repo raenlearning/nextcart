@@ -38,7 +38,7 @@ class ProductEmptyState extends StatelessWidget {
             Text(
               hasFilter ? 'Tidak ada hasil' : 'Belum ada produk',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 15,
                 fontWeight: FontWeight.bold,
                 color: context.colors.textPrimary,
               ),
@@ -50,7 +50,7 @@ class ProductEmptyState extends StatelessWidget {
                   : 'Mulai tambahkan produk pertama ke toko.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 13,
+                fontSize: 12.5,
                 color: context.colors.textSecondary,
                 height: 1.5,
               ),

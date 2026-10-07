@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:nextcart/core/constants/app_assets.dart';
 import 'package:nextcart/core/constants/order_status.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/features/order/presentation/widgets/order_list.dart';
 import 'package:nextcart/features/order/presentation/widgets/order_search_bar.dart';
@@ -11,7 +12,9 @@ import 'package:nextcart/features/order/presentation/widgets/order_status_tabs.d
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OrderScreen extends StatefulWidget {
-  const OrderScreen({super.key});
+  final SupabaseClient? supabaseClient;
+
+  const OrderScreen({super.key, this.supabaseClient});
 
   @override
   State<OrderScreen> createState() => OrderScreenState();
@@ -21,7 +24,8 @@ class OrderScreenState extends State<OrderScreen>
     with SingleTickerProviderStateMixin {
   static const int _pageSize = 5;
 
-  final SupabaseClient _supabase = Supabase.instance.client;
+  late final SupabaseClient _supabase =
+      widget.supabaseClient ?? Supabase.instance.client;
   late final TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
@@ -179,12 +183,7 @@ class OrderScreenState extends State<OrderScreen>
         _isLoadingTab[tabIndex] = false;
         _isInitialLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Gagal memuat pesanan: ${e.toString()}'),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      ToastHelper.showToast(context, 'Gagal memuat pesanan: ${e.toString()}', ToastSeverity.error);
     }
   }
 
@@ -203,7 +202,7 @@ class OrderScreenState extends State<OrderScreen>
           style: TextStyle(
             color: colors.textPrimary,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 17,
           ),
         ),
         bottom: PreferredSize(
@@ -239,7 +238,7 @@ class OrderScreenState extends State<OrderScreen>
                     'Memuat pesanan...',
                     style: TextStyle(
                       color: colors.textSecondary,
-                      fontSize: 13,
+                      fontSize: 12.5,
                     ),
                   ),
                 ],

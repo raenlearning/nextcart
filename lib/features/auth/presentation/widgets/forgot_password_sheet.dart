@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nextcart/core/helper/validators.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 
 class ForgotPasswordSheet extends StatefulWidget {
@@ -54,7 +55,7 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
             'Lupa Kata Sandi',
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 16,
+              fontSize: 15,
               color: context.colors.textPrimary,
             ),
           ),
@@ -62,7 +63,7 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
           Text(
             'Masukkan email Anda. Kami akan mengirimkan tautan untuk mereset kata sandi.',
             style: TextStyle(
-              fontSize: 13,
+              fontSize: 12.5,
               color: context.colors.textSecondary,
             ),
           ),
@@ -76,8 +77,7 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
               autofillHints: const [AutofillHints.email],
               onFieldSubmitted: (_) => _submit(),
               decoration: _buildInputDecoration(context),
-              validator: (value) =>
-                  (value == null || !value.contains('@')) ? 'Email tidak valid' : null,
+              validator: Validators.email,
             ),
           ),
           const SizedBox(height: 20),
@@ -113,7 +113,7 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
   InputDecoration _buildInputDecoration(BuildContext context) {
     return InputDecoration(
       hintText: 'Masukkan alamat email Anda',
-      hintStyle: TextStyle(color: context.colors.textSecondary, fontSize: 14),
+      hintStyle: TextStyle(color: context.colors.textSecondary, fontSize: 13),
       filled: true,
       fillColor: context.colors.inputFill,
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),

@@ -5,12 +5,14 @@ class SpecRow extends StatelessWidget {
   final String label;
   final String value;
   final AppColorScheme colors;
+  final String? fontFamily;
 
   const SpecRow({
     super.key,
     required this.label,
     required this.value,
     required this.colors,
+    this.fontFamily,
   });
 
   @override
@@ -24,15 +26,16 @@ class SpecRow extends StatelessWidget {
             width: 100,
             child: Text(
               label,
-              style: TextStyle(color: colors.textSecondary, fontSize: 13),
+              style: TextStyle(color: colors.textSecondary, fontSize: 12.5),
             ),
           ),
           Expanded(
             child: Text(
               value,
               style: TextStyle(
+                fontFamily: fontFamily,
                 color: colors.textPrimary,
-                fontSize: 13,
+                fontSize: 12.5,
                 fontWeight: FontWeight.w600,
               ),
             ),

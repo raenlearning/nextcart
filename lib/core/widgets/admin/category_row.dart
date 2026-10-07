@@ -16,7 +16,8 @@ class CategoryRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Map<String, String> nameById = {
-      for (final c in categories) c['id'] as String: c['name'] as String,
+      for (final c in categories)
+        (c['id'] ?? '').toString(): (c['name'] ?? '').toString(),
     };
     final String? selectedName = selectedId != null
         ? nameById[selectedId]
@@ -37,7 +38,7 @@ class CategoryRow extends StatelessWidget {
               child: Text(
                 selectedName ?? 'Tambah Kategori',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 13,
                   color: selectedName != null
                       ? context.colors.textPrimary
                       : context.colors.textHint,
@@ -51,7 +52,7 @@ class CategoryRow extends StatelessWidget {
               style: TextStyle(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w600,
-                fontSize: 13,
+                fontSize: 12.5,
               ),
             ),
           ],

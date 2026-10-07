@@ -2,6 +2,14 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/product_model.dart';
 
+String _mapProductError(Object e) {
+  final msg = e.toString().toLowerCase();
+  if (msg.contains('duplicate key') || msg.contains('23505')) {
+    return 'Nama produk sudah digunakan. Gunakan nama lain.';
+  }
+  return e.toString();
+}
+
 class AdminRepository {
   final SupabaseClient _supabase = Supabase.instance.client;
 
@@ -23,7 +31,7 @@ class AdminRepository {
     try {
       await _supabase.from('products').insert(product.toJson());
     } catch (e) {
-      throw Exception('Gagal menambahkan produk: ${e.toString()}');
+      throw Exception('Gagal menambahkan produk: ${_mapProductError(e)}');
     }
   }
 
@@ -34,7 +42,7 @@ class AdminRepository {
           .update(product.toJson())
           .eq('id', product.id);
     } catch (e) {
-      throw Exception('Gagal memperbarui produk: ${e.toString()}');
+      throw Exception('Gagal memperbarui produk: ${_mapProductError(e)}');
     }
   }
 

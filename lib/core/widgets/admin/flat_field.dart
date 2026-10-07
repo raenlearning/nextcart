@@ -39,10 +39,10 @@ class FlatField extends StatelessWidget {
             ? TextInputAction.newline
             : TextInputAction.next,
         inputFormatters: inputFormatters,
-        style: TextStyle(color: context.colors.textPrimary, fontSize: 14),
+        style: TextStyle(color: context.colors.textPrimary, fontSize: 13),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(color: context.colors.textHint, fontSize: 14),
+          hintStyle: TextStyle(color: context.colors.textHint, fontSize: 13),
           filled: true,
           fillColor: context.colors.inputFill,
           contentPadding: EdgeInsets.symmetric(

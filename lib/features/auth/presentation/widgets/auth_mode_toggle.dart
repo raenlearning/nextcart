@@ -84,7 +84,7 @@ class _ToggleButton extends StatelessWidget {
           textAlign: TextAlign.center,
           style: TextStyle(
             fontWeight: FontWeight.w700,
-            fontSize: 14,
+            fontSize: 13,
             color: active ? Colors.white : colors.textSecondary,
           ),
         ),

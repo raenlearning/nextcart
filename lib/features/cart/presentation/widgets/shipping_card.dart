@@ -54,7 +54,7 @@ class ShippingCard extends StatelessWidget {
                       title,
                       style: TextStyle(
                         color: colors.textSecondary,
-                        fontSize: 11,
+                        fontSize: 10.5,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -63,7 +63,7 @@ class ShippingCard extends StatelessWidget {
                       subtitle,
                       style: TextStyle(
                         color: colors.textPrimary,
-                        fontSize: 13,
+                        fontSize: 12.5,
                         fontWeight: FontWeight.w600,
                       ),
                       maxLines: 2,
@@ -75,7 +75,7 @@ class ShippingCard extends StatelessWidget {
                         footnote!,
                         style: TextStyle(
                           color: colors.textHint,
-                          fontSize: 10.5,
+                          fontSize: 10,
                         ),
                       ),
                     ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/data/repository/notification_repository.dart';
 
@@ -44,10 +45,7 @@ class _NotificationListPageState extends State<NotificationListPage> {
       await _load();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal menandai dibaca: $e'),
-              backgroundColor: AppColors.error),
-        );
+        ToastHelper.showToast(context, 'Gagal menandai dibaca: $e', ToastSeverity.error);
       }
     }
   }
@@ -82,7 +80,7 @@ class _NotificationListPageState extends State<NotificationListPage> {
           style: TextStyle(
             color: colors.textPrimary,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 17,
           ),
         ),
         leading: IconButton(
@@ -194,7 +192,7 @@ class _NotificationCard extends StatelessWidget {
                             fontWeight: notification.isRead
                                 ? FontWeight.w600
                                 : FontWeight.bold,
-                            fontSize: 13.5,
+                            fontSize: 13,
                           ),
                         ),
                       ),
@@ -214,14 +212,14 @@ class _NotificationCard extends StatelessWidget {
                     Text(
                       notification.body!,
                       style: TextStyle(
-                          color: colors.textSecondary, fontSize: 12.5),
+                          color: colors.textSecondary, fontSize: 12),
                     ),
                   ],
                   const SizedBox(height: 6),
                   Text(
                     DateFormat('d MMM yyyy, HH:mm', 'id_ID')
                         .format(notification.createdAt),
-                    style: TextStyle(color: colors.textHint, fontSize: 11),
+                    style: TextStyle(color: colors.textHint, fontSize: 10.5),
                   ),
                 ],
               ),
@@ -250,7 +248,7 @@ class _EmptyState extends StatelessWidget {
             'Belum ada notifikasi',
             style: TextStyle(
               color: colors.textHint,
-              fontSize: 15,
+              fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
           ),

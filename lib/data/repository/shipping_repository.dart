@@ -1,7 +1,10 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ShippingRepository {
-  final SupabaseClient _supabase = Supabase.instance.client;
+  final SupabaseClient _supabase;
+
+  ShippingRepository({SupabaseClient? client})
+      : _supabase = client ?? Supabase.instance.client;
 
   /// Menghitung tarif ongkir semua kurir aktif untuk alamat tujuan.
   Future<List<Map<String, dynamic>>> fetchRates({

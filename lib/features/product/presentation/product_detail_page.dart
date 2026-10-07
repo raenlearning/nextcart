@@ -5,11 +5,16 @@ import 'package:go_router/go_router.dart';
 import 'package:nextcart/data/models/product_model.dart';
 import 'package:nextcart/data/repository/product_repository.dart';
 import 'package:nextcart/core/helper/currency_formatter.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
+import 'package:nextcart/core/constants/store_info.dart';
+import 'package:nextcart/core/helper/whatsapp_helper.dart';
 import 'package:nextcart/core/widgets/user/product_grid.dart';
+import 'package:nextcart/core/widgets/user/product/heart_burst_animation.dart';
 import 'package:nextcart/features/product/presentation/widgets/meta_row.dart';
 import 'package:nextcart/features/wishlist/bloc/wishlist_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_fonts.dart';
 import 'widgets/image_hero.dart';
 import 'widgets/name_row.dart';
 import 'widgets/price_row.dart';
@@ -17,7 +22,6 @@ import 'widgets/description.dart';
 import 'widgets/expandable_section_row.dart';
 import 'widgets/detail_top_bar.dart';
 import 'widgets/bottom_bar.dart';
-import 'widgets/quantity_selector.dart';
 import 'widgets/spec_row.dart';
 
 class ProductDetailPage extends StatefulWidget {
@@ -32,6 +36,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   final PageController _pageController = PageController();
   final SupabaseClient _supabase = Supabase.instance.client;
   final GlobalKey _addToCartKey = GlobalKey();
+  final GlobalKey _wishlistIconKey = GlobalKey();
   int _quantity = 1;
 
   double _rating = 0;
@@ -57,16 +62,31 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   void _toggleWishlist() {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Silakan login terlebih dahulu')),
-      );
+      ToastHelper.showToast(context, 'Silakan login terlebih dahulu', ToastSeverity.info);
       return;
     }
-    context.read<WishlistBloc>().add(WishlistToggle(widget.product.id));
+
+    final bloc = context.read<WishlistBloc>();
+    final willAdd = !bloc.contains(widget.product.id);
+    bloc.add(WishlistToggle(widget.product.id));
+
+    if (willAdd) {
+      HeartBurstAnimation.burst(context: context, key: _wishlistIconKey);
+      ToastHelper.showToast(
+        context,
+        '${widget.product.name} ditambahkan ke wishlist',
+        ToastSeverity.success,
+      );
+    } else {
+      ToastHelper.showToast(
+        context,
+        '${widget.product.name} dihapus dari wishlist',
+        ToastSeverity.info,
+      );
+    }
   }
 
   Future<void> _loadDetail() async {
-    // Jalankan fetch rating, kategori, dan produk terkait secara paralel.
     await Future.wait([
       _fetchRating(),
       _fetchCategory(),
@@ -147,7 +167,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 Text(
                   'Spesifikasi Produk',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.bold,
                     color: colors.textPrimary,
                   ),
@@ -157,21 +177,25 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   label: 'Nama Produk',
                   value: widget.product.name,
                   colors: colors,
+                  fontFamily: AppFonts.secondary,
                 ),
                 SpecRow(
                   label: 'Kategori',
                   value: _categoryLabel ?? '-',
                   colors: colors,
+                  fontFamily: AppFonts.secondary,
                 ),
                 SpecRow(
                   label: 'Harga',
                   value: CurrencyFormatter.rupiah(widget.product.price),
                   colors: colors,
+                  fontFamily: AppFonts.secondary,
                 ),
                 SpecRow(
                   label: 'Stok',
                   value: '${widget.product.stock}',
                   colors: colors,
+                  fontFamily: AppFonts.secondary,
                 ),
               ],
             ),
@@ -192,12 +216,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             '${imageUrl ?? 'Lihat produk di NextCart'}',
       ),
     );
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Link produk disalin ke clipboard'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+    ToastHelper.showToast(context, 'Link produk disalin ke clipboard', ToastSeverity.success);
   }
 
   @override
@@ -260,6 +279,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           colors: colors,
                           isDark: isDark,
                           onWishlistTap: _toggleWishlist,
+                          wishlistIconKey: _wishlistIconKey,
                         ),
                         const SizedBox(height: 10),
 
@@ -276,18 +296,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           ),
                         ),
 
-                        const SizedBox(height: 20),
-                        Divider(color: colors.divider, height: 1),
-                        const SizedBox(height: 20),
-
-                        QuantitySelector(
-                          quantity: _quantity,
-                          stock: widget.product.stock,
-                          colors: colors,
-                          onChanged: (value) =>
-                              setState(() => _quantity = value),
-                        ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 10),
 
                         Description(
                           description: widget.product.description,
@@ -325,16 +334,22 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             right: 0,
             child: SafeArea(
               bottom: false,
-              child: DetailTopBar(colors: colors, onShare: _shareProduct),
+              child: DetailTopBar(
+                colors: colors,
+                onShare: _shareProduct,
+                onWhatsApp: () => WhatsAppHelper.openChat(
+                  'Halo ${StoreInfo.name}, saya tertarik dengan produk '
+                  '"${widget.product.name}". Apakah stoknya tersedia?',
+                ),
+              ),
             ),
           ),
         ],
       ),
       bottomNavigationBar: BottomBar(
-        price: widget.product.price,
         quantity: _quantity,
+        onQuantityChanged: (value) => setState(() => _quantity = value),
         colors: colors,
-        isDark: isDark,
         product: widget.product,
         addToCartKey: _addToCartKey,
       ),
@@ -365,7 +380,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         Text(
           'Produk Serupa',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.bold,
             color: colors.textPrimary,
           ),

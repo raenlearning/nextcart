@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 
 class ProfileDetailPage extends StatefulWidget {
@@ -97,21 +98,14 @@ class ProfileDetailPageState extends State<ProfileDetailPage> {
           .eq('id', userId);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profil berhasil diperbarui!')),
-        );
+        ToastHelper.showToast(context, 'Profil berhasil diperbarui!', ToastSeverity.success);
         context.pop(
           true,
         ); 
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal memperbarui profil: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ToastHelper.showToast(context, 'Gagal memperbarui profil: $e', ToastSeverity.error);
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -128,9 +122,8 @@ class ProfileDetailPageState extends State<ProfileDetailPage> {
         title: const Text(
           'Edit Profil',
           style: TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
             fontWeight: FontWeight.bold,
-            fontSize: 16,
+            fontSize: 15,
           ),
         ),
         leading: IconButton(
@@ -191,19 +184,17 @@ class ProfileDetailPageState extends State<ProfileDetailPage> {
               Text(
                 'Nama Lengkap',
                 style: TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
                   color: colors.textPrimary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 14,
+                  fontSize: 13,
                 ),
               ),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _nameController,
                 style: TextStyle(
-                  fontFamily: 'SF Pro',
                   color: colors.textPrimary,
-                  fontSize: 14,
+                  fontSize: 13,
                 ),
                 decoration: const InputDecoration(
                   hintText: 'Masukkan nama lengkap kamu',
@@ -234,7 +225,6 @@ class ProfileDetailPageState extends State<ProfileDetailPage> {
                       : const Text(
                           'Simpan Perubahan',
                           style: TextStyle(
-                            fontFamily: 'Plus Jakarta Sans',
                             fontWeight: FontWeight.bold,
                           ),
                         ),

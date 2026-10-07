@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nextcart/core/constants/order_status.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/widgets/shimmer_box.dart';
 import 'package:nextcart/features/cart/bloc/cart_bloc.dart';
+import 'package:nextcart/features/cart/presentation/payment_status_page.dart';
 import 'package:nextcart/features/cart/presentation/payment_webview_page.dart';
 import 'package:nextcart/features/cart/presentation/widgets/cart_item_tile.dart';
 import 'package:nextcart/features/cart/presentation/widgets/checkout_bar.dart';
@@ -52,69 +54,20 @@ class _CartPageState extends State<CartPage> {
             );
 
             if (context.mounted && isSuccess != true) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Pesanan disimpan ke riwayat, menunggu pembayaran.',
-                  ),
-                  backgroundColor: AppColors.warning,
-                ),
+              ToastHelper.showToast(
+                context,
+                'Pesanan disimpan ke riwayat, menunggu pembayaran.',
+                ToastSeverity.warning,
               );
               Navigator.of(context).popUntil((route) => route.isFirst);
             }
           }
 
           if (state is CheckoutStatusVerified && context.mounted) {
-            final isSuccess = state.orderStatus == OrderStatus.processing ||
-                state.orderStatus == OrderStatus.delivered ||
-                state.orderStatus == OrderStatus.completed;
-            final isCancelled = state.orderStatus == OrderStatus.cancelled;
-
-            await showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) => AlertDialog(
-                backgroundColor: context.colors.card,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                icon: Icon(
-                  isSuccess
-                      ? Icons.check_circle_rounded
-                      : (isCancelled
-                          ? Icons.cancel_rounded
-                          : Icons.hourglass_empty_rounded),
-                  size: 48,
-                  color: isSuccess
-                      ? AppColors.success
-                      : (isCancelled ? AppColors.error : AppColors.warning),
-                ),
-                title: Text(
-                  isSuccess
-                      ? 'Pembayaran Berhasil'
-                      : (isCancelled ? 'Pembayaran Gagal' : 'Menunggu Pembayaran'),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: context.colors.textPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                content: Text(
-                  state.message,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: context.colors.textSecondary),
-                ),
-                actionsAlignment: MainAxisAlignment.center,
-                actions: [
-                  FilledButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                    ),
-                    child: const Text('Ke Riwayat Pesanan'),
-                  ),
-                ],
+            await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => PaymentStatusPage(status: state),
+                fullscreenDialog: true,
               ),
             );
 
@@ -124,22 +77,12 @@ class _CartPageState extends State<CartPage> {
           }
 
           if (state is CartError && context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.error,
-              ),
-            );
+            ToastHelper.showToast(context, state.message, ToastSeverity.error);
           }
         },
         builder: (context, state) {
           if (state is CartLoading) {
-            return const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.primary,
-                strokeWidth: 2,
-              ),
-            );
+            return const _CartShimmerSkeleton();
           }
 
           if (state is CartError) {
@@ -194,7 +137,7 @@ class _CartPageState extends State<CartPage> {
         style: TextStyle(
           color: colors.textPrimary,
           fontWeight: FontWeight.bold,
-          fontSize: 18,
+          fontSize: 17,
         ),
       ),
     );
@@ -308,6 +251,55 @@ class _CartBody extends StatelessWidget {
           },
         ),
       ],
+    );
+  }
+}
+
+class _CartShimmerSkeleton extends StatelessWidget {
+  const _CartShimmerSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+      child: Column(
+        children: List.generate(
+          3,
+          (index) => Container(
+            margin: const EdgeInsets.only(bottom: 14),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: colors.card,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                const ShimmerBox(width: 80, height: 80, radius: 14),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ShimmerBox(
+                        width: 120 + (index * 30).toDouble(),
+                        height: 14,
+                        radius: 6,
+                      ),
+                      const SizedBox(height: 6),
+                      const ShimmerBox(width: 80, height: 10, radius: 5),
+                      const SizedBox(height: 10),
+                      const ShimmerBox(width: 100, height: 12, radius: 6),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const ShimmerBox(width: 60, height: 14, radius: 6),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -24,7 +24,7 @@ class StaticInfoPage extends StatelessWidget {
           style: TextStyle(
             color: colors.textPrimary,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 17,
           ),
         ),
       ),
@@ -37,7 +37,7 @@ class StaticInfoPage extends StatelessWidget {
               style: TextStyle(
                 color: colors.textPrimary,
                 fontWeight: FontWeight.bold,
-                fontSize: 15,
+                fontSize: 14,
               ),
             ),
             const SizedBox(height: 8),
@@ -46,7 +46,7 @@ class StaticInfoPage extends StatelessWidget {
                 paragraph,
                 style: TextStyle(
                   color: colors.textSecondary,
-                  fontSize: 13.5,
+                  fontSize: 13,
                   height: 1.5,
                 ),
               ),

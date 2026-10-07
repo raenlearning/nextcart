@@ -34,7 +34,7 @@ class OrderStatusActionButton extends StatelessWidget {
         icon: Icon(icon, size: 15),
         label: Text(
           label,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+          style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700),
         ),
       ),
     );

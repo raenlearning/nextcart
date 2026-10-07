@@ -1,3 +1,4 @@
+import 'package:nextcart/data/models/analytic_model.dart';
 
 abstract class AdminAnalyticsState {}
 
@@ -22,6 +23,8 @@ class AdminAnalyticsLoaded extends AdminAnalyticsState {
 
   final String period;
 
+  final List<LowStockProduct> lowStockProducts;
+
   AdminAnalyticsLoaded({
     required this.grossRevenue,
     required this.completedOrders,
@@ -31,6 +34,7 @@ class AdminAnalyticsLoaded extends AdminAnalyticsState {
     required this.topProducts,
     required this.orderStatusBreakdown,
     required this.period,
+    this.lowStockProducts = const [],
   });
 }
 

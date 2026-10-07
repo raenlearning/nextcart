@@ -14,6 +14,13 @@ class ShippingAddress {
   final double? longitude;
   final bool isDefault;
 
+  String get displayName {
+    final labelTrimmed = label?.trim() ?? '';
+    if (labelTrimmed.isNotEmpty) return labelTrimmed;
+    final trimmed = fullAddress.trim();
+    return trimmed.isEmpty ? 'Alamat' : trimmed;
+  }
+
   ShippingAddress({
     required this.id,
     this.label,
@@ -66,13 +73,15 @@ class AddressRepository {
         .toList();
   }
 
-  Future<void> createAddress(Map<String, dynamic> fields) async {
+  Future<ShippingAddress?> createAddress(Map<String, dynamic> fields) async {
     final userId = _supabase.auth.currentUser?.id;
-    if (userId != null) {
-      await _supabase
-          .from('shipping_addresses')
-          .insert({...fields, 'user_id': userId});
-    }
+    if (userId == null) return null;
+    final data = await _supabase
+        .from('shipping_addresses')
+        .insert({...fields, 'user_id': userId})
+        .select()
+        .single();
+    return ShippingAddress.fromJson(data);
   }
 
   Future<void> updateAddress(String id, Map<String, dynamic> fields) async {
@@ -84,5 +93,44 @@ class AddressRepository {
 
   Future<void> deleteAddress(String id) async {
     await _supabase.from('shipping_addresses').delete().eq('id', id);
+  }
+
+  Future<ShippingAddress?> fetchSelectedAddress() async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return null;
+
+    final profileData = await _supabase
+        .from('profiles')
+        .select('selected_address_id')
+        .eq('id', userId)
+        .maybeSingle();
+
+    final selectedId = profileData?['selected_address_id'] as String?;
+    if (selectedId != null) {
+      final data = await _supabase
+          .from('shipping_addresses')
+          .select()
+          .eq('user_id', userId)
+          .eq('id', selectedId)
+          .maybeSingle();
+      if (data != null) {
+        return ShippingAddress.fromJson(data);
+      }
+    }
+
+    final addresses = await fetchAddresses();
+    if (addresses.isNotEmpty && addresses.first.isDefault) {
+      return addresses.first;
+    }
+    return null;
+  }
+
+  Future<void> selectAddress(String? id) async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return;
+    await _supabase
+        .from('profiles')
+        .update({'selected_address_id': id})
+        .eq('id', userId);
   }
 }

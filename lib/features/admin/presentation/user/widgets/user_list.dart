@@ -3,20 +3,19 @@ import 'package:nextcart/core/constants/app_spacing.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'user_item.dart';
 
-typedef OnRoleSelect = void Function(String userId, String newRole);
+typedef OnToggleBlock = void Function(Map<String, dynamic> user);
+typedef OnDelete = void Function(Map<String, dynamic> user);
 
 class UserList extends StatelessWidget {
   final List<Map<String, dynamic>> users;
-  final Map<String, String> pendingChanges;
-  final OnRoleSelect onRoleSelect;
-  final double columnWidth;
+  final OnToggleBlock onToggleBlock;
+  final OnDelete? onDelete;
 
   const UserList({
     super.key,
     required this.users,
-    required this.onRoleSelect,
-    this.pendingChanges = const {},
-    this.columnWidth = 56,
+    required this.onToggleBlock,
+    this.onDelete,
   });
 
   @override
@@ -33,7 +32,7 @@ class UserList extends StatelessWidget {
                 '${users.length} pengguna',
                 style: TextStyle(
                   color: colors.textSecondary,
-                  fontSize: 12.5,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -46,16 +45,10 @@ class UserList extends StatelessWidget {
             itemCount: users.length,
             itemBuilder: (context, index) {
               final user = users[index];
-              final userId = user['id'] as String;
-              final originalRole = user['role'] ?? 'buyer';
-              final effectiveRole = pendingChanges[userId] ?? originalRole;
-
               return UserItem(
                 user: user,
-                role: effectiveRole,
-                isPending: pendingChanges.containsKey(userId),
-                onRoleSelect: onRoleSelect,
-                columnWidth: columnWidth,
+                onToggleBlock: onToggleBlock,
+                onDelete: onDelete,
                 avatarSeed: index,
               );
             },

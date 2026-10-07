@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nextcart/core/helper/currency_formatter.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/theme/app_fonts.dart';
 
 class PriceRow extends StatelessWidget {
   final double price;
@@ -16,7 +17,7 @@ class PriceRow extends StatelessWidget {
         Text(
           'Harga',
           style: TextStyle(
-            fontSize: 12,
+            fontSize: 11.5,
             fontWeight: FontWeight.w600,
             color: colors.textSecondary,
           ),
@@ -28,10 +29,12 @@ class PriceRow extends StatelessWidget {
             Text(
               CurrencyFormatter.rupiah(price),
               style: TextStyle(
-                fontSize: 24,
+                fontFamily: AppFonts.secondary,
+                fontSize: 22,
                 fontWeight: FontWeight.w800,
                 color: AppColors.price,
                 height: 1.1,
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
             const SizedBox(width: 10),
@@ -40,7 +43,7 @@ class PriceRow extends StatelessWidget {
               child: Text(
                 'termasuk PPN',
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 10.5,
                   color: colors.textHint,
                 ),
               ),

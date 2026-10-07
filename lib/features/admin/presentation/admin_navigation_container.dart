@@ -4,7 +4,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:nextcart/features/admin/presentation/dashboard/admin_dashboard_page.dart';
 import 'package:nextcart/features/admin/presentation/order/admin_order_page.dart';
 import 'package:nextcart/features/admin/presentation/product/admin_product_management.dart';
-import 'package:nextcart/features/admin/presentation/review/admin_review_management.dart';
 import 'package:nextcart/features/admin/presentation/user/admin_user_management.dart';
 import '../../../core/theme/app_colors.dart';
 
@@ -20,11 +19,10 @@ class _AdminNavigationContainerState extends State<AdminNavigationContainer> {
   int _currentIndex = 0;
 
   final List<Widget> _adminPages = [
-    const AdminAnalyticsDashboardPage(), 
-    const AdminProductManagementPage(),  
-    const AdminOrderPage(),    
-    const AdminReviewManagementPage(),
-    const AdminUserManagementPage(),     
+    const AdminAnalyticsDashboardPage(),
+    const AdminProductManagementPage(),
+    const AdminOrderPage(),
+    const AdminUserManagementPage(),
   ];
 
   @override
@@ -72,8 +70,7 @@ class _AdminNavigationContainerState extends State<AdminNavigationContainer> {
                     _buildAdminNavItem(0, FontAwesomeIcons.chartPie, 'Dashboard'),
                     _buildAdminNavItem(1, FontAwesomeIcons.boxOpen, 'Produk'),
                     _buildAdminNavItem(2, FontAwesomeIcons.receipt, 'Pesanan'),
-                    _buildAdminNavItem(3, FontAwesomeIcons.star, 'Ulasan'),                  
-                    _buildAdminNavItem(4, FontAwesomeIcons.usersGear, 'Pengguna'),
+                    _buildAdminNavItem(3, FontAwesomeIcons.usersGear, 'Pengguna'),
                   ],
                 ),
               ),
@@ -116,7 +113,7 @@ class _AdminNavigationContainerState extends State<AdminNavigationContainer> {
                         const SizedBox(width: 8),
                         Text(
                           label,
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11.5),
                         ),
                       ],
                     )

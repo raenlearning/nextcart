@@ -34,14 +34,14 @@ class OrderSearchBar extends StatelessWidget {
         controller: controller,
         style: TextStyle(
           color: colors.textPrimary,
-          fontSize: 14,
+          fontSize: 13,
           fontWeight: FontWeight.w500,
         ),
         decoration: InputDecoration(
           hintText: 'Cari nama pembeli atau ID pesanan...',
           hintStyle: TextStyle(
             color: colors.textHint,
-            fontSize: 13.5,
+            fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
           prefixIcon: Icon(

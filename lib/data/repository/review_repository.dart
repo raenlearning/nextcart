@@ -90,11 +90,15 @@ class ReviewRepository {
         .toList();
   }
 
-  /// Semua ulasan (untuk halaman admin).
-  Future<List<ProductReview>> fetchAllReviews() async {
-    final data = await _supabase
-        .from('reviews')
-        .select('''
+  /// Semua ulasan dengan pagination + filter (untuk halaman admin).
+  Future<({List<ProductReview> items, int total})> fetchReviewsPage({
+    int page = 1,
+    int pageSize = 15,
+    String? search,
+    int? ratingFilter,
+    String? replyFilter,
+  }) async {
+    var query = _supabase.from('reviews').select('''
           id,
           product_id,
           user_id,
@@ -107,12 +111,39 @@ class ReviewRepository {
           created_at,
           products(name),
           profiles(full_name, avatar_url)
-        ''')
-        .order('created_at', ascending: false);
+        ''');
 
-    return (data as List)
+    final q = search?.trim() ?? '';
+    if (q.isNotEmpty) {
+      final sanitized = q.replaceAll(RegExp(r'[,()]'), ' ');
+      query = query.or(
+        'title.ilike.%$sanitized%,'
+        'comment.ilike.%$sanitized%,'
+        'products.name.ilike.%$sanitized%,'
+        'profiles.full_name.ilike.%$sanitized%',
+      );
+    }
+
+    if (ratingFilter != null) {
+      query = query.eq('rating', ratingFilter);
+    }
+
+    if (replyFilter == 'replied') {
+      query = query.not('reply_text', 'is', null);
+    } else if (replyFilter == 'unreplied') {
+      query = query.isFilter('reply_text', null);
+    }
+
+    final response = await query
+        .order('created_at', ascending: false)
+        .range((page - 1) * pageSize, page * pageSize - 1)
+        .count(CountOption.exact);
+
+    final items = (response.data as List)
         .map((json) => ProductReview.fromJson(json as Map<String, dynamic>))
         .toList();
+
+    return (items: items, total: response.count);
   }
 
   /// Balasan admin ke sebuah ulasan (via RPC, memvalidasi role admin).

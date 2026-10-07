@@ -26,7 +26,7 @@ class _DescriptionState extends State<Description> {
         Text(
           'Deskripsi',
           style: TextStyle(
-            fontSize: 15,
+            fontSize: 14,
             fontWeight: FontWeight.bold,
             color: widget.colors.textPrimary,
           ),
@@ -44,7 +44,7 @@ class _DescriptionState extends State<Description> {
             style: TextStyle(
               color: widget.colors.textSecondary,
               height: 1.6,
-              fontSize: 14,
+              fontSize: 13,
             ),
           ),
           secondChild: Text(
@@ -52,7 +52,7 @@ class _DescriptionState extends State<Description> {
             style: TextStyle(
               color: widget.colors.textSecondary,
               height: 1.6,
-              fontSize: 14,
+              fontSize: 13,
             ),
           ),
         ),
@@ -62,7 +62,7 @@ class _DescriptionState extends State<Description> {
           child: Text(
             _expanded ? 'Tampilkan lebih sedikit' : 'Baca selengkapnya',
             style: const TextStyle(
-              fontSize: 13,
+              fontSize: 12.5,
               color: AppColors.primary,
               fontWeight: FontWeight.w600,
             ),

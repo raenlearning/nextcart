@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:nextcart/core/constants/order_status.dart';
 import 'package:nextcart/core/helper/currency_formatter.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/theme/app_fonts.dart';
 import 'package:nextcart/features/admin/presentation/order/widgets/order_status_action_button.dart';
 
 class AdminOrderCard extends StatelessWidget {
@@ -56,7 +57,7 @@ class AdminOrderCard extends StatelessWidget {
                     'INV/$shortId',
                     style: TextStyle(
                       color: colors.textSecondary,
-                      fontSize: 12,
+                      fontSize: 11.5,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.3,
                     ),
@@ -75,7 +76,7 @@ class AdminOrderCard extends StatelessWidget {
                     OrderStatus.label(status),
                     style: TextStyle(
                       color: statusColor,
-                      fontSize: 11,
+                      fontSize: 10.5,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -105,7 +106,7 @@ class AdminOrderCard extends StatelessWidget {
                   order['shipping_address'] ?? '-',
                   style: TextStyle(
                     color: colors.textSecondary,
-                    fontSize: 12.5,
+                    fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
                   maxLines: 1,
@@ -135,7 +136,7 @@ class AdminOrderCard extends StatelessWidget {
                           paymentMethod.replaceAll('_', ' ').toUpperCase(),
                           style: TextStyle(
                             color: colors.textHint,
-                            fontSize: 10.5,
+                            fontSize: 10,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -187,7 +188,7 @@ class AdminOrderCard extends StatelessWidget {
                                 product?['name'] ?? 'Produk Tidak Diketahui',
                                 style: TextStyle(
                                   color: colors.textPrimary,
-                                  fontSize: 13.5,
+                                  fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                 ),
                                 maxLines: 1,
@@ -197,9 +198,11 @@ class AdminOrderCard extends StatelessWidget {
                               Text(
                                 '${item['quantity']} x ${CurrencyFormatter.rupiah(item['price_at_purchase'])}',
                                 style: TextStyle(
+                                  fontFamily: AppFonts.secondary,
                                   color: colors.textSecondary,
-                                  fontSize: 12,
+                                  fontSize: 11.5,
                                   fontWeight: FontWeight.w500,
+                                  fontFeatures: const [FontFeature.tabularFigures()],
                                 ),
                               ),
                             ],
@@ -217,7 +220,7 @@ class AdminOrderCard extends StatelessWidget {
                       '+ ${items.length - 2} produk lainnya',
                       style: TextStyle(
                         color: colors.textHint,
-                        fontSize: 12,
+                        fontSize: 11.5,
                         fontWeight: FontWeight.w500,
                         fontStyle: FontStyle.italic,
                       ),
@@ -238,7 +241,7 @@ class AdminOrderCard extends StatelessWidget {
                             'Total Pembayaran',
                             style: TextStyle(
                               color: colors.textSecondary,
-                              fontSize: 11,
+                              fontSize: 10.5,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -246,10 +249,12 @@ class AdminOrderCard extends StatelessWidget {
                           Text(
                             CurrencyFormatter.rupiah(order['total_amount']),
                             style: TextStyle(
+                              fontFamily: AppFonts.secondary,
                               color: colors.textPrimary,
                               fontWeight: FontWeight.w800,
-                              fontSize: 17,
+                              fontSize: 16,
                               letterSpacing: -0.3,
+                              fontFeatures: const [FontFeature.tabularFigures()],
                             ),
                           ),
                         ],

@@ -69,7 +69,7 @@ class StatusFilterChips extends StatelessWidget {
                           : context.colors.textSecondary,
                       fontWeight:
                           isSelected ? FontWeight.w700 : FontWeight.w500,
-                      fontSize: 12.5,
+                      fontSize: 12,
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -90,7 +90,7 @@ class StatusFilterChips extends StatelessWidget {
                         color: isSelected
                             ? Colors.white
                             : context.colors.textSecondary,
-                        fontSize: 11,
+                        fontSize: 10.5,
                         fontWeight: FontWeight.w700,
                       ),
                     ),

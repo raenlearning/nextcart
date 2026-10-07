@@ -37,7 +37,7 @@ class RememberMeRow extends StatelessWidget {
               'Ingat Saya',
               style: TextStyle(
                 color: context.colors.textPrimary,
-                fontSize: 13,
+                fontSize: 12.5,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -49,7 +49,7 @@ class RememberMeRow extends StatelessWidget {
             'Lupa Kata Sandi',
             style: TextStyle(
               color: context.colors.textPrimary,
-              fontSize: 13,
+              fontSize: 12.5,
               fontWeight: FontWeight.w500,
             ),
           ),

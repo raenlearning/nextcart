@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/core/widgets/pressable_scale.dart';
 
@@ -26,11 +27,14 @@ class AddToCartButton extends StatelessWidget {
             ),
           ],
         ),
-        child: const Icon(
-          Icons.shopping_cart_outlined,
-          color: Colors.white,
-          size: 16,
-        ),
+        child:  Center(
+          child: const FaIcon(
+            FontAwesomeIcons.bagShopping,
+            size: 14,
+            color: Colors.white,
+          
+          ),
+        )
       ),
     );
   }

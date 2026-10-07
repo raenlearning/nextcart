@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:nextcart/core/constants/order_status.dart';
 import 'package:nextcart/core/helper/currency_formatter.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/theme/app_fonts.dart';
 
 class OrderItemTile extends StatelessWidget {
   final Map<String, dynamic> item;
@@ -72,15 +73,17 @@ class OrderItemTile extends StatelessWidget {
                       style: TextStyle(
                         color: colors.textPrimary,
                         fontWeight: FontWeight.w600,
-                        fontSize: 13.5,
+                        fontSize: 13,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       '$quantity x ${CurrencyFormatter.rupiah(priceAtPurchase)}',
                       style: TextStyle(
+                        fontFamily: AppFonts.secondary,
                         color: colors.textSecondary,
-                        fontSize: 12.5,
+                        fontSize: 12,
+                        fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                     ),
                   ],
@@ -89,9 +92,11 @@ class OrderItemTile extends StatelessWidget {
               Text(
                 CurrencyFormatter.rupiah((priceAtPurchase as num) * quantity),
                 style: TextStyle(
+                  fontFamily: AppFonts.secondary,
                   color: colors.textPrimary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 13.5,
+                  fontSize: 13,
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
             ],
@@ -108,7 +113,7 @@ class OrderItemTile extends StatelessWidget {
                   foregroundColor: AppColors.primary,
                   textStyle: const TextStyle(
                     fontWeight: FontWeight.w600,
-                    fontSize: 12.5,
+                    fontSize: 12,
                   ),
                 ),
               ),

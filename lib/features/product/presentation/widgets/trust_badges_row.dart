@@ -48,7 +48,7 @@ class TrustBadgesRow extends StatelessWidget {
                   Text(
                     badge.label,
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 10.5,
                       fontWeight: FontWeight.w600,
                       color: colors.textPrimary,
                     ),

@@ -7,24 +7,18 @@ class CategoryGrid extends StatelessWidget {
   final List<Map<String, dynamic>> categories;
   final String? selectedCategoryId;
   final bool isLoading;
-  final bool isExpanded;
   final ValueChanged<String?> onCategoryTap;
-  final VoidCallback onToggleExpand;
 
   const CategoryGrid({
     super.key,
     required this.categories,
     required this.selectedCategoryId,
     required this.isLoading,
-    required this.isExpanded,
     required this.onCategoryTap,
-    required this.onToggleExpand,
   });
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
     if (isLoading) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 20),
@@ -41,76 +35,61 @@ class CategoryGrid extends StatelessWidget {
       );
     }
 
-    final totalItems = categories.length + 1;
-    final displayedCount =
-        isExpanded ? totalItems : (totalItems > 4 ? 4 : totalItems);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Belanja Sesuai Kategori',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: colors.textPrimary,
-                ),
+    return SizedBox(
+      height: 90,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: categories.length + 1,
+        separatorBuilder: (_, _) => const SizedBox(width: 12),
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return Padding(
+              padding: EdgeInsetsGeometry.symmetric(vertical: 5),
+              child: CategoryChip(
+                label: 'Semua',
+                imageAsset: null,
+                isSelected: selectedCategoryId == null,
+                onTap: () => onCategoryTap(null),
               ),
-              if (totalItems > 4)
-                IconButton(
-                  onPressed: onToggleExpand,
-                  icon: Icon(
-                    isExpanded
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    color: colors.textSecondary,
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: displayedCount,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 12,
-              childAspectRatio: 0.82,
-            ),
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return CategoryChip(
-                  label: 'Semua',
-                  isSelected: selectedCategoryId == null,
-                  onTap: () => onCategoryTap(null),
-                  svgAsset: null,
-                );
-              }
-              final category = categories[index - 1];
-              final categoryId = category['id'] as String;
-              final categoryName = category['name'] as String;
+            );
+          }
+                  final category = categories[index - 1];
+                  final categoryId = (category['id'] ?? '').toString();
+                  final categoryName = (category['name'] ?? '').toString();
 
-              return CategoryChip(
-                label: categoryName,
-                isSelected: selectedCategoryId == categoryId,
-                onTap: () => onCategoryTap(categoryId),
-                svgAsset: _getSvgAsset(categoryName),
-              );
-            },
-          ),
-        ],
+          return Padding(
+            padding: EdgeInsetsGeometry.symmetric(vertical: 5),
+            child: CategoryChip(
+              label: categoryName,
+              imageAsset: _resolveImage(category, categoryName),
+              isSelected: selectedCategoryId == categoryId,
+              onTap: () => onCategoryTap(categoryId),
+            ),
+          );
+        },
       ),
     );
   }
 
-  String? _getSvgAsset(String categoryName) {
+  String? _resolveImage(Map<String, dynamic> category, String categoryName) {
+    String? image = category['image_url']?.toString();
+    if (image == null || image.isEmpty) {
+      final products = category['products'] as List?;
+      if (products != null && products.isNotEmpty) {
+        final img = (products.first as Map<String, dynamic>)['images'];
+        if (img is List && img.isNotEmpty) {
+          image = img.first?.toString();
+        } else if (img != null) {
+          image = img.toString();
+        }
+      }
+    }
+    if (image == null || image.isEmpty) image = _getImageAsset(categoryName);
+    return (image == null || image.isEmpty) ? null : image;
+  }
+
+  String? _getImageAsset(String categoryName) {
     switch (categoryName.toLowerCase()) {
       case 'smartphone':
         return AppAssets.categorySmartPhone;
@@ -125,9 +104,16 @@ class CategoryGrid extends StatelessWidget {
       case 'computer':
         return AppAssets.categoryComputer;
       case 'television':
+      case 'tv':
+      case 'televisi':
         return AppAssets.categoryTelevision;
       case 'camera':
+      case 'kamera':
         return AppAssets.categoryCamera;
+      case 'other':
+      case 'others':
+      case 'lainnya':
+        return AppAssets.categoryOther;
       default:
         return null;
     }

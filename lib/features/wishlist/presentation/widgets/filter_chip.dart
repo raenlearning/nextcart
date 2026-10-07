@@ -36,7 +36,7 @@ class WishlistFilterChip extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: isActive ? Colors.white : colors.textSecondary,
-            fontSize: 12,
+            fontSize: 11.5,
             fontWeight: FontWeight.w600,
           ),
         ),

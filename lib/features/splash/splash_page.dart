@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:nextcart/core/constants/app_assets.dart';
+import 'package:nextcart/core/theme/app_colors.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -21,13 +22,12 @@ class _SplashPageState extends State<SplashPage>
   void initState() {
     super.initState();
     _setupAnimations();
-    _checkInitialSession();
   }
 
   void _setupAnimations() {
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 2),
+      duration: const Duration(milliseconds: 600),
     );
 
     _fadeAnimation = CurvedAnimation(
@@ -35,12 +35,20 @@ class _SplashPageState extends State<SplashPage>
       curve: Curves.easeIn,
     );
 
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _checkInitialSession();
+      }
+    });
+
     _controller.forward();
   }
 
   Future<void> _checkInitialSession() async {
-    await Future.delayed(const Duration(seconds: 2));
     if (!mounted) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final onboardingDone = prefs.getBool('onboarding_completed') ?? false;
 
     final session = Supabase.instance.client.auth.currentSession;
 
@@ -58,14 +66,16 @@ class _SplashPageState extends State<SplashPage>
           if (role == 'admin') {
             context.go('/admin-dashboard');
           } else {
-            context.go('/home');
+            context.go('/');
           }
         }
       } catch (e) {
-        if (mounted) context.go('/home');
+        if (mounted) context.go('/');
       }
+    } else if (onboardingDone) {
+      if (mounted) context.go('/auth');
     } else {
-      context.go('/onboarding');
+      if (mounted) context.go('/onboarding');
     }
   }
 
@@ -77,11 +87,8 @@ class _SplashPageState extends State<SplashPage>
 
   @override
   Widget build(BuildContext context) {
-    const cream = Color(0xFFF5F0E1);
-    const deepBlue = Color.fromARGB(255, 68, 106, 194);
-
     return Scaffold(
-      backgroundColor: deepBlue,
+      backgroundColor: AppColors.splashBackground,
       body: FadeTransition(
         opacity: _fadeAnimation,
         child: SafeArea(
@@ -89,31 +96,30 @@ class _SplashPageState extends State<SplashPage>
             children: [
               const Spacer(flex: 3),
 
-              // Brand name
               Text(
                 'NextCart',
-                style: GoogleFonts.dmSerifDisplay(
+                style: TextStyle(
+                  fontFamily: 'Geist',
+                  fontWeight: FontWeight.w900,
                   fontSize: 44,
-                  color: cream,
+                  color: AppColors.splashCream,
                   letterSpacing: 0.5,
                   height: 1.1,
                 ),
               ),
               const SizedBox(height: 8),
 
-              // Thin brand underline accent
               Container(
                 width: 48,
                 height: 3,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF22D3EE),
+                  color: AppColors.splashAccent,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
 
               const Spacer(flex: 2),
 
-              // Illustration
               SvgPicture.asset(
                 AppAssets.splashIllustration,
                 width: MediaQuery.sizeOf(context).width * 0.92,

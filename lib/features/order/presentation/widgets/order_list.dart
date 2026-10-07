@@ -122,14 +122,14 @@ class _OrderListState extends State<OrderList> {
                     style: TextStyle(
                       color: widget.colors.textPrimary,
                       fontWeight: FontWeight.w600,
-                      fontSize: 14,
+                      fontSize: 13,
                     ),
                   ),
                   Text(
                     '($totalItems)',
                     style: TextStyle(
                       color: widget.colors.textSecondary,
-                      fontSize: 13,
+                      fontSize: 12.5,
                     ),
                   ),
                 ],

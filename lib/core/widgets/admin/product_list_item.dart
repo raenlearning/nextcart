@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:nextcart/core/helper/currency_formatter.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/theme/app_fonts.dart';
 
 class ProductListItem extends StatelessWidget {
   final dynamic product;
@@ -49,7 +50,7 @@ class ProductListItem extends StatelessWidget {
                   Text(
                     product.name,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 12.5,
                       fontWeight: FontWeight.w600,
                       color: context.colors.textPrimary,
                     ),
@@ -133,7 +134,7 @@ class _ActiveBadge extends StatelessWidget {
           Text(
             isActive ? 'Aktif' : 'Tidak Aktif',
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 9.5,
               fontWeight: FontWeight.w600,
               color: isActive ? const Color(0xFF16A34A) : AppColors.slate500,
             ),
@@ -160,9 +161,11 @@ class _PriceStockRow extends StatelessWidget {
         Text(
           CurrencyFormatter.rupiah(price),
           style: TextStyle(
-            fontSize: 12,
+            fontFamily: AppFonts.secondary,
+            fontSize: 11.5,
             fontWeight: FontWeight.w700,
             color: context.colors.textPrimary,
+            fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
         const SizedBox(width: 8),
@@ -185,7 +188,7 @@ class _PriceStockRow extends StatelessWidget {
             child: Text(
               stockValue == 0 ? 'Stok habis' : 'Stok menipis ($stockValue)',
               style: const TextStyle(
-                fontSize: 11,
+                fontSize: 10.5,
                 fontWeight: FontWeight.w700,
                 color: AppColors.error,
               ),
@@ -195,7 +198,7 @@ class _PriceStockRow extends StatelessWidget {
           Text(
             '$stockValue stok',
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 11.5,
               color: context.colors.textSecondary,
             ),
           ),

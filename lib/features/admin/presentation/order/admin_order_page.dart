@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nextcart/core/constants/app_spacing.dart';
 import 'package:nextcart/core/constants/order_status.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/features/admin/presentation/order/widgets/admin_order_card.dart';
 import 'package:nextcart/features/admin/presentation/order/widgets/order_search_bar.dart';
 import 'package:nextcart/features/admin/presentation/order/widgets/status_filter_chips.dart';
@@ -96,12 +97,7 @@ class _AdminOrderPageState extends State<AdminOrderPage> {
       if (!mounted) return;
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal memuat pesanan: ${e.toString()}'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ToastHelper.showToast(context, 'Gagal memuat pesanan: ${e.toString()}', ToastSeverity.error);
       }
     }
   }
@@ -190,43 +186,27 @@ class _AdminOrderPageState extends State<AdminOrderPage> {
           .eq('id', orderId);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Status pesanan berhasil diperbarui menjadi ${OrderStatus.label(newStatus)}',
-            ),
-            backgroundColor: AppColors.success,
-          ),
+        ToastHelper.showToast(
+          context,
+          'Status pesanan berhasil diperbarui menjadi ${OrderStatus.label(newStatus)}',
+          ToastSeverity.success,
         );
       }
       _fetchOrders();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal memperbarui status: ${e.toString()}'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ToastHelper.showToast(context, 'Gagal memperbarui status: ${e.toString()}', ToastSeverity.error);
       }
     }
   }
 
   void _showStatusUpdateSheet(String orderId, String currentStatus) {
     if (currentStatus == OrderStatus.waitingPayment) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Pesanan ini masih menunggu pembayaran, belum bisa diubah.',
-          ),
-        ),
-      );
+      ToastHelper.showToast(context, 'Pesanan ini masih menunggu pembayaran, belum bisa diubah.', ToastSeverity.info);
       return;
     }
     if (currentStatus == OrderStatus.cancelled) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pesanan ini sudah dibatalkan.')),
-      );
+      ToastHelper.showToast(context, 'Pesanan ini sudah dibatalkan.', ToastSeverity.info);
       return;
     }
 
@@ -333,7 +313,7 @@ class _AdminOrderPageState extends State<AdminOrderPage> {
                 Text(
                   '${_orders.length} pesanan tercatat',
                   style: TextStyle(
-                    fontSize: 12.5,
+                    fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: colors.textSecondary,
                   ),
@@ -386,7 +366,7 @@ class _AdminOrderPageState extends State<AdminOrderPage> {
             'Tidak ada pesanan di kategori ini.',
             style: TextStyle(
               color: colors.textSecondary,
-              fontSize: 13.5,
+              fontSize: 13,
               fontWeight: FontWeight.w500,
             ),
           ),

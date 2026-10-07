@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/theme/app_fonts.dart';
 import 'package:nextcart/core/helper/currency_formatter.dart';
 import 'package:nextcart/features/cart/bloc/cart_bloc.dart';
 import 'package:nextcart/features/cart/presentation/widgets/item_thumbnail.dart';
@@ -62,7 +63,7 @@ class CartItemTile extends StatelessWidget {
                     style: TextStyle(
                       color: colors.textPrimary,
                       fontWeight: FontWeight.w600,
-                      fontSize: 14,
+                      fontSize: 13,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -72,7 +73,7 @@ class CartItemTile extends StatelessWidget {
                     storeName,
                     style: const TextStyle(
                       color: AppColors.success,
-                      fontSize: 11.5,
+                      fontSize: 11,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -87,7 +88,7 @@ class CartItemTile extends StatelessWidget {
                           UpdateCartQuantity(itemId, quantity - 1),
                         );
                       } else {
-                        context.read<CartBloc>().add(RemoveFromCart(itemId));
+                        _showRemoveConfirmation(context, itemId);
                       }
                     },
                     onIncrement: () {
@@ -105,7 +106,7 @@ class CartItemTile extends StatelessWidget {
                         'Stok habis, silakan hapus produk',
                         style: TextStyle(
                           color: AppColors.error,
-                          fontSize: 10.5,
+                          fontSize: 10,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -116,9 +117,11 @@ class CartItemTile extends StatelessWidget {
                       child: Text(
                         'Stok tersisa $stock',
                         style: const TextStyle(
+                          fontFamily: AppFonts.secondary,
                           color: AppColors.warning,
-                          fontSize: 10.5,
+                          fontSize: 10,
                           fontWeight: FontWeight.w600,
+                          fontFeatures: [FontFeature.tabularFigures()],
                         ),
                       ),
                     ),
@@ -128,9 +131,11 @@ class CartItemTile extends StatelessWidget {
             Text(
               CurrencyFormatter.rupiah(price),
               style: TextStyle(
+                fontFamily: AppFonts.secondary,
                 color: colors.textPrimary,
                 fontWeight: FontWeight.bold,
-                fontSize: 13.5,
+                fontSize: 13,
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
           ],
@@ -138,4 +143,29 @@ class CartItemTile extends StatelessWidget {
       ),
     );
   }
+}
+
+void _showRemoveConfirmation(BuildContext context, String itemId) {
+  showDialog(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: const Text('Hapus Produk'),
+      content: const Text('Hapus produk ini dari keranjang?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext),
+          child: const Text('Batal'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(dialogContext);
+            context.read<CartBloc>().add(RemoveFromCart(itemId));
+          },
+          style: TextButton.styleFrom(foregroundColor: AppColors.error),
+          child: const Text('Hapus'),
+        ),
+      ],
+    ),
+  );
 }

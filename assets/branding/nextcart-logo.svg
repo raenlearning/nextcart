@@ -1,0 +1,18 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Flat rounded-square app icon: indigo background, single accent color, no gradients/shadows for max versatility -->
+  <rect x="0" y="0" width="512" height="512" rx="112" ry="112" fill="#4F46E5"/>
+
+  <!-- Handle / forward arrow: doubles as the cart handle AND a "next" chevron -->
+  <path d="M 118 168 L 176 216 L 118 264"
+        fill="none" stroke="#FFFFFF" stroke-width="30"
+        stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Cart basket -->
+  <path d="M 176 216 L 396 216 L 358 336 L 202 336 Z"
+        fill="none" stroke="#FFFFFF" stroke-width="30"
+        stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Wheels: one accent wheel for a subtle brand pop -->
+  <circle cx="232" cy="384" r="24" fill="#FFFFFF"/>
+  <circle cx="330" cy="384" r="24" fill="#FF6B4A"/>
+</svg>

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nextcart/core/constants/order_status.dart';
-import 'package:nextcart/core/constants/pricing.dart';
+import 'package:nextcart/core/service/address_store.dart';
 import 'package:nextcart/data/repository/shipping_repository.dart';
 import 'package:nextcart/features/cart/bloc/cart_event.dart';
 import 'package:nextcart/features/cart/bloc/cart_state.dart';
@@ -13,13 +13,16 @@ export 'package:nextcart/features/cart/bloc/cart_event.dart';
 export 'package:nextcart/features/cart/bloc/cart_state.dart';
 
 class CartBloc extends Bloc<CartEvent, CartState> {
-  final SupabaseClient _supabase = Supabase.instance.client;
-  final ShippingRepository _shippingRepository = ShippingRepository();
+  final SupabaseClient _supabase;
+  final ShippingRepository _shippingRepository;
   Timer? _orderPollTimer;
   String? _cachedCartId;
   String? _cachedCartUserId;
 
-  CartBloc() : super(CartInitial()) {
+  CartBloc({SupabaseClient? client, ShippingRepository? shippingRepository})
+      : _supabase = client ?? Supabase.instance.client,
+        _shippingRepository = shippingRepository ?? ShippingRepository(),
+        super(CartInitial()) {
     on<LoadCart>(_onLoadCart);
     on<AddToCart>(_onAddToCart);
     on<UpdateCartQuantity>(_onUpdateQuantity);
@@ -27,6 +30,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     on<TriggerCheckout>(_onTriggerCheckout);
     on<ApplyVoucher>(_onApplyVoucher);
     on<ClearVoucher>(_onClearVoucher);
+    on<ClearVoucherError>(_onClearVoucherError);
     on<SelectShippingAddress>(_onSelectShippingAddress);
     on<SelectCourier>(_onSelectCourier);
   }
@@ -42,9 +46,6 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     _orderPollTimer = null;
   }
 
-  /// Menunggu status pesanan berubah dari `waiting_payment` via polling.
-  /// Mengembalikan status terbaru, atau status fallback setelah timeout.
-  /// Memakai polling bertahap (bukan Realtime) agar tetap jalan di Free Plan.
   Future<String> _waitForOrderStatus(String orderId) {
     final completer = Completer<String>();
     final statuses = {
@@ -167,8 +168,24 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         }
       }
 
-      final keepAddress =
+      Map<String, dynamic>? keepAddress =
           prev is CartLoaded ? prev.selectedAddress : null;
+      if (keepAddress == null) {
+        if (!AddressStore.instance.isLoaded) {
+          await AddressStore.instance.load();
+        }
+        final selected = AddressStore.instance.value;
+        if (selected != null) {
+          keepAddress = {
+            'id': selected.id,
+            'full_address': selected.fullAddress,
+            'province': selected.province,
+            'city': selected.city,
+            'district': selected.district,
+            'postal_code': selected.postalCode,
+          };
+        }
+      }
       emit(CartLoaded(cartItems, total,
           totalWeightGrams: totalWeight, selectedAddress: keepAddress));
 
@@ -178,13 +195,12 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     }
   }
 
-  double get _vatRate => AppPricing.vatRate;
-
-  CartLoaded _copyLoaded(CartLoaded c, {Map<String, dynamic>? voucher}) {
+  CartLoaded _copyLoaded(CartLoaded c, {Map<String, dynamic>? voucher, String? voucherError}) {
     return CartLoaded(
       c.cartItems,
       c.totalPrice,
       voucher: voucher ?? c.voucher,
+      voucherError: voucherError,
       totalWeightGrams: c.totalWeightGrams,
       selectedAddress: c.selectedAddress,
       selectedCourier: c.selectedCourier,
@@ -281,7 +297,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   ) {
     final discount = calculateDiscount(subtotal, voucher);
     final discounted = subtotal - discount;
-    return discounted + shippingFee + discounted * _vatRate;
+    return discounted + shippingFee;
   }
 
   Future<void> _onApplyVoucher(ApplyVoucher event, Emitter<CartState> emit) async {
@@ -297,7 +313,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
           .maybeSingle();
 
       if (data == null) {
-        emit(CartError('Kode voucher tidak valid.'));
+        emit(_copyLoaded(current, voucherError: 'Kode voucher tidak valid.'));
         return;
       }
 
@@ -305,38 +321,48 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       final validFrom = DateTime.tryParse(data['valid_from'] as String? ?? '');
       final validUntil = DateTime.tryParse(data['valid_until'] as String? ?? '');
       if (validFrom != null && now.isBefore(validFrom)) {
-        emit(CartError('Voucher belum aktif.'));
+        emit(_copyLoaded(current, voucherError: 'Voucher belum aktif.'));
         return;
       }
       if (validUntil != null && now.isAfter(validUntil)) {
-        emit(CartError('Voucher sudah kedaluwarsa.'));
+        emit(_copyLoaded(current, voucherError: 'Voucher sudah kedaluwarsa.'));
         return;
       }
 
       final minPurchase = (data['min_purchase'] as num?)?.toDouble() ?? 0;
       if (current.totalPrice < minPurchase) {
-        emit(CartError(
-            'Minimal belanja Rp ${minPurchase.round()} untuk voucher ini.'));
+        emit(_copyLoaded(current,
+            voucherError: 'Minimal belanja Rp ${minPurchase.round()} untuk voucher ini.'));
         return;
       }
 
       final usageLimit = (data['usage_limit'] as num?)?.toInt() ?? 0;
       final usedCount = (data['used_count'] as num?)?.toInt() ?? 0;
       if (usageLimit > 0 && usedCount >= usageLimit) {
-        emit(CartError('Voucher sudah habis digunakan.'));
+        emit(_copyLoaded(current, voucherError: 'Voucher sudah habis digunakan.'));
         return;
       }
 
-      emit(_copyLoaded(current, voucher: data));
+      emit(_copyLoaded(current, voucher: data, voucherError: null));
     } catch (e) {
-      emit(CartError('Gagal memakai voucher: ${e.toString()}'));
+      final s = state;
+      if (s is CartLoaded) {
+        emit(_copyLoaded(s, voucherError: 'Gagal memakai voucher: ${e.toString()}'));
+      }
     }
   }
 
   Future<void> _onClearVoucher(ClearVoucher event, Emitter<CartState> emit) async {
     final current = state;
     if (current is CartLoaded) {
-      emit(_copyLoaded(current, voucher: null));
+      emit(_copyLoaded(current, voucher: null, voucherError: null));
+    }
+  }
+
+  void _onClearVoucherError(ClearVoucherError event, Emitter<CartState> emit) {
+    final current = state;
+    if (current is CartLoaded && current.voucherError != null) {
+      emit(_copyLoaded(current, voucherError: null));
     }
   }
 
@@ -499,11 +525,10 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         voucherCode = redeemResult['code']?.toString();
       }
 
-      // Hitung ongkir & pajak (PPN atas nilai setelah diskon)
+      // Hitung ongkir
       final double discounted = recalculatedTotal - discountAmount;
       final double deliveryFee = shippingFee;
-      final double tax = discounted * _vatRate;
-      final double payableTotal = discounted + deliveryFee + tax;
+      final double payableTotal = discounted + deliveryFee;
       final int grossAmount = payableTotal.round();
 
       // 2. Ambil alamat pengiriman terpilih (fallback ke alamat profil)
@@ -538,7 +563,6 @@ class CartBloc extends Bloc<CartEvent, CartState> {
             'voucher_code': ?voucherCode,
             'discount_amount': discountAmount,
             'delivery_fee': deliveryFee,
-            'tax_amount': tax,
           })
           .select()
           .single();
@@ -617,7 +641,11 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         userMessage = 'Pembayaran gagal atau dibatalkan.';
       }
 
-      emit(CheckoutStatusVerified(orderStatus: status, message: userMessage));
+      emit(CheckoutStatusVerified(
+        orderStatus: status,
+        message: userMessage,
+        orderId: orderId,
+      ));
       add(LoadCart()); // Muat ulang isi keranjang yang sekarang sudah kosong
     } catch (e) {
       emit(CartError('Gagal memproses checkout: ${e.toString()}'));

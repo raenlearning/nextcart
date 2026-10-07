@@ -51,73 +51,76 @@ class _ImageHeroState extends State<ImageHero> {
     final hasImages = widget.product.images.isNotEmpty;
     final imageCount = widget.product.images.length;
 
-    return SizedBox(
-      height: widget.height,
-      width: double.infinity,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          if (!hasImages)
-            ColoredBox(
-              color: widget.colors.inputFill,
-              child: Center(
-                child: Icon(
-                  Icons.image_not_supported_outlined,
-                  size: 80,
-                  color: widget.colors.textHint,
+    return Hero(
+      tag: 'product-image-${widget.product.id}',
+      child: SizedBox(
+        height: widget.height,
+        width: double.infinity,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (!hasImages)
+              ColoredBox(
+                color: widget.colors.inputFill,
+                child: Center(
+                  child: Icon(
+                    Icons.image_not_supported_outlined,
+                    size: 80,
+                    color: widget.colors.textHint,
+                  ),
+                ),
+              )
+            else
+              PageView.builder(
+                controller: widget.pageController,
+                itemCount: imageCount,
+                physics: const BouncingScrollPhysics(),
+                itemBuilder: (_, index) =>
+                    SingleImage(url: widget.product.images[index]),
+              ),
+
+            if (hasImages && imageCount > 1)
+              Positioned(
+                top: 16,
+                right: 16,
+                child: _ImageCounterPill(
+                  current: _currentPage + 1,
+                  total: imageCount,
+                  colors: widget.colors,
                 ),
               ),
-            )
-          else
-            PageView.builder(
-              controller: widget.pageController,
-              itemCount: imageCount,
-              physics: const BouncingScrollPhysics(),
-              itemBuilder: (_, index) =>
-                  SingleImage(url: widget.product.images[index]),
-            ),
 
-          if (hasImages && imageCount > 1)
-            Positioned(
-              top: 16,
-              right: 16,
-              child: _ImageCounterPill(
-                current: _currentPage + 1,
-                total: imageCount,
-                colors: widget.colors,
-              ),
-            ),
-
-          if (hasImages && imageCount > 1)
-            Positioned(
-              bottom: 16,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withAlpha(90),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: SmoothPageIndicator(
-                    controller: widget.pageController,
-                    count: imageCount,
-                    effect: ExpandingDotsEffect(
-                      dotWidth: 6,
-                      dotHeight: 6,
-                      expansionFactor: 2.5,
-                      activeDotColor: Colors.white,
-                      dotColor: Colors.white.withAlpha(90),
+            if (hasImages && imageCount > 1)
+              Positioned(
+                bottom: 16,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withAlpha(90),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: SmoothPageIndicator(
+                      controller: widget.pageController,
+                      count: imageCount,
+                      effect: ExpandingDotsEffect(
+                        dotWidth: 6,
+                        dotHeight: 6,
+                        expansionFactor: 2.5,
+                        activeDotColor: Colors.white,
+                        dotColor: Colors.white.withAlpha(90),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -151,7 +154,7 @@ class _ImageCounterPill extends StatelessWidget {
             '$current/$total',
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 12,
+              fontSize: 11.5,
               fontWeight: FontWeight.w600,
             ),
           ),

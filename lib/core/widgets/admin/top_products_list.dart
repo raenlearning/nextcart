@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/widgets/bento_tile.dart';
 
 class TopProductsList extends StatefulWidget {
   final List<Map<String, dynamic>> products;
@@ -25,20 +26,9 @@ class _TopProductsListState extends State<TopProductsList> {
         ? 0
         : qtys.reduce((a, b) => a + b) / qtys.length;
 
-    return Container(
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        color: colors.card,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: colors.border),
-        boxShadow: [
-          BoxShadow(
-            color: colors.textPrimary.withAlpha(8),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
+    return BentoTile(
+      padding: const EdgeInsets.all(20),
+      borderRadius: 22,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -54,7 +44,7 @@ class _TopProductsListState extends State<TopProductsList> {
                 'Rating Produk',
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
-                  fontSize: 15,
+                  fontSize: 14,
                   color: colors.textPrimary,
                   letterSpacing: -0.1,
                 ),
@@ -75,7 +65,7 @@ class _TopProductsListState extends State<TopProductsList> {
                       Text(
                         _tabs[i],
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: 12.5,
                           fontWeight: isActive
                               ? FontWeight.w800
                               : FontWeight.w500,
@@ -146,7 +136,7 @@ class _TopProductsListState extends State<TopProductsList> {
                       child: Text(
                         '$rank',
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: 9.5,
                           fontWeight: FontWeight.w800,
                           color: rankColor,
                         ),
@@ -185,7 +175,7 @@ class _TopProductsListState extends State<TopProductsList> {
                           Text(
                             name,
                             style: TextStyle(
-                              fontSize: 13.5,
+                              fontSize: 13,
                               fontWeight: FontWeight.w700,
                               color: colors.textPrimary,
                               letterSpacing: -0.1,
@@ -197,7 +187,7 @@ class _TopProductsListState extends State<TopProductsList> {
                           Text(
                             '$qty units sold',
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 10.5,
                               color: colors.textSecondary,
                               fontWeight: FontWeight.w500,
                             ),
@@ -230,7 +220,7 @@ class _TopProductsListState extends State<TopProductsList> {
                           Text(
                             '${pct.abs().toStringAsFixed(0)}%',
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 10.5,
                               fontWeight: FontWeight.w700,
                               color: trendColor,
                             ),

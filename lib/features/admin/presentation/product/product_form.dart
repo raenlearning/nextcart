@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nextcart/core/helper/supabase_storage_helper.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
+import 'package:nextcart/core/helper/validators.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/core/widgets/admin/category_row.dart';
 import 'package:nextcart/core/widgets/admin/media_picker_sheet.dart';
@@ -95,7 +98,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
     try {
       final response = await _supabase
           .from('categories')
-          .select('id, name')
+          .select('id, name, image_url, products(id, images)')
           .order('name', ascending: true);
       if (mounted) {
         setState(() {
@@ -103,6 +106,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
             return {
               'id': item['id'].toString(),
               'name': item['name'].toString(),
+              'image_url': item['image_url'],
+              'products': item['products'],
             };
           }).toList();
           _isLoadingCategories = false;
@@ -117,15 +122,17 @@ class _ProductFormPageState extends State<ProductFormPage> {
   }
 
   void _showSnack(String msg, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg, style: const TextStyle(color: Colors.white)),
-        backgroundColor: color,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      ),
-    );
+    ToastSeverity severity;
+    if (color == AppColors.error) {
+      severity = ToastSeverity.error;
+    } else if (color == AppColors.warning) {
+      severity = ToastSeverity.warning;
+    } else if (color == AppColors.success) {
+      severity = ToastSeverity.success;
+    } else {
+      severity = ToastSeverity.info;
+    }
+    ToastHelper.showToast(context, msg, severity);
   }
 
   void _openMediaSheet() {
@@ -160,11 +167,6 @@ class _ProductFormPageState extends State<ProductFormPage> {
       _showSnack('Silakan pilih kategori produk.', AppColors.warning);
       return;
     }
-    final weightInput = int.tryParse(_weightController.text.trim());
-    if (weightInput == null || weightInput <= 0) {
-      _showSnack('Berat produk harus diisi (minimal 1 gram).', AppColors.warning);
-      return;
-    }
 
     setState(() => _isLoading = true);
 
@@ -176,6 +178,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
         );
       }
       final finalImages = [..._existingImages, ...newUrls];
+      final price = double.tryParse(_priceController.text.trim()) ?? 0;
+      final stock = int.tryParse(_stockController.text.trim()) ?? 0;
       final weightGrams = int.tryParse(_weightController.text.trim()) ?? 0;
 
       if (!mounted) return;
@@ -185,8 +189,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
           AddAdminProduct(
             name: _nameController.text.trim(),
             description: _descController.text.trim(),
-            price: double.parse(_priceController.text),
-            stock: int.parse(_stockController.text),
+            price: price,
+            stock: stock,
             categoryId: _selectedCategoryId!,
             images: finalImages,
             isActive: _isActive,
@@ -200,8 +204,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
               id: widget.product!.id,
               name: _nameController.text.trim(),
               description: _descController.text.trim(),
-              price: double.parse(_priceController.text),
-              stock: int.parse(_stockController.text),
+              price: price,
+              stock: stock,
               categoryId: _selectedCategoryId!,
               images: finalImages,
               sellerId: widget.product!.sellerId,
@@ -241,7 +245,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
         title: Text(
           _isEdit ? 'Edit Produk' : 'Buat Produk',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.bold,
             color: context.colors.textPrimary,
           ),
@@ -261,7 +265,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
                     'Sedang memproses...',
                     style: TextStyle(
                       color: context.colors.textSecondary,
-                      fontSize: 13,
+                      fontSize: 12.5,
                     ),
                   ),
                 ],
@@ -279,7 +283,12 @@ class _ProductFormPageState extends State<ProductFormPage> {
                   ),
 
                   FormSection(label: "Product Name"),
-                  FlatField(controller: _nameController, hint: "Product name"),
+                  FlatField(
+                    controller: _nameController,
+                    hint: "Product name",
+                    validator: (v) =>
+                        Validators.requiredField(v, message: 'Nama produk wajib diisi'),
+                  ),
 
                   FormSection(label: "Status"),
                   Padding(
@@ -338,7 +347,11 @@ class _ProductFormPageState extends State<ProductFormPage> {
                   FlatField(
                     controller: _priceController,
                     hint: "Rp 0",
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
+                    ],
+                    validator: Validators.price,
                   ),
 
                   FormSection(label: "Stock"),
@@ -346,6 +359,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
                     controller: _stockController,
                     hint: "0",
                     keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    validator: Validators.stock,
                   ),
 
                   FormSection(label: "Berat (gram)"),
@@ -353,13 +368,15 @@ class _ProductFormPageState extends State<ProductFormPage> {
                     controller: _weightController,
                     hint: "cth: 250",
                     keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    validator: Validators.weight,
                   ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
                     child: Text(
                       'Berat dipakai untuk menghitung ongkos kirim.',
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: 10.5,
                         color: context.colors.textSecondary,
                       ),
                     ),

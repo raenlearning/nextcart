@@ -89,7 +89,7 @@ class _SortChip extends StatelessWidget {
             Text(
               option.label,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 11.5,
                 fontWeight: FontWeight.w600,
                 color: isSelected ? Colors.white : colors.textPrimary,
               ),

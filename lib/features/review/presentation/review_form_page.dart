@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/data/repository/review_repository.dart';
 
@@ -39,12 +40,7 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
       final already = await _repository.hasAlreadyReviewed(widget.productId);
       if (!mounted) return;
       if (already) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Kamu sudah memberi ulasan untuk produk ini'),
-            backgroundColor: AppColors.warning,
-          ),
-        );
+        ToastHelper.showToast(context, 'Kamu sudah memberi ulasan untuk produk ini', ToastSeverity.warning);
         context.pop();
       } else {
         setState(() => _checked = true);
@@ -71,12 +67,7 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal memilih foto: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ToastHelper.showToast(context, 'Gagal memilih foto: $e', ToastSeverity.error);
       }
     }
   }
@@ -84,9 +75,7 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
   Future<void> _submit() async {
     if (!_checked) return;
     if (_rating == 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pilih rating terlebih dahulu')),
-      );
+      ToastHelper.showToast(context, 'Pilih rating terlebih dahulu', ToastSeverity.info);
       return;
     }
     if (!_formKey.currentState!.validate()) return;
@@ -106,19 +95,12 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
         images: uploadedUrls,
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ulasan berhasil dikirim!')),
-        );
+        ToastHelper.showToast(context, 'Ulasan berhasil dikirim!', ToastSeverity.success);
         context.pop(true);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal mengirim ulasan: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ToastHelper.showToast(context, 'Gagal mengirim ulasan: $e', ToastSeverity.error);
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -141,7 +123,7 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
           style: TextStyle(
             color: colors.textPrimary,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 17,
           ),
         ),
         leading: IconButton(
@@ -161,7 +143,7 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
                 style: TextStyle(
                   color: colors.textPrimary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 15,
+                  fontSize: 14,
                 ),
               ),
               const SizedBox(height: 16),
@@ -192,7 +174,7 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
                 style: TextStyle(
                   color: colors.textPrimary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 14,
+                  fontSize: 13,
                 ),
               ),
               const SizedBox(height: 6),
@@ -269,7 +251,7 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
                                 '${_images.length}/$_maxImages',
                                 style: TextStyle(
                                   color: colors.textHint,
-                                  fontSize: 10,
+                                  fontSize: 9.5,
                                 ),
                               ),
                             ],
@@ -285,13 +267,13 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
                 style: TextStyle(
                   color: colors.textPrimary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 14,
+                  fontSize: 13,
                 ),
               ),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _titleController,
-                style: TextStyle(color: colors.textPrimary, fontSize: 14),
+                style: TextStyle(color: colors.textPrimary, fontSize: 13),
                 decoration: const InputDecoration(
                     hintText: 'cth: Sangat memuaskan'),
               ),
@@ -301,13 +283,13 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
                 style: TextStyle(
                   color: colors.textPrimary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 14,
+                  fontSize: 13,
                 ),
               ),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _commentController,
-                style: TextStyle(color: colors.textPrimary, fontSize: 14),
+                style: TextStyle(color: colors.textPrimary, fontSize: 13),
                 maxLines: 4,
                 decoration: const InputDecoration(
                     hintText: 'Ceritakan pengalamanmu dengan produk ini'),
@@ -338,7 +320,7 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
                       : const Text(
                           'Kirim Ulasan',
                           style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 14),
+                              fontWeight: FontWeight.bold, fontSize: 13),
                         ),
                 ),
               ),

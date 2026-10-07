@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nextcart/core/helper/auth_error_helper.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -43,18 +45,11 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       );
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Kata sandi berhasil diubah')),
-      );
+      ToastHelper.showToast(context, 'Kata sandi berhasil diubah', ToastSeverity.success);
       context.pop();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Gagal mengubah kata sandi: $e'),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      ToastHelper.showToast(context, 'Gagal mengubah kata sandi: ${mapAuthErrorMessage(e)}', ToastSeverity.error);
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -75,7 +70,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           style: TextStyle(
             color: colors.textPrimary,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 17,
           ),
         ),
       ),
@@ -87,7 +82,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             children: [
               Text(
                 'Masukkan kata sandi saat ini dan kata sandi baru kamu.',
-                style: TextStyle(color: colors.textSecondary, fontSize: 13),
+                style: TextStyle(color: colors.textSecondary, fontSize: 12.5),
               ),
               const SizedBox(height: 24),
               _buildPasswordField(
@@ -183,7 +178,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           style: TextStyle(
             color: colors.textPrimary,
             fontWeight: FontWeight.bold,
-            fontSize: 14,
+            fontSize: 13,
           ),
         ),
         const SizedBox(height: 8),
@@ -191,7 +186,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           controller: controller,
           obscureText: obscure,
           validator: validator,
-          style: TextStyle(color: colors.textPrimary, fontSize: 14),
+          style: TextStyle(color: colors.textPrimary, fontSize: 13),
           decoration: InputDecoration(
             suffixIcon: IconButton(
               icon: Icon(

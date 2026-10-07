@@ -19,10 +19,10 @@ class OrderSearchBar extends StatelessWidget {
       controller: controller,
       onChanged: onChanged,
       textInputAction: TextInputAction.search,
-      style: TextStyle(color: colors.textPrimary, fontSize: 14),
+      style: TextStyle(color: colors.textPrimary, fontSize: 13),
       decoration: InputDecoration(
         hintText: 'Cari pesanan berdasarkan produk...',
-        hintStyle: TextStyle(color: colors.textHint, fontSize: 13.5),
+        hintStyle: TextStyle(color: colors.textHint, fontSize: 13),
         prefixIcon: Icon(
           Icons.search,
           size: 20,

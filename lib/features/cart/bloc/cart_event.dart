@@ -31,6 +31,8 @@ class ApplyVoucher extends CartEvent {
 
 class ClearVoucher extends CartEvent {}
 
+class ClearVoucherError extends CartEvent {}
+
 class SelectShippingAddress extends CartEvent {
   final Map<String, dynamic> address;
   SelectShippingAddress(this.address);

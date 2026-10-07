@@ -1,11 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lottie/lottie.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
-import 'package:nextcart/core/constants/app_assets.dart';
 import 'package:nextcart/core/constants/app_spacing.dart';
-import 'package:nextcart/core/widgets/pressable_scale.dart';
+import 'package:nextcart/core/theme/theme_cubit.dart';
+import 'package:nextcart/core/widgets/bento_tile.dart';
+import 'package:nextcart/core/widgets/shimmer_box.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -138,19 +139,17 @@ class ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: colors.background,
       body: _isLoading
-          ? Center(
-              child: Lottie.asset(
-                AppAssets.loadingChart,
-                width: 80,
-                height: 80,
-                repeat: true,
-              ),
-            )
+          ? const _ProfileShimmerSkeleton()
           : SafeArea(
               top: true,
               bottom: false,
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, AppSpacing.bottomNavSpace),
+                padding: const EdgeInsets.fromLTRB(
+                  20,
+                  16,
+                  20,
+                  AppSpacing.bottomNavSpace,
+                ),
                 children: [
                   Text(
                     'Akun',
@@ -190,7 +189,7 @@ class ProfilePageState extends State<ProfilePage> {
                               style: TextStyle(
                                 color: colors.textPrimary,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 15,
+                                fontSize: 14,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -199,7 +198,7 @@ class ProfilePageState extends State<ProfilePage> {
                               email,
                               style: TextStyle(
                                 color: colors.textSecondary,
-                                fontSize: 12,
+                                fontSize: 11.5,
                               ),
                             ),
                           ],
@@ -211,8 +210,7 @@ class ProfilePageState extends State<ProfilePage> {
 
                   // Kartu ringkasan
                   _buildSummaryCards(colors),
-                  const SizedBox(height: 28),
-
+                  const _ThemeToggleItem(),
                   _buildSectionTitle(colors, 'Pengaturan Akun'),
                   const SizedBox(height: 10),
                   _buildCard(colors, [
@@ -239,6 +237,11 @@ class ProfilePageState extends State<ProfilePage> {
                       icon: Icons.lock_outline,
                       label: 'Ganti Kata Sandi',
                       onTap: () => context.push('/change-password'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.storefront_outlined,
+                      label: 'Profil Toko',
+                      onTap: () => context.push('/store-profile'),
                     ),
                     _MenuItem(
                       icon: Icons.privacy_tip_outlined,
@@ -286,7 +289,7 @@ class ProfilePageState extends State<ProfilePage> {
                         'Keluar',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                          fontSize: 13,
                         ),
                       ),
                     ),
@@ -338,12 +341,12 @@ class ProfilePageState extends State<ProfilePage> {
       style: TextStyle(
         color: colors.textPrimary,
         fontWeight: FontWeight.bold,
-        fontSize: 15,
+        fontSize: 14,
       ),
     );
   }
 
-  Widget _buildCard(AppColorScheme colors, List<_MenuItem> items) {
+  Widget _buildCard(AppColorScheme colors, List<Widget> items) {
     return Container(
       decoration: BoxDecoration(
         color: colors.card,
@@ -387,39 +390,40 @@ class _SummaryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-    return PressableScale(
+    return BentoTile(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          color: colors.card,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: colors.border),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 22, color: color),
-            const SizedBox(height: 8),
-            Text(
-              '$count',
-              style: TextStyle(
-                color: colors.textPrimary,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      borderRadius: 20,
+      child: Column(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: color.withAlpha(18),
+              shape: BoxShape.circle,
             ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: TextStyle(
-                color: colors.textSecondary,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
+            child: Icon(icon, size: 20, color: color),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            '$count',
+            style: TextStyle(
+              color: context.colors.textPrimary,
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: TextStyle(
+              color: context.colors.textSecondary,
+              fontSize: 10.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
@@ -450,12 +454,140 @@ class _MenuItem extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: TextStyle(color: colors.textPrimary, fontSize: 13.5),
+                style: TextStyle(color: colors.textPrimary, fontSize: 13),
               ),
             ),
             Icon(Icons.chevron_right, size: 18, color: colors.textHint),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ThemeToggleItem extends StatelessWidget {
+  const _ThemeToggleItem();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return InkWell(
+      onTap: () => context.read<ThemeCubit>().toggle(),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Icon(
+              Icons.dark_mode_outlined,
+              size: 20,
+              color: colors.textSecondary,
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                'Mode Gelap',
+                style: TextStyle(color: colors.textPrimary, fontSize: 13),
+              ),
+            ),
+            BlocBuilder<ThemeCubit, ThemeMode>(
+              builder: (context, mode) {
+                final isDark = mode == ThemeMode.dark;
+                return Switch(
+                  value: isDark,
+                  onChanged: (_) => context.read<ThemeCubit>().toggle(),
+                  activeThumbColor: AppColors.primary,
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileShimmerSkeleton extends StatelessWidget {
+  const _ProfileShimmerSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return SafeArea(
+      top: true,
+      bottom: false,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(
+          20,
+          16,
+          20,
+          AppSpacing.bottomNavSpace,
+        ),
+        children: [
+          const ShimmerBox(width: 80, height: 20, radius: 6),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              const ShimmerBox(width: 56, height: 56, radius: 28),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const ShimmerBox(width: 140, height: 15, radius: 6),
+                    const SizedBox(height: 6),
+                    ShimmerBox(width: 180, height: 12, radius: 5),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: List.generate(
+              3,
+              (index) => Expanded(
+                child: Container(
+                  margin: EdgeInsets.only(right: index < 2 ? 12 : 0),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: colors.card,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Column(
+                    children: [
+                      const ShimmerBox(width: 36, height: 36, radius: 18),
+                      const SizedBox(height: 8),
+                      const ShimmerBox(width: 40, height: 14, radius: 6),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          ...List.generate(
+            4,
+            (index) => Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: colors.card,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  const ShimmerBox(width: 20, height: 20, radius: 10),
+                  const SizedBox(width: 14),
+                  ShimmerBox(
+                    width: 120 + (index * 20).toDouble(),
+                    height: 14,
+                    radius: 6,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

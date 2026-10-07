@@ -51,7 +51,7 @@ class PeriodFilterTabs extends StatelessWidget {
                 child: Text(
                   p,
                   style: TextStyle(
-                    fontSize: 12.5,
+                    fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: isActive ? Colors.white : colors.textSecondary,
                     letterSpacing: 0.1,

@@ -4,6 +4,51 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nextcart/core/constants/app_assets.dart';
 
+class BannerSlideData {
+  final String badge;
+  final String title;
+  final String cta;
+  final String image;
+
+  const BannerSlideData({
+    required this.badge,
+    required this.title,
+    required this.cta,
+    required this.image,
+  });
+}
+
+class HomeBannerSlides {
+  HomeBannerSlides._();
+
+  static const List<BannerSlideData> all = [
+    BannerSlideData(
+      badge: 'Diskon 25%',
+      title: 'Temukan\nProduk Terbaru',
+      cta: 'Belanja Sekarang',
+      image: AppAssets.bannerTech1,
+    ),
+    BannerSlideData(
+      badge: 'Promo Spesial',
+      title: 'Gadget Favorit\nMakin Hemat',
+      cta: 'Lihat Promo',
+      image: AppAssets.bannerTech2,
+    ),
+    BannerSlideData(
+      badge: 'Gratis Ongkir',
+      title: 'Belanja Puas\nTanpa Biaya Kirim',
+      cta: 'Cek Syarat',
+      image: AppAssets.bannerTech3,
+    ),
+    BannerSlideData(
+      badge: 'Hari Ini Saja',
+      title: 'Flash Sale\nSampai Stok Habis',
+      cta: 'Grab It Fast',
+      image: AppAssets.bannerTech4,
+    ),
+  ];
+}
+
 class HomeBannerCarousel extends StatefulWidget {
   const HomeBannerCarousel({super.key});
 
@@ -50,6 +95,7 @@ class _HomeBannerCarouselState extends State<HomeBannerCarousel> {
   }
 
   void _startAutoPlay() {
+    _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 5), (_) {
       if (!mounted || !_controller.hasClients) return;
       final next = (_current + 1) % _slides.length;
@@ -59,6 +105,16 @@ class _HomeBannerCarouselState extends State<HomeBannerCarousel> {
         curve: Curves.easeOutCubic,
       );
     });
+  }
+
+  void _stopAutoPlay() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
+  void _rescheduleAutoPlay() {
+    _timer?.cancel();
+    _timer = Timer(const Duration(seconds: 4), _startAutoPlay);
   }
 
   @override
@@ -79,17 +135,22 @@ class _HomeBannerCarouselState extends State<HomeBannerCarousel> {
       children: [
         SizedBox(
           height: cardHeight,
-          child: PageView.builder(
-            controller: _controller,
-            physics: const BouncingScrollPhysics(),
-            onPageChanged: (index) => setState(() => _current = index),
-            itemCount: _slides.length,
-            itemBuilder: (context, index) {
-              return _BannerCard(
-                slide: _slides[index],
-                isActive: index == _current,
-              );
-            },
+          child: Listener(
+            onPointerDown: (_) => _stopAutoPlay(),
+            onPointerUp: (_) => _rescheduleAutoPlay(),
+            onPointerCancel: (_) => _rescheduleAutoPlay(),
+            child: PageView.builder(
+              controller: _controller,
+              physics: const BouncingScrollPhysics(),
+              onPageChanged: (index) => setState(() => _current = index),
+              itemCount: _slides.length,
+              itemBuilder: (context, index) {
+                return _BannerCard(
+                  slide: _slides[index],
+                  isActive: index == _current,
+                );
+              },
+            ),
           ),
         ),
         const SizedBox(height: 10),
@@ -174,7 +235,7 @@ class _BannerCard extends StatelessWidget {
                     child: Text(
                       slide.badge,
                       style: const TextStyle(
-                        fontSize: 11,
+                        fontSize: 10.5,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -184,7 +245,7 @@ class _BannerCard extends StatelessWidget {
                   Text(
                     slide.title,
                     style: const TextStyle(
-                      fontSize: 17,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                       height: 1.2,
                       color: Colors.white,
@@ -212,7 +273,7 @@ class _BannerCard extends StatelessWidget {
                     child: Text(
                       slide.cta,
                       style: const TextStyle(
-                        fontSize: 12,
+                        fontSize: 11.5,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

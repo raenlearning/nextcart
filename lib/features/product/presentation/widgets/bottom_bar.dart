@@ -1,28 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:nextcart/core/helper/cart_alert_helper.dart';
-import 'package:nextcart/core/helper/currency_formatter.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/theme/app_fonts.dart';
 import 'package:nextcart/core/widgets/cart_fly_animation.dart';
 import 'package:nextcart/data/models/product_model.dart';
 import 'package:nextcart/features/cart/bloc/cart_bloc.dart';
 
 class BottomBar extends StatelessWidget {
-  final double price;
   final int quantity;
+  final ValueChanged<int> onQuantityChanged;
   final AppColorScheme colors;
-  final bool isDark;
   final Product product;
   final GlobalKey addToCartKey;
 
   const BottomBar({
     super.key,
-    required this.price,
     required this.quantity,
+    required this.onQuantityChanged,
     required this.colors,
-    required this.isDark,
     required this.product,
     required this.addToCartKey,
   });
@@ -52,24 +50,6 @@ class BottomBar extends StatelessWidget {
     );
   }
 
-  void _buyNow(BuildContext context) {
-    HapticFeedback.lightImpact();
-
-    context
-        .read<CartBloc>()
-        .add(AddToCart(product.id, quantity: quantity));
-
-    CartFlyAnimation.fly(
-      context: context,
-      startKey: addToCartKey,
-      icon: Icons.shopping_bag,
-      color: Colors.white,
-      backgroundColor: AppColors.primary,
-    );
-
-    context.push('/cart');
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -84,7 +64,7 @@ class BottomBar extends StatelessWidget {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(isDark ? 60 : 15),
+            color: Colors.black.withAlpha(15),
             blurRadius: 20,
             offset: const Offset(0, -6),
           ),
@@ -98,79 +78,37 @@ class BottomBar extends StatelessWidget {
             Text(
               'Stok menipis, tersisa ${product.stock}',
               style: const TextStyle(
-                fontSize: 11,
+                fontFamily: AppFonts.secondary,
+                fontSize: 10.5,
                 fontWeight: FontWeight.bold,
                 color: AppColors.warning,
+                fontFeatures: [FontFeature.tabularFigures()],
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 10),
           ],
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      CurrencyFormatter.rupiah(price * quantity),
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w800,
-                        color: colors.textPrimary,
-                      ),
-                    ),
-                    if (quantity > 1) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        '($quantity x ${CurrencyFormatter.rupiah(price)})',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: colors.textHint,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
+              _QuantityPill(
+                quantity: quantity,
+                colors: colors,
+                outOfStock: _outOfStock,
+                maxStock: product.stock,
+                onDecrement: quantity > 1
+                    ? () => onQuantityChanged(quantity - 1)
+                    : null,
+                onIncrement: !_outOfStock && quantity < product.stock
+                    ? () => onQuantityChanged(quantity + 1)
+                    : null,
               ),
-
               const SizedBox(width: 12),
-
-              if (_outOfStock)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colors.textHint.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    'Stok Habis',
-                    style: TextStyle(
-                      color: colors.textHint,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                )
-              else ...[
-                _CartButton(
-                  key: addToCartKey,
+              Expanded(
+                child: _AddToCartButton(
                   colors: colors,
-                  isDark: isDark,
-                  quantity: quantity,
+                  outOfStock: _outOfStock,
                   onTap: () => _addToCart(context),
                 ),
-                const SizedBox(width: 10),
-                _BuyNowButton(
-                  quantity: quantity,
-                  colors: colors,
-                  onTap: () => _buyNow(context),
-                ),
-              ],
+              ),
             ],
           ),
         ],
@@ -179,90 +117,147 @@ class BottomBar extends StatelessWidget {
   }
 }
 
-class _CartButton extends StatelessWidget {
-  final AppColorScheme colors;
-  final bool isDark;
+class _QuantityPill extends StatelessWidget {
   final int quantity;
-  final VoidCallback onTap;
+  final AppColorScheme colors;
+  final bool outOfStock;
+  final int maxStock;
+  final VoidCallback? onDecrement;
+  final VoidCallback? onIncrement;
 
-  const _CartButton({
-    super.key,
-    required this.colors,
-    required this.isDark,
+  const _QuantityPill({
     required this.quantity,
+    required this.colors,
+    required this.outOfStock,
+    required this.maxStock,
+    required this.onDecrement,
+    required this.onIncrement,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 52,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(26),
+        border: Border.all(color: colors.border, width: 1.4),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _StepIcon(
+            icon: Icons.remove_rounded,
+            colors: colors,
+            enabled: onDecrement != null,
+            onTap: onDecrement,
+          ),
+          SizedBox(
+            width: 36,
+            child: Text(
+              '$quantity',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: AppFonts.secondary,
+                color: outOfStock ? colors.textHint : colors.textPrimary,
+                fontWeight: FontWeight.w800,
+                fontSize: 14,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+          ),
+          _StepIcon(
+            icon: Icons.add_rounded,
+            colors: colors,
+            enabled: onIncrement != null,
+            onTap: onIncrement,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StepIcon extends StatelessWidget {
+  final IconData icon;
+  final AppColorScheme colors;
+  final bool enabled;
+  final VoidCallback? onTap;
+
+  const _StepIcon({
+    required this.icon,
+    required this.colors,
+    required this.enabled,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: colors.inputFill,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: colors.border),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.shopping_bag_outlined,
-              color: colors.textPrimary,
-              size: 20,
-            ),
-            const SizedBox(height: 2),
-            Text(
-              quantity > 1 ? 'Keranjang ($quantity)' : 'Keranjang',
-              style: TextStyle(
-                color: colors.textPrimary,
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
+    return InkWell(
+      onTap: enabled
+          ? () {
+              HapticFeedback.selectionClick();
+              onTap!();
+            }
+          : null,
+      customBorder: const CircleBorder(),
+      child: SizedBox(
+        width: 44,
+        height: 44,
+        child: Icon(
+          icon,
+          size: 20,
+          color: enabled ? colors.textPrimary : colors.textHint,
         ),
       ),
     );
   }
 }
 
-class _BuyNowButton extends StatelessWidget {
-  final int quantity;
+class _AddToCartButton extends StatelessWidget {
   final AppColorScheme colors;
+  final bool outOfStock;
   final VoidCallback onTap;
 
-  const _BuyNowButton({
-    required this.quantity,
+  const _AddToCartButton({
     required this.colors,
+    required this.outOfStock,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: outOfStock ? null : onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+        height: 52,
+        alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: AppColors.primary,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.35),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+          color: outOfStock ? colors.inputFill : AppColors.primary,
+          borderRadius: BorderRadius.circular(26),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            FaIcon(
+              FontAwesomeIcons.cartPlus,
+              size: 20,
+              color: Colors.white,
+            ),
+
+            SizedBox(width: 4),
+
+            Text(
+              outOfStock ? 'Stok Habis' : ' Keranjang',
+              style: TextStyle(
+                color: outOfStock ? colors.textHint : Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                letterSpacing: 0.2,
+              ),
             ),
           ],
-        ),
-        child: Text(
-          quantity > 1 ? 'Beli $quantity Sekarang' : 'Beli Sekarang',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-          ),
         ),
       ),
     );

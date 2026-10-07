@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/data/repository/address_repository.dart';
 
 class AddressFormPage extends StatefulWidget {
   final ShippingAddress? address;
+  final Map<String, dynamic>? prefill;
 
-  const AddressFormPage({super.key, this.address});
+  const AddressFormPage({super.key, this.address, this.prefill});
 
   @override
   State<AddressFormPage> createState() => _AddressFormPageState();
@@ -25,6 +27,8 @@ class _AddressFormPageState extends State<AddressFormPage> {
   final AddressRepository _repository = AddressRepository();
   bool _isDefault = false;
   bool _isSaving = false;
+  double? _latitude;
+  double? _longitude;
 
   bool get _isEditing => widget.address != null;
 
@@ -42,6 +46,16 @@ class _AddressFormPageState extends State<AddressFormPage> {
       _districtController.text = a.district ?? '';
       _postalCodeController.text = a.postalCode ?? '';
       _isDefault = a.isDefault;
+      _latitude = a.latitude;
+      _longitude = a.longitude;
+    } else {
+      final prefill = widget.prefill;
+      if (prefill != null) {
+        _addressController.text =
+            (prefill['full_address'] as String?)?.trim() ?? '';
+        _latitude = prefill['latitude'] as double?;
+        _longitude = prefill['longitude'] as double?;
+      }
     }
   }
 
@@ -83,32 +97,30 @@ class _AddressFormPageState extends State<AddressFormPage> {
             ? null
             : _postalCodeController.text.trim(),
         'is_default': _isDefault,
+        'latitude': _latitude,
+        'longitude': _longitude,
       };
 
+      ShippingAddress? created;
       if (_isEditing) {
         await _repository.updateAddress(widget.address!.id, fields);
       } else {
-        await _repository.createAddress(fields);
+        created = await _repository.createAddress(fields);
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(_isEditing
-                ? 'Alamat berhasil diperbarui!'
-                : 'Alamat berhasil ditambahkan!'),
-          ),
+        ToastHelper.showToast(
+          context,
+          _isEditing
+              ? 'Alamat berhasil diperbarui!'
+              : 'Alamat berhasil ditambahkan!',
+          ToastSeverity.success,
         );
-        context.pop({'saved': true});
+        context.pop(created ?? {'saved': true});
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal menyimpan alamat: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ToastHelper.showToast(context, 'Gagal menyimpan alamat: $e', ToastSeverity.error);
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -131,12 +143,15 @@ class _AddressFormPageState extends State<AddressFormPage> {
           style: TextStyle(
             color: colors.textPrimary,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 17,
           ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded,
-              size: 18, color: colors.textPrimary),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 18,
+            color: colors.textPrimary,
+          ),
           onPressed: () => context.pop(),
         ),
       ),
@@ -150,15 +165,17 @@ class _AddressFormPageState extends State<AddressFormPage> {
               const SizedBox(height: 6),
               TextFormField(
                 controller: _labelController,
-                style: TextStyle(color: colors.textPrimary, fontSize: 14),
-                decoration: const InputDecoration(hintText: 'cth: Rumah, Kantor'),
+                style: TextStyle(color: colors.textPrimary, fontSize: 13),
+                decoration: const InputDecoration(
+                  hintText: 'cth: Rumah, Kantor',
+                ),
               ),
               const SizedBox(height: 20),
               _label('Nama Penerima'),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _recipientController,
-                style: TextStyle(color: colors.textPrimary, fontSize: 14),
+                style: TextStyle(color: colors.textPrimary, fontSize: 13),
                 decoration: const InputDecoration(hintText: 'Nama penerima'),
               ),
               const SizedBox(height: 20),
@@ -166,7 +183,7 @@ class _AddressFormPageState extends State<AddressFormPage> {
               const SizedBox(height: 6),
               TextFormField(
                 controller: _phoneController,
-                style: TextStyle(color: colors.textPrimary, fontSize: 14),
+                style: TextStyle(color: colors.textPrimary, fontSize: 13),
                 keyboardType: TextInputType.phone,
                 decoration: const InputDecoration(hintText: '08xxxxxxxxxx'),
               ),
@@ -175,9 +192,11 @@ class _AddressFormPageState extends State<AddressFormPage> {
               const SizedBox(height: 6),
               TextFormField(
                 controller: _addressController,
-                style: TextStyle(color: colors.textPrimary, fontSize: 14),
+                style: TextStyle(color: colors.textPrimary, fontSize: 13),
                 maxLines: 3,
-                decoration: const InputDecoration(hintText: 'Masukkan alamat lengkap'),
+                decoration: const InputDecoration(
+                  hintText: 'Masukkan alamat lengkap',
+                ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Alamat tidak boleh kosong';
@@ -190,7 +209,7 @@ class _AddressFormPageState extends State<AddressFormPage> {
               const SizedBox(height: 6),
               TextFormField(
                 controller: _provinceController,
-                style: TextStyle(color: colors.textPrimary, fontSize: 14),
+                style: TextStyle(color: colors.textPrimary, fontSize: 13),
                 decoration: const InputDecoration(hintText: 'cth: DKI Jakarta'),
               ),
               const SizedBox(height: 20),
@@ -198,23 +217,27 @@ class _AddressFormPageState extends State<AddressFormPage> {
               const SizedBox(height: 6),
               TextFormField(
                 controller: _cityController,
-                style: TextStyle(color: colors.textPrimary, fontSize: 14),
-                decoration: const InputDecoration(hintText: 'cth: Jakarta Selatan'),
+                style: TextStyle(color: colors.textPrimary, fontSize: 13),
+                decoration: const InputDecoration(
+                  hintText: 'cth: Jakarta Selatan',
+                ),
               ),
               const SizedBox(height: 20),
               _label('Kecamatan'),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _districtController,
-                style: TextStyle(color: colors.textPrimary, fontSize: 14),
-                decoration: const InputDecoration(hintText: 'cth: Kebayoran Baru'),
+                style: TextStyle(color: colors.textPrimary, fontSize: 13),
+                decoration: const InputDecoration(
+                  hintText: 'cth: Kebayoran Baru',
+                ),
               ),
               const SizedBox(height: 20),
               _label('Kode Pos'),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _postalCodeController,
-                style: TextStyle(color: colors.textPrimary, fontSize: 14),
+                style: TextStyle(color: colors.textPrimary, fontSize: 13),
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(hintText: 'cth: 12120'),
                 validator: (value) {
@@ -230,7 +253,7 @@ class _AddressFormPageState extends State<AddressFormPage> {
                 contentPadding: EdgeInsets.zero,
                 title: Text(
                   'Jadikan alamat utama',
-                  style: TextStyle(color: colors.textPrimary, fontSize: 13.5),
+                  style: TextStyle(color: colors.textPrimary, fontSize: 13),
                 ),
                 activeThumbColor: AppColors.primary,
                 onChanged: (v) => setState(() => _isDefault = v),
@@ -261,7 +284,9 @@ class _AddressFormPageState extends State<AddressFormPage> {
                       : const Text(
                           'Simpan Alamat',
                           style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 14),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
                         ),
                 ),
               ),
@@ -279,7 +304,7 @@ class _AddressFormPageState extends State<AddressFormPage> {
       style: TextStyle(
         color: colors.textPrimary,
         fontWeight: FontWeight.bold,
-        fontSize: 14,
+        fontSize: 13,
       ),
     );
   }

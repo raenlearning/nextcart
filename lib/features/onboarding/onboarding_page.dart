@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nextcart/core/constants/app_assets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 
@@ -51,8 +52,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
   bool get _isLastPage => _currentIndex == _slides.length - 1;
   bool get _isFirstPage => _currentIndex == 0;
 
-  void _onFinishOnboarding() {
-    context.go('/auth');
+  void _onFinishOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_completed', true);
+    if (mounted) context.go('/auth');
   }
 
   void _goToPrevious() {
@@ -163,7 +166,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         Text(
                           item.title,
                           style: const TextStyle(
-                            fontSize: 24,
+                            fontSize: 22,
                             fontWeight: FontWeight.w800,
                             color: Colors.white,
                             height: 1.25,
@@ -174,7 +177,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         Text(
                           item.description,
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 13,
                             fontWeight: FontWeight.w400,
                             color: Colors.white.withValues(alpha: 0.75),
                             height: 1.5,
@@ -199,7 +202,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     'NEXTCART',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 15,
+                      fontSize: 14,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1.5,
                     ),
@@ -215,7 +218,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           'Skip',
                           style: TextStyle(
                             color: Colors.white70,
-                            fontSize: 14,
+                            fontSize: 13,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -266,7 +269,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                 'Kembali',
                                 style: TextStyle(
                                   color: Colors.white70,
-                                  fontSize: 14,
+                                  fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -291,7 +294,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             child: Text(
                               _isLastPage ? 'Mulai' : 'Lanjut',
                               style: const TextStyle(
-                                fontSize: 15,
+                                fontSize: 14,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),

@@ -18,7 +18,7 @@ class RealTimeBarChart extends StatelessWidget {
         child: Center(
           child: Text(
             'Belum ada data.',
-            style: TextStyle(color: colors.textSecondary, fontSize: 12),
+            style: TextStyle(color: colors.textSecondary, fontSize: 11.5),
           ),
         ),
       );
@@ -65,7 +65,7 @@ class RealTimeBarChart extends StatelessWidget {
                       DateFormat('d/M').format(date),
                       style: TextStyle(
                         color: colors.textHint,
-                        fontSize: 9,
+                        fontSize: 8.5,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -85,7 +85,7 @@ class RealTimeBarChart extends StatelessWidget {
                 const TextStyle(
                   color: AppColors.primary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 12,
+                  fontSize: 11.5,
                 ),
               ),
             ),

@@ -8,6 +8,7 @@ class CartLoaded extends CartState {
   final List<Map<String, dynamic>> cartItems;
   final double totalPrice;
   final Map<String, dynamic>? voucher;
+  final String? voucherError;
   final int totalWeightGrams;
   final Map<String, dynamic>? selectedAddress;
   final Map<String, dynamic>? selectedCourier;
@@ -18,6 +19,7 @@ class CartLoaded extends CartState {
     this.cartItems,
     this.totalPrice, {
     this.voucher,
+    this.voucherError,
     this.totalWeightGrams = 0,
     this.selectedAddress,
     this.selectedCourier,
@@ -41,5 +43,10 @@ class CheckoutRedirectReady extends CartState {
 class CheckoutStatusVerified extends CartState {
   final String orderStatus;
   final String message;
-  CheckoutStatusVerified({required this.orderStatus, required this.message});
+  final String orderId;
+  CheckoutStatusVerified({
+    required this.orderStatus,
+    required this.message,
+    required this.orderId,
+  });
 }

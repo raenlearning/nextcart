@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nextcart/core/service/address_store.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/data/repository/address_repository.dart';
 
@@ -51,7 +52,7 @@ class _AddressPickerSheetState extends State<AddressPickerSheet> {
               'Pilih Alamat',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: 15,
                 color: colors.textPrimary,
               ),
             ),
@@ -113,26 +114,29 @@ class _AddressPickerSheetState extends State<AddressPickerSheet> {
                           style: TextStyle(
                             color: colors.textPrimary,
                             fontWeight: FontWeight.w600,
-                            fontSize: 13,
+                            fontSize: 12.5,
                           ),
                         ),
                         subtitle: Text(
                           parts.join(', '),
                           style: TextStyle(
                             color: colors.textSecondary,
-                            fontSize: 12,
+                            fontSize: 11.5,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        onTap: () => widget.onSelected({
-                          'id': a.id,
-                          'full_address': a.fullAddress,
-                          'province': a.province,
-                          'city': a.city,
-                          'district': a.district,
-                          'postal_code': a.postalCode,
-                        }),
+                        onTap: () {
+                          AddressStore.instance.select(a);
+                          widget.onSelected({
+                            'id': a.id,
+                            'full_address': a.fullAddress,
+                            'province': a.province,
+                            'city': a.city,
+                            'district': a.district,
+                            'postal_code': a.postalCode,
+                          });
+                        },
                       );
                     },
                   ),
@@ -144,8 +148,19 @@ class _AddressPickerSheetState extends State<AddressPickerSheet> {
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: () async {
-                  await context.push('/address-form');
-                  if (context.mounted) _reload();
+                  final created = await context.push('/address-form');
+                  if (created is ShippingAddress) {
+                    await AddressStore.instance.select(created);
+                    widget.onSelected({
+                      'id': created.id,
+                      'full_address': created.fullAddress,
+                      'province': created.province,
+                      'city': created.city,
+                      'district': created.district,
+                      'postal_code': created.postalCode,
+                    });
+                  }
+                  if (mounted) _reload();
                 },
                 icon: const Icon(Icons.add_location_alt_outlined, size: 18),
                 label: const Text('Tambah Alamat Baru'),

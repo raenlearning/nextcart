@@ -28,7 +28,7 @@ class RatingRow extends StatelessWidget {
           rating,
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 13,
+            fontSize: 12.5,
             color: colors.textPrimary,
           ),
         ),
@@ -36,7 +36,7 @@ class RatingRow extends StatelessWidget {
         Text(
           '${_formatCount(reviewCount)} Ulasan',
           style: const TextStyle(
-            fontSize: 12,
+            fontSize: 11.5,
             fontWeight: FontWeight.w600,
             color: AppColors.success,
           ),

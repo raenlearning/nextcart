@@ -44,7 +44,7 @@ class StatusUpdateSheet extends StatelessWidget {
                   style: TextStyle(
                     color: colors.textPrimary,
                     fontWeight: FontWeight.w800,
-                    fontSize: 16,
+                    fontSize: 15,
                     letterSpacing: -0.2,
                   ),
                 ),
@@ -101,7 +101,7 @@ class StatusUpdateSheet extends StatelessWidget {
                                 fontWeight: isSelected
                                     ? FontWeight.w800
                                     : FontWeight.w600,
-                                fontSize: 13.5,
+                                fontSize: 13,
                               ),
                             ),
                           ),

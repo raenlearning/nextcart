@@ -11,21 +11,22 @@ class AppAssets {
   static const onBoarding3 = 'assets/images/onboarding_3.png';
 
   // SVG
-  static const emptyData = 'assets/svg/no_data.svg';
+  static const emptyData = 'assets/images/empty_search.svg';
   static const emptyCart = 'assets/images/empty_cart.svg';
   static const emptyWishlist = 'assets/images/empty_wishlist.svg';
   static const emptyOrders = 'assets/images/empty_orders.svg';
   static const emptySearch = 'assets/images/empty_search.svg';
 
-  // Category
-  static const categorySmartPhone = 'assets/svg/categoryPhone.svg';
-  static const categoryWatch = 'assets/svg/categoryWatch.svg';
-  static const categoryLaptop = 'assets/svg/categoryLaptop.svg';
-  static const categoryAudio = 'assets/svg/categoryAudio.svg';
-  static const categoryCamera = 'assets/svg/categoryCamera.svg';
-  static const categoryComputer = 'assets/svg/categoryComputer.svg';
-  static const categoryGaming = 'assets/svg/categoryGaming.svg';
-  static const categoryTelevision = 'assets/svg/categoryTelevision.svg';
+  // Category (JPG product images)
+  static const categorySmartPhone = 'assets/images/categories/smartphone.jpg';
+  static const categoryWatch = 'assets/images/categories/watch.jpg';
+  static const categoryLaptop = 'assets/images/categories/laptop.jpg';
+  static const categoryAudio = 'assets/images/categories/audio.jpg';
+  static const categoryCamera = 'assets/images/categories/camera.jpg';
+  static const categoryComputer = 'assets/images/categories/computer.jpg';
+  static const categoryGaming = 'assets/images/categories/gaming.jpg';
+  static const categoryTelevision = 'assets/images/categories/television.jpg';
+  static const categoryOther = 'assets/images/categories/other.jpg';
   static const cartIcon = 'assets/svg/cartIcon.svg';
 
   // Animation (Lottie)

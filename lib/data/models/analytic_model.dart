@@ -19,6 +19,18 @@ class TopProduct {
   });
 }
 
+class LowStockProduct {
+  final String productId;
+  final String name;
+  final int stock;
+
+  const LowStockProduct({
+    required this.productId,
+    required this.name,
+    required this.stock,
+  });
+}
+
 class AnalyticsSummary {
   final double grossRevenue;
   final int completedOrders;
@@ -27,6 +39,7 @@ class AnalyticsSummary {
   final List<RevenuePoint> revenueChart;
   final List<TopProduct> topProducts;
   final Map<String, int> orderStatusBreakdown;
+  final List<LowStockProduct> lowStockProducts;
 
   const AnalyticsSummary({
     required this.grossRevenue,
@@ -36,5 +49,6 @@ class AnalyticsSummary {
     required this.revenueChart,
     required this.topProducts,
     required this.orderStatusBreakdown,
+    this.lowStockProducts = const [],
   });
 }

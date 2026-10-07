@@ -1,100 +1,121 @@
-# 🛒 NextCart — Next-Gen Electronics & Computer Mobile Marketplace
+# NextCart
 
-![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)
-![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
-![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
-![BLoC](https://img.shields.io/badge/State_Management-BLoC-blue?style=for-the-badge)
+**NextCart** is a modern Flutter e-commerce application built with Supabase as the backend. It features a clean architecture, reusable widgets, and an Apple Store-inspired design system.
 
-**NextCart** adalah aplikasi *e-commerce / marketplace* mobile modern berbasis **Flutter** yang dirancang khusus untuk ritel produk elektronik dan komputer. Aplikasi ini menghadirkan pengalaman belanja yang responsif, aman, dan intuitif bagi pembeli, serta menyediakan dasbor manajemen dan analitik bisnis yang komprehensif untuk admin/penjual.
+## 📱 Project Overview
 
----
+NextCart is a full-featured mobile e-commerce app that allows users to browse products, manage carts and wishlists, track orders, and authenticate via email/password or OAuth. The app implements a complete redesign with custom SVG illustrations, subtle micro-interactions, and a consistent design language across all screens.
 
-## 🌟 Fitur Utama (Key Features)
+## 🛠 Tech Stack
 
-### 🛍️ Modul Pembeli 
-* **Pencarian & Filter Kategori Interaktif**: Penelusuran produk berbasis kategori (Smartphone, Laptop, Audio, Gaming, dll.) dengan fitur *live search & debounce*.
-* **Keamanan Akses Data (Row Level Security)**: Isolasi penuh data riwayat transaksi, profil, dan keranjang belanja berbasis PostgreSQL RLS (`auth.uid()`
-* **Alur Checkout & Integrasi Payment Gateway**: Mendukung pemrosesan transaksi *real-time* via **Midtrans Snap WebView**[cite: 3], kalkulasi otomatis PPN (11%) ongkir, serta klaim *voucher* diskon atomik berbasis RPC database
-* **Lacak Pengiriman Kurir Interaktif**: Visualisasi peta *real-time* posisi kurir menuju lokasi pembeli menggunakan `flutter_map` dan **Supabase Realtime Broadcast**
-* **Manajemen Alamat & Geolocation**: Pemilihan alamat akurat melalui *reverse geocoding* (OpenStreetMap / Nominatim) dan deteksi GPS lokasi pengguna
-* **Ulasan & Wishlist**: Fitur pemberian *star rating* & ulasan produk[cite: 3], serta daftar keinginan (*wishlist*)
-* **Animasi UI Interaktif**: Efek animasi *cart flying icon*, *bumping badge*, Lottie animation, dan dukungan mode Gelap/Terang (*Dark/Light Mode*)
+| Layer | Technology |
+|-------|-----------|
+| **Frontend** | Flutter 3.x |
+| **State Management** | Bloc (Business Logic Components) |
+| **Backend** | Supabase (PostgREST + Realtime + Storage) |
+| **Authentication** | Supabase Auth (Email + OAuth) |
+| **Database** | PostgreSQL via PostgREST |
+| **Images** | SVG illustrations, network images with caching |
+| **Animations** | Lottie (delight moments), custom SVG, implicit animations |
+| **Testing** | Flutter analyze, manual curl verification against Supabase |
 
-### 🛡️ Modul Admin & Manajemen 
-* **Dasboard Analitik Bisnis**: Grafik performa penjualan (*Revenue Chart*), pendapatan kotor (*Gross Revenue*), total pesanan, produk terlaris (*Top Products*), serta *export* laporan ke CSV
-* **Kelola Katalog & Inventaris**: Tambah/edit produk, manajemen stok, unggah multi-foto produk ke **Supabase Storage**, dan fitur otomatis pembersihan berkas (*orphan images cleanup*)
-* **Manajemen Pesanan & Status Pengiriman**: Pembaruan status pesanan secara *real-time* (Menunggu Pembayaran ➔ Diproses ➔ Dikirim ➔ Selesai)
-* **Manajemen Hak Akses Pengguna**: Fitur *role switching* untuk mengubah peran akun (Admin / Buyer) secara instan
+## 📂 Project Structure
 
----
-
-## 🏗️ Arsitektur & Tech Stack
-
-* **Frontend Framework**: [Flutter](https://flutter.dev) (Dart)[cite: 3]
-* **State Management**: `flutter_bloc` / BLoC Pattern (Auth, Product, Cart, Admin Analytics)
-* **Routing**: `go_router`
-* **Backend-as-a-Service (BaaS)**: [Supabase](https://supabase.com) (PostgreSQL, Auth, Storage, Edge Functions, Realtime Channels)
-* **Payment Gateway**: Midtrans Sandbox & Webhook Integration via Supabase Edge Functions
-* **Maps & Geolocation**: `flutter_map` (OpenStreetMap) & `geolocator`
-
----
-
-🚀 Panduan Memulai (Getting Started)
-Prasyarat
-Flutter SDK (v3.x atau terbaru)
-
-akun Supabase & Proyek Active
-
-Akun Midtrans Sandbox (Merchant)
-
-Langkah Instalasi
-Clone Repositori:
-
-Bash
-git clone [https://github.com/username/nextcart.git](https://github.com/username/nextcart.git)
-cd nextcart
-Instal Dependensi:
-
-Bash
-flutter pub get
-Konfigurasi Environment (.env):
-Buat berkas .env di direktori root proyek dan masukkan kredensial Supabase Anda:
-
-Cuplikan kode
-SUPABASE_URL=[https://your-supabase-project.supabase.co](https://your-supabase-project.supabase.co)
-SUPABASE_PUBLISHABLE_KEY=your-supabase-publishable-key
-Jalankan Aplikasi:
-
-Bash
-flutter run
-
-## 📁 Struktur Proyek (Directory Structure
-
-Aplikasi ini menggunakan pendekatan **Feature-First Architecture**
-
-```text
+```
 lib/
-├── core/                   # Utility, Theme, Router, & Shared Widgets
-│   ├── constants/          # Assets, Colors, & Order Status Constants
-│   ├── helper/             # Currency Formatter, CSV Exporter, Animations
-│   ├── router/             # GoRouter Navigation Config
-│   └── theme/              # Light & Dark App Themes
-├── data/                   # Data Layer
-│   ├── models/             # Product, Category, Review, Analytics Models
-│   └── repository/         # Supabase Repositories (Auth, Product, Order, etc.)
-└── features/               # Presentation & Business Logic (BLoC) Layer
-    ├── admin/              # Dashboard, Product/Order/User Management
-    ├── address/            # Address List & Form
-    ├── auth/               # Login & Register BLoCs & Screens
-    ├── cart/               # Cart BLoC, Checkout, & Payment WebView
-    ├── home/               # Home View & Bottom Navigation Shell
-    ├── location/           # OpenStreetMap Address Picker
-    ├── notification/       # Notification List & Push Handler
-    ├── onboarding/         # Onboarding Slides
-    ├── order/              # Order History, Details, & Courier Tracking Map
-    ├── product/            # Product Details, Reviews, & Grid View
-    ├── profile/            # Profile Detail & Settings
-    └── wishlist/           # User Wishlist Grid
+├── core/                  # Shared constants, widgets, helpers
+│   ├── assets/            # SVG illustrations, images
+│   ├── constants/         # AppColors, AppSpacing, OrderStatus, pricing
+│   ├── helper/            # Date formatter, order status UI, cart alert
+│   ├── theme/             - app_theme.dart
+│   └── widgets/           - PressableScale, ShimmerBox, empty states
+├── features/              # Feature modules
+│   ├── auth/              # Login/Register pages
+│   ├── home/              # Product grid, search, categories
+│   ├── product/           # Product detail, view-all
+│   ├── cart/              # Cart management
+│   ├── wishlist/          # Wishlist feature
+│   ├── order/             # Order history & tracking
+│   ├── profile/           # User profile & settings
+│   ├── admin/             # Admin dashboard
+│   └── review/            # Product reviews
+└── main.dart              # App entry point
+```
 
+## ✨ Key Features
 
+- **Splash Screen**: Static SVG illustration + `DM Serif Display` font, fade-in animation
+- **Product Browsing**: Grid view with cards, category chips, promo banners, sorting/filtering
+- **Search**: Global search across products with debounced queries
+- **Cart & Wishlist**: Add/remove items, persistent storage, price sorting
+- **Order Tracking**: 3 status tabs (Aktif/Selesai/Dibatalkan), infinite scroll pagination (5 items/page)
+- **Authentication**: Email/password + Google/GitHub OAuth, session persistence
+- **Profile**: Summary cards with wishlist count (fetched directly from DB), change password
+- **Admin Dashboard**: Analytics charts, product management, user management
+- **Custom SVG Empty States**: `empty_cart.svg`, `empty_wishlist.svg`, `empty_orders.svg`, `empty_search.svg`
+- **Micro-interactions**: `PressableScale` widget for subtle button feedback
+- **Infinite Scroll**: Load more on list scroll threshold
+
+## 🎨 Design Decisions
+
+- **Apple Store Reference**: Home and Auth pages designed with Apple's minimalist aesthetic
+- **Color Palette**:
+  - Deep Navy: `#0F172A` (backgrounds)
+  - Cream: `#F5F0E1` (surfaces)
+  - Cyan Accent: `#22D3EE` (underlines, highlights)
+  - Primary: `#0A84FF` (action buttons)
+- **Typography**: `DM Serif Display` for headers, system fonts for body
+- **Radius Standards**: 16-20px for cards, 28px for buttons
+- **No Lottie Overhead**: Custom SVG illustrations replace Lottie animations where possible
+
+## 🔧 Recent Improvements
+
+| Feature | Description |
+|---------|-------------|
+| **Order Search & Pagination** | Global debounced search + 3 server-side queries per tab, 5 items per page, infinite scroll |
+| **Wishlist Price Sort** | Fixed PostgREST `order=products(price)` syntax (was `products.price`, now `products(price)`) |
+| **Profile Wishlist Count** | Query `wishlist_items` table directly instead of reading Bloc state |
+| **Empty State SVGs** | 4 custom SVG illustrations replacing Lottie animations |
+| **Onboarding Fix** | `BoxFit.cover` for edge-to-edge images |
+
+## 📦 Setup & Run
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/raenlearning/nextcart.git
+cd nextcart
+
+# 2. Install dependencies
+flutter pub get
+
+# 3. Configure Supabase
+# - Add google-services.json (Android) / GoogleService-Info.plist (iOS)
+# - Set SUPABASE_URL and SUPABASE_ANON_KEY in appropriate config
+
+# 4. Run the app
+flutter run
+```
+
+## 🛠 Development
+
+```bash
+# Code analysis (3 pre-existing infos, all other code clean)
+flutter analyze
+
+# Format code
+flutter format .
+
+# Run tests (if any)
+flutter test
+```
+
+## 📄 License
+
+This project is licensed under the MIT License. See the `LICENSE` file for details.
+
+## 🙏 Acknowledgments
+
+- Design reference: Apple Store UI patterns
+- Backend: Supabase (free tier)
+- Font: `DM Serif Display` (Google Fonts)
+- SVG illustrations: Hand-crafted for this project

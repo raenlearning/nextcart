@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/theme/app_fonts.dart';
 import 'package:nextcart/features/cart/presentation/widgets/step_btn.dart';
 
 class QuantityStepper extends StatelessWidget {
@@ -21,7 +22,7 @@ class QuantityStepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
       decoration: BoxDecoration(
         color: colors.inputFill,
         borderRadius: BorderRadius.circular(20),
@@ -30,14 +31,17 @@ class QuantityStepper extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           StepBtn(icon: Icons.remove, onTap: onDecrement, colors: colors),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
+          SizedBox(
+            width: 24,
             child: Text(
               '$quantity',
+              textAlign: TextAlign.center,
               style: TextStyle(
+                fontFamily: AppFonts.secondary,
                 color: colors.textPrimary,
                 fontWeight: FontWeight.w600,
                 fontSize: 12.5,
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
           ),

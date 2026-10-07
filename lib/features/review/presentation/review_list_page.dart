@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 import 'package:nextcart/data/repository/review_repository.dart';
 
@@ -49,10 +50,7 @@ class _ReviewListPageState extends State<ReviewListPage> {
     if (!mounted) return;
 
     if (hasAlreadyReviewed) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Kamu sudah memberi ulasan untuk produk ini')),
-      );
+      ToastHelper.showToast(context, 'Kamu sudah memberi ulasan untuk produk ini', ToastSeverity.info);
       return;
     }
 
@@ -77,7 +75,7 @@ class _ReviewListPageState extends State<ReviewListPage> {
           style: TextStyle(
             color: colors.textPrimary,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 17,
           ),
         ),
         leading: IconButton(
@@ -141,7 +139,7 @@ class _ReviewListPageState extends State<ReviewListPage> {
                   _load();
                 },
                 labelStyle: TextStyle(
-                  fontSize: 12,
+                  fontSize: 11.5,
                   fontWeight: FontWeight.w600,
                   color: selected ? Colors.white : colors.textPrimary,
                 ),
@@ -203,14 +201,14 @@ class _ReviewCard extends StatelessWidget {
                       style: TextStyle(
                         color: colors.textPrimary,
                         fontWeight: FontWeight.w600,
-                        fontSize: 13.5,
+                        fontSize: 13,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       DateFormat('d MMM yyyy', 'id_ID')
                           .format(review.createdAt),
-                      style: TextStyle(color: colors.textHint, fontSize: 11),
+                      style: TextStyle(color: colors.textHint, fontSize: 10.5),
                     ),
                   ],
                 ),
@@ -225,7 +223,7 @@ class _ReviewCard extends StatelessWidget {
               style: TextStyle(
                 color: colors.textPrimary,
                 fontWeight: FontWeight.bold,
-                fontSize: 13.5,
+                fontSize: 13,
               ),
             ),
           ],
@@ -233,7 +231,7 @@ class _ReviewCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               review.comment!,
-              style: TextStyle(color: colors.textSecondary, fontSize: 13),
+              style: TextStyle(color: colors.textSecondary, fontSize: 12.5),
             ),
           ],
           if (review.images.isNotEmpty) ...[
@@ -293,7 +291,7 @@ class _ReviewCard extends StatelessWidget {
                         style: TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,
-                          fontSize: 12,
+                          fontSize: 11.5,
                         ),
                       ),
                     ],
@@ -303,7 +301,7 @@ class _ReviewCard extends StatelessWidget {
                     review.replyText!,
                     style: TextStyle(
                       color: colors.textPrimary,
-                      fontSize: 12.5,
+                      fontSize: 12,
                     ),
                   ),
                   if (review.replyAt != null) ...[
@@ -311,7 +309,7 @@ class _ReviewCard extends StatelessWidget {
                     Text(
                       DateFormat('d MMM yyyy', 'id_ID')
                           .format(review.replyAt!),
-                      style: TextStyle(color: colors.textHint, fontSize: 10.5),
+                      style: TextStyle(color: colors.textHint, fontSize: 10),
                     ),
                   ],
                 ],
@@ -344,7 +342,7 @@ class _EmptyState extends StatelessWidget {
               'Belum ada ulasan untuk produk ini',
               style: TextStyle(
                 color: colors.textHint,
-                fontSize: 15,
+                fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nextcart/features/admin/presentation/user/widgets/search_bar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/helper/toast_helper.dart';
 import 'widgets/role_filter.dart';
 import 'widgets/user_list.dart';
 
@@ -17,11 +18,8 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
   List<Map<String, dynamic>> _users = [];
   List<Map<String, dynamic>> _filteredUsers = [];
   bool _isLoading = true;
-  bool _isSaving = false;
   String _searchQuery = '';
   String _selectedRoleFilter = 'all';
-
-  final Map<String, String> _pendingChanges = {};
 
   @override
   void initState() {
@@ -34,13 +32,12 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
     try {
       final data = await _supabase
           .from('profiles')
-          .select('id, full_name, email, role, avatar_url, created_at')
+          .select('id, full_name, email, role, avatar_url, is_blocked, created_at')
           .order('created_at', ascending: false);
 
       if (mounted) {
         setState(() {
           _users = List<Map<String, dynamic>>.from(data);
-          _pendingChanges.clear();
           _applyFilters();
           _isLoading = false;
         });
@@ -48,12 +45,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal memuat data pengguna: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ToastHelper.showToast(context, 'Gagal memuat data pengguna: $e', ToastSeverity.error);
       }
     }
   }
@@ -76,19 +68,9 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
     });
   }
 
-  void _onRoleSelect(String userId, String newRole) {
-    final original = _users.firstWhere((u) => u['id'] == userId)['role'] ?? 'buyer';
-    setState(() {
-      if (newRole == original) {
-        _pendingChanges.remove(userId);
-      } else {
-        _pendingChanges[userId] = newRole;
-      }
-    });
-  }
-
-  Future<void> _saveChanges() async {
-    if (_pendingChanges.isEmpty || _isSaving) return;
+  Future<void> _toggleBlock(Map<String, dynamic> user) async {
+    final isBlocked = (user['is_blocked'] as bool?) ?? false;
+    final name = (user['full_name'] ?? 'pengguna ini').toString();
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -96,10 +78,21 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
         final colors = context.colors;
         return AlertDialog(
           backgroundColor: colors.card,
-          title: const Text('Simpan Perubahan'),
-          content: Text(
-            'Ubah peran ${_pendingChanges.length} pengguna?',
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(
+            isBlocked ? 'Buka Blokir?' : 'Blokir Pengguna?',
             style: TextStyle(color: colors.textPrimary),
+          ),
+          content: Text(
+            isBlocked
+                ? '$name akan dapat login dan berbelanja kembali.'
+                : '$name tidak akan bisa login lagi ke aplikasi.',
+            style: TextStyle(
+              color: colors.textSecondary,
+              height: 1.4,
+            ),
           ),
           actions: [
             TextButton(
@@ -109,10 +102,11 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor:
+                    isBlocked ? AppColors.primary : AppColors.error,
                 foregroundColor: Colors.white,
               ),
-              child: const Text('Simpan'),
+              child: Text(isBlocked ? 'Buka Blokir' : 'Blokir'),
             ),
           ],
         );
@@ -121,51 +115,102 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
 
     if (confirmed != true || !mounted) return;
 
-    setState(() => _isSaving = true);
     try {
-      await Future.wait(
-        _pendingChanges.entries.map(
-          (entry) => _supabase
-              .from('profiles')
-              .update({'role': entry.value})
-              .eq('id', entry.key),
-        ),
-      );
+      await _supabase
+          .from('profiles')
+          .update({'is_blocked': !isBlocked})
+          .eq('id', user['id']);
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Berhasil memperbarui ${_pendingChanges.length} pengguna'),
-            backgroundColor: AppColors.success,
-          ),
-        );
-        await _fetchUsers();
-      }
+      if (!mounted) return;
+      ToastHelper.showToast(
+        context,
+        isBlocked ? '$name berhasil dibuka blokirnya' : '$name telah diblokir',
+        isBlocked ? ToastSeverity.success : ToastSeverity.warning,
+      );
+      await _fetchUsers();
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal menyimpan perubahan: $e'),
-            backgroundColor: AppColors.error,
+      if (!mounted) return;
+      ToastHelper.showToast(context, 'Gagal memperbarui status: $e', ToastSeverity.error);
+    }
+  }
+
+  Future<void> _deleteUser(Map<String, dynamic> user) async {
+    final name = (user['full_name'] ?? 'pengguna ini').toString();
+    final userId = user['id'] as String;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        final colors = context.colors;
+        return AlertDialog(
+          backgroundColor: colors.card,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
+          title: const Text(
+            'Hapus Pengguna?',
+            style: TextStyle(color: AppColors.error),
+          ),
+          content: Text(
+            'Semua data $name akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.',
+            style: TextStyle(
+              color: colors.textSecondary,
+              height: 1.4,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Batal'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.error,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Hapus'),
+            ),
+          ],
         );
+      },
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    try {
+      // Delete profile row (RLS policy allows admin delete).
+      await _supabase.from('profiles').delete().eq('id', userId);
+
+      // Best-effort: invoke Edge Function to delete auth user.
+      // If the function is not deployed, the profile is already deleted.
+      try {
+        await _supabase.functions.invoke('delete-user', body: {'user_id': userId});
+      } catch (_) {
+        // Auth user deletion is best-effort; profile is already gone.
       }
-    } finally {
-      if (mounted) setState(() => _isSaving = false);
+
+      if (!mounted) return;
+      ToastHelper.showToast(context, '$name telah dihapus secara permanen', ToastSeverity.success);
+      await _fetchUsers();
+    } catch (e) {
+      if (!mounted) return;
+      ToastHelper.showToast(context, 'Gagal menghapus pengguna: $e', ToastSeverity.error);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final hasPendingChanges = _pendingChanges.isNotEmpty;
+    final blockedCount =
+        _users.where((u) => (u['is_blocked'] as bool?) == true).length;
 
     return Scaffold(
       backgroundColor: colors.surface,
       body: SafeArea(
         child: Column(
           children: [
-            // ── Header 
+            // ── Header
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: Row(
@@ -186,9 +231,11 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          '${_users.length} total akun terdaftar',
+                          blockedCount > 0
+                              ? '${_users.length} akun · $blockedCount diblokir'
+                              : '${_users.length} total akun terdaftar',
                           style: TextStyle(
-                            fontSize: 12.5,
+                            fontSize: 12,
                             fontWeight: FontWeight.w500,
                             color: colors.textSecondary,
                           ),
@@ -273,7 +320,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                                 'Tidak ada pengguna ditemukan.',
                                 style: TextStyle(
                                   color: colors.textSecondary,
-                                  fontSize: 13.5,
+                                  fontSize: 13,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -284,64 +331,10 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: UserList(
                             users: _filteredUsers,
-                            pendingChanges: _pendingChanges,
-                            onRoleSelect: _onRoleSelect,
+                            onToggleBlock: _toggleBlock,
+                            onDelete: _deleteUser,
                           ),
                         ),
-            ),
-
-            // ── Save bar 
-            SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(10, 8, 10, 12),
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
-                  child: hasPendingChanges
-                      ? SizedBox(
-                          key: const ValueKey('save-active'),
-                          width: double.infinity,
-                          height: 52,
-                          child: ElevatedButton(
-                            onPressed: !_isSaving ? _saveChanges : null,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              disabledBackgroundColor: colors.border,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              elevation: 0,
-                            ),
-                            child: _isSaving
-                                ? const SizedBox(
-                                    width: 22,
-                                    height: 22,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2.5,
-                                    ),
-                                  )
-                                : Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(Icons.check_rounded, color: Colors.white, size: 18),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        'Simpan ${_pendingChanges.length} perubahan',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 14.5,
-                                          letterSpacing: 0.1,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                          ),
-                        )
-                      : const SizedBox.shrink(key: ValueKey('save-hidden')),
-                ),
-              ),
             ),
           ],
         ),

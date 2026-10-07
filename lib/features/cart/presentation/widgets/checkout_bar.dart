@@ -39,7 +39,7 @@ class CheckoutBar extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
-          disabledBackgroundColor: AppColors.slate200,
+          disabledBackgroundColor: colors.inputFill,
           minimumSize: const Size(double.infinity, 54),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(28),
@@ -60,7 +60,7 @@ class CheckoutBar extends StatelessWidget {
             }
             return const Text(
               'Beli Sekarang',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             );
           },
         ),

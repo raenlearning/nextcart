@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
+import 'package:nextcart/core/widgets/bento_tile.dart';
 
 class OrderStatusChart extends StatelessWidget {
   final Map<String, int> statusBreakdown;
@@ -19,20 +20,9 @@ class OrderStatusChart extends StatelessWidget {
     final colors = context.colors;
     final total = statusBreakdown.values.fold(0, (a, b) => a + b);
 
-    return Container(
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        color: colors.card,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: colors.border),
-        boxShadow: [
-          BoxShadow(
-            color: colors.textPrimary.withAlpha(8),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
+    return BentoTile(
+      padding: const EdgeInsets.all(20),
+      borderRadius: 22,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -48,7 +38,7 @@ class OrderStatusChart extends StatelessWidget {
                 'Status Pesanan',
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
-                  fontSize: 15,
+                  fontSize: 14,
                   color: colors.textPrimary,
                   letterSpacing: -0.1,
                 ),
@@ -92,7 +82,7 @@ class OrderStatusChart extends StatelessWidget {
                         Text(
                           _capitalize(e.key),
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: 12.5,
                             color: colors.textPrimary,
                             fontWeight: FontWeight.w600,
                           ),
@@ -101,7 +91,7 @@ class OrderStatusChart extends StatelessWidget {
                         Text(
                           '${e.value}',
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: 12.5,
                             fontWeight: FontWeight.w800,
                             color: colors.textPrimary,
                           ),
@@ -110,7 +100,7 @@ class OrderStatusChart extends StatelessWidget {
                         Text(
                           '(${(pct * 100).toStringAsFixed(0)}%)',
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: 10.5,
                             color: colors.textSecondary,
                             fontWeight: FontWeight.w500,
                           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:nextcart/core/constants/app_assets.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 
@@ -25,7 +26,7 @@ class EmptyCart extends StatelessWidget {
               'Keranjang anda masih kosong',
               style: TextStyle(
                 color: colors.textPrimary,
-                fontSize: 16,
+                fontSize: 15,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -35,13 +36,13 @@ class EmptyCart extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: colors.textSecondary,
-                fontSize: 13,
+                fontSize: 12.5,
                 height: 1.4,
               ),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => context.go('/'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,

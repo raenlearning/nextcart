@@ -2,7 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:nextcart/core/theme/app_colors.dart';
 
-typedef OnRoleSelect = void Function(String userId, String newRole);
+typedef OnToggleBlock = void Function(Map<String, dynamic> user);
+typedef OnDelete = void Function(Map<String, dynamic> user);
 
 const _kAvatarPalette = [
   (bg: Color(0xFFFCE4E9), fg: Color(0xFFB6607A)),
@@ -13,19 +14,15 @@ const _kAvatarPalette = [
 
 class UserItem extends StatelessWidget {
   final Map<String, dynamic> user;
-  final String role;
-  final bool isPending;
-  final OnRoleSelect onRoleSelect;
-  final double columnWidth;
+  final OnToggleBlock onToggleBlock;
+  final OnDelete? onDelete;
   final int avatarSeed;
 
   const UserItem({
     super.key,
     required this.user,
-    required this.role,
-    required this.onRoleSelect,
-    this.isPending = false,
-    this.columnWidth = 56,
+    required this.onToggleBlock,
+    this.onDelete,
     this.avatarSeed = 0,
   });
 
@@ -41,10 +38,11 @@ class UserItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final userId = user['id'] as String;
     final name = (user['full_name'] as String?) ?? 'User Baru';
     final email = (user['email'] as String?) ?? '-';
     final avatarUrl = user['avatar_url'] as String?;
+    final role = (user['role'] ?? 'buyer').toString();
+    final isBlocked = (user['is_blocked'] as bool?) ?? false;
     final style = _kAvatarPalette[avatarSeed % _kAvatarPalette.length];
 
     return Container(
@@ -54,12 +52,12 @@ class UserItem extends StatelessWidget {
         color: colors.card,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: isPending ? AppColors.warning : colors.border,
-          width: isPending ? 1.4 : 1,
+          color: isBlocked ? AppColors.error.withValues(alpha: 0.4) : colors.border,
+          width: isBlocked ? 1.4 : 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: colors.textPrimary.withAlpha(isPending ? 14 : 6),
+            color: colors.textPrimary.withAlpha(6),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -85,7 +83,7 @@ class UserItem extends StatelessWidget {
                 ? Text(
                     _initials(name),
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: FontWeight.w800,
                       color: style.fg,
                     ),
@@ -107,12 +105,12 @@ class UserItem extends StatelessWidget {
                         style: TextStyle(
                           color: colors.textPrimary,
                           fontWeight: FontWeight.w700,
-                          fontSize: 14,
+                          fontSize: 13,
                           letterSpacing: -0.1,
                         ),
                       ),
                     ),
-                    if (isPending) ...[
+                    if (role == 'admin') ...[
                       const SizedBox(width: 6),
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -120,14 +118,35 @@ class UserItem extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.warning,
+                          color: AppColors.primary.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: const Text(
-                          'Belum disimpan',
+                          'Admin',
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 8.5,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                    if (isBlocked) ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.error,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Text(
+                          'Diblokir',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 9,
+                            fontSize: 8.5,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -141,7 +160,7 @@ class UserItem extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: colors.textSecondary,
-                    fontSize: 12,
+                    fontSize: 11.5,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -149,81 +168,26 @@ class UserItem extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          _RoleToggle(role: role, onSelect: (r) => onRoleSelect(userId, r)),
+          IconButton(
+            onPressed: () => onToggleBlock(user),
+            tooltip: isBlocked ? 'Buka blokir' : 'Blokir',
+            icon: Icon(
+              isBlocked ? Icons.lock_open_rounded : Icons.block_rounded,
+              size: 20,
+              color: isBlocked ? AppColors.success : AppColors.error,
+            ),
+          ),
+          if (onDelete != null)
+            IconButton(
+              onPressed: () => onDelete!(user),
+              tooltip: 'Hapus pengguna',
+              icon: const Icon(
+                Icons.delete_outline_rounded,
+                size: 20,
+                color: AppColors.error,
+              ),
+            ),
         ],
-      ),
-    );
-  }
-}
-
-class _RoleToggle extends StatelessWidget {
-  final String role;
-  final ValueChanged<String> onSelect;
-
-  const _RoleToggle({required this.role, required this.onSelect});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return Container(
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: colors.inputFill,
-        borderRadius: BorderRadius.circular(11),
-        border: Border.all(color: colors.border),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _ToggleChip(
-            label: 'Admin',
-            selected: role == 'admin',
-            onTap: () => onSelect('admin'),
-          ),
-          _ToggleChip(
-            label: 'Pembeli',
-            selected: role == 'buyer',
-            onTap: () => onSelect('buyer'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ToggleChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _ToggleChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 160),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-        decoration: BoxDecoration(
-          color: selected ? AppColors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            color: selected ? Colors.white : colors.textSecondary,
-          ),
-        ),
       ),
     );
   }
